@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/presentation/screens/screen_signup_signin.dart';
 
 import 'core/constants/theme.dart';
 import 'features/auth/presentation/screens/screen_welcome.dart';
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'TFM',
       theme: theme.light(),
       // darkTheme: theme.dark(), // Puedes descomentar esto si tienes un tema oscuro
-      home: const WelcomeScreen(),
+      home: const SignUpScreen(),
     );
   }
 }

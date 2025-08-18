@@ -1,0 +1,427 @@
+import 'package:country_flags/country_flags.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:frontend/features/auth/presentation/widgets/widget_draggable_form_sheet.dart';
+
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
+
+  bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+
+    super.dispose();
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordObscured = !_isPasswordObscured;
+    });
+  }
+
+  void _toggleConfirmPasswordVisibility() {
+    setState(() {
+      _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
+    });
+  }
+
+  void _performSignUp() {
+    if (_formKey.currentState!.validate()) {
+      // TODO: Lógica de registro
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Processing Sign Up')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return _SignUpSignInScreen(
+      title: 'Hello, let’s get started!',
+      subtitle: 'What’s your game?',
+      formContent: [
+        Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Name*', border: OutlineInputBorder()),
+                autocorrect: false,
+                enableSuggestions: false,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Surname', border: OutlineInputBorder()),
+                autocorrect: false,
+                enableSuggestions: false,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  // if (value == null || value.isEmpty) {
+                  //   return 'Please enter your surname';
+                  // }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Phone number*',
+                  prefixIcon: InkWell(
+                    onTap: () {}, // TODO: Lógica para seleccionar prefijo
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.arrow_drop_down_rounded, color: colorScheme.outline),
+                          CountryFlag.fromCountryCode(
+                            'ES',
+                            width: 24.0,
+                            height: 18.0,
+                            shape: const RoundedRectangle(2.0),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '+ 34',
+                            style: TextStyle(color: colorScheme.outline, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  border: const OutlineInputBorder(),
+                ),
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.phone,
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Mail*', border: OutlineInputBorder()),
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your mail';
+                  }
+                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password*',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(_isPasswordObscured ? Icons.visibility_off : Icons.visibility),
+                    onPressed: _togglePasswordVisibility,
+                  ),
+                ),
+                autocorrect: false,
+                enableSuggestions: false,
+                obscureText: _isPasswordObscured,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Confirm password*',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(_isConfirmPasswordObscured ? Icons.visibility_off : Icons.visibility),
+                    onPressed: _toggleConfirmPasswordVisibility,
+                  ),
+                ),
+                autocorrect: false,
+                enableSuggestions: false,
+                obscureText: _isConfirmPasswordObscured,
+                textInputAction: TextInputAction.done,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please confirm your password';
+                  }
+                  if (value != _passwordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+      isSignUp: true,
+      onPrimaryAction: _performSignUp,
+    );
+  }
+}
+
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
+
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  late TextEditingController _passwordController;
+  bool _isPasswordObscured = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+
+    super.dispose();
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordObscured = !_isPasswordObscured;
+    });
+  }
+
+  void _performSignIn() {
+    if (_formKey.currentState!.validate()) {
+      // TODO: Lógica de inicio de sesión
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Processing Sign In')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _SignUpSignInScreen(
+      title: 'Welcome back!',
+      subtitle: 'What are we playing today?',
+      formContent: [
+        Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Mail*', border: OutlineInputBorder()),
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your mail';
+                  }
+                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password*',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(_isPasswordObscured ? Icons.visibility_off : Icons.visibility),
+                    onPressed: _togglePasswordVisibility,
+                  ),
+                ),
+                autocorrect: false,
+                enableSuggestions: false,
+                obscureText: _isPasswordObscured,
+                textInputAction: TextInputAction.next,
+                // Cambiado a .next si hay más campos o .done si es el último
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  // Podrías añadir más validaciones si es necesario, como la longitud mínima
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+      isSignUp: false,
+      onPrimaryAction: _performSignIn,
+    );
+  }
+}
+
+class _SignUpSignInScreen extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final List<Widget> formContent;
+  final bool isSignUp;
+  final VoidCallback? onPrimaryAction; // Callback para la acción principal
+
+  const _SignUpSignInScreen({
+    required this.title,
+    required this.subtitle,
+    required this.formContent,
+    required this.isSignUp,
+    this.onPrimaryAction, // Añadido
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final Brightness statusBarIconBrightness =
+        ThemeData.estimateBrightnessForColor(colorScheme.primary) == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: colorScheme.primary,
+        statusBarIconBrightness: statusBarIconBrightness,
+        statusBarBrightness: statusBarIconBrightness,
+      ),
+      child: Scaffold(
+        backgroundColor: colorScheme.primary,
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          maintainBottomViewPadding: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.displayMedium?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(subtitle, style: textTheme.headlineSmall?.copyWith(color: colorScheme.onPrimary)),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: isSignUp
+                    ? DraggableFormSheet(
+                        formContent: formContent,
+                        buttonLabel: 'Sign up',
+                        bottomMessage: 'Already have an account?',
+                        bottomButtonLabel: 'Sign in',
+                        showDragHandle: true,
+                      )
+                    : DraggableFormSheet(
+                        formContent: formContent,
+                        buttonLabel: 'Sign in',
+                        bottomMessage: 'Don\'t have an account?',
+                        bottomButtonLabel: 'Sign up',
+                        showDragHandle: false,
+                        initialChildSize: 0.46,
+                        minChildSize: 0.46,
+                        maxSheetHeightProportionCap: 0.46,
+                      ),
+              ),
+              Container(
+                color: colorScheme.surface,
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    FilledButton(
+                      onPressed: onPrimaryAction,
+                      style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
+                      child: Text(isSignUp ? 'Sign up' : 'Sign in'),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          isSignUp ? 'Already have an account?' : 'Don\'t have an account?',
+                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            if (isSignUp) {
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SignInScreen()));
+                            } else {
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SignUpScreen()));
+                            }
+                          },
+                          child: Text(
+                            isSignUp ? 'Sign in' : 'Sign up',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
