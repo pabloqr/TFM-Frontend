@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/data/repositories/repository_auth.dart';
+import 'package:frontend/domain/usecases/usecase_sign_in.dart';
 import 'package:frontend/domain/usecases/usecase_sign_up.dart';
 import 'package:frontend/features/auth/data/services/service_local_auth.dart';
 import 'package:frontend/features/auth/data/services/service_remote_auth.dart';
@@ -51,6 +52,12 @@ List<SingleChildWidget> get appProviders {
     ProxyProvider<AuthRepository?, SignUpUseCase?>(
       update: (context, repository, previousSignUpUseCase) {
         return repository != null ? SignUpUseCase(repository: repository) : null;
+      },
+    ),
+
+    ProxyProvider<AuthRepository?, SignInUseCase?>(
+      update: (context, repository, previousSignInUseCase) {
+        return repository != null ? SignInUseCase(repository: repository) : null;
       },
     ),
   ];

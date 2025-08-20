@@ -1,7 +1,9 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/domain/usecases/usecase_sign_in.dart';
 import 'package:frontend/domain/usecases/usecase_sign_up.dart';
+import 'package:frontend/features/auth/data/models/model_sign_in_request.dart';
 import 'package:frontend/features/auth/data/models/model_sign_up_request.dart';
 import 'package:frontend/features/auth/presentation/widgets/widget_draggable_form_sheet.dart';
 import 'package:provider/provider.dart';
@@ -65,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  void _performSignUp() async {
+  Future<void> _performSignUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -82,7 +84,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final int? phoneNumber = int.tryParse(phone);
 
       if (phoneNumber == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid phone number')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Invalid phone number'), behavior: SnackBarBehavior.floating));
         setState(() {
           _isLoading = false;
         });
@@ -101,9 +105,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
       final signUpUseCase = context.read<SignUpUseCase?>();
       if (signUpUseCase == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Initializing services, please wait...')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Initializing services, please wait...'), behavior: SnackBarBehavior.floating),
+        );
 
         if (mounted && _isLoading) {
           setState(() {
@@ -121,7 +125,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       result.fold(
         (failure) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failure.message)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(failure.message), behavior: SnackBarBehavior.floating));
         },
         (authResponse) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -129,6 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               content: Text(
                 'Sign up successful for  ${authResponse.user.name}! Token: ${authResponse.accessToken.substring(0, 10)}...',
               ),
+              behavior: SnackBarBehavior.floating,
             ),
           );
         },
@@ -157,7 +164,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Name*', border: OutlineInputBorder()),
                 autocorrect: false,
-                enableSuggestions: false,
                 textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -171,7 +177,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: _surnameController,
                 decoration: const InputDecoration(labelText: 'Surname', border: OutlineInputBorder()),
                 autocorrect: false,
-                enableSuggestions: false,
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
@@ -205,7 +210,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   border: const OutlineInputBorder(),
                 ),
                 autocorrect: false,
-                enableSuggestions: false,
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
               ),
@@ -214,7 +218,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: _mailController,
                 decoration: const InputDecoration(labelText: 'Mail*', border: OutlineInputBorder()),
                 autocorrect: false,
-                enableSuggestions: false,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 validator: (value) {
@@ -299,17 +302,25 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  late TextEditingController _mailController;
   late TextEditingController _passwordController;
+
   bool _isPasswordObscured = true;
+
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Se inicializan los controladores de los campos de texto del formulario
+    _mailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _mailController.dispose();
     _passwordController.dispose();
 
     super.dispose();
@@ -321,10 +332,60 @@ class _SignInScreenState extends State<SignInScreen> {
     });
   }
 
-  void _performSignIn() {
+  Future<void> _performSignIn() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Lógica de inicio de sesión
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Processing Sign In')));
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Se recogen los datos del formulario
+      final mail = _mailController.text;
+      final password = _passwordController.text;
+
+      final signInRequest = SignInRequestModel(mail: mail, password: password);
+
+      // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
+      final signInUseCase = context.read<SignInUseCase?>();
+      if (signInUseCase == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Initializing services, please wait...'), behavior: SnackBarBehavior.floating),
+        );
+
+        if (mounted && _isLoading) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+
+        return;
+      }
+
+      // Se llama al caso de uso para realizar el inicio de sesión
+      final result = await signInUseCase.call(signInRequest);
+
+      if (!mounted) return;
+
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(failure.message), behavior: SnackBarBehavior.floating));
+        },
+        (authResponse) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Sign in successful for ${authResponse.user.name}! Token: ${authResponse.accessToken.substring(0, 10)}...',
+              ),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -339,9 +400,9 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             children: [
               TextFormField(
+                controller: _mailController,
                 decoration: const InputDecoration(labelText: 'Mail*', border: OutlineInputBorder()),
                 autocorrect: false,
-                enableSuggestions: false,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 validator: (value) {

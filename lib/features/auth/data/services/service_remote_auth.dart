@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:frontend/features/auth/data/models/model_sign_in_request.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/error/exceptions.dart';
@@ -7,6 +8,8 @@ import 'package:frontend/features/auth/data/models/model_auth_response.dart';
 
 abstract class AuthRemoteService {
   Future<AuthResponseModel> signUp(SignUpRequestModel request);
+
+  Future<AuthResponseModel> signIn(SignInRequestModel request);
 }
 
 class AuthRemoteServiceImpl implements AuthRemoteService {
@@ -43,6 +46,38 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
     } catch (e) {
       if (e is ServerException) rethrow;
       throw NetworkException(message: 'Network error signing up: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<AuthResponseModel> signIn(SignInRequestModel request) async {
+    final Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.signInEndpoint}');
+
+    try {
+      final response = await _client.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: request.toJsonString(),
+      );
+
+      final Map<String, dynamic> data;
+      try {
+        data = json.decode(utf8.decode(response.bodyBytes));
+      } catch (e) {
+        throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+      }
+
+      if (response.statusCode == 200) {
+        return AuthResponseModel.fromJson(data);
+      } else {
+        throw ServerException(
+          message: data['message'] ?? 'Error signing in: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error signing in: ${e.toString()}');
     }
   }
 }
