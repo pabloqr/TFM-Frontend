@@ -1,7 +1,10 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/domain/usecases/usecase_sign_up.dart';
+import 'package:frontend/features/auth/data/models/model_sign_up_request.dart';
 import 'package:frontend/features/auth/presentation/widgets/widget_draggable_form_sheet.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -13,21 +16,37 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  late TextEditingController _nameController;
+  late TextEditingController _surnameController;
+  late TextEditingController _phoneNumberController;
+  late TextEditingController _mailController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
 
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
+
+    // Se inicializan los controladores de los campos de texto del formulario
+    _nameController = TextEditingController();
+    _surnameController = TextEditingController();
+    _phoneNumberController = TextEditingController();
+    _mailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _phoneNumberController.dispose();
+    _mailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
 
@@ -46,10 +65,78 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  void _performSignUp() {
+  void _performSignUp() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Lógica de registro
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Processing Sign Up')));
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Se recogen los datos del formulario
+      final name = _nameController.text;
+      final surname = _surnameController.text;
+      final phone = _phoneNumberController.text;
+      final mail = _mailController.text;
+      final password = _passwordController.text;
+
+      final int phonePrefix = 34;
+      final int? phoneNumber = int.tryParse(phone);
+
+      if (phoneNumber == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid phone number')));
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final signUpRequest = SignUpRequestModel(
+        name: name,
+        surname: surname,
+        phoneNumber: phoneNumber,
+        phonePrefix: phonePrefix,
+        mail: mail,
+        password: password,
+      );
+
+      // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
+      final signUpUseCase = context.read<SignUpUseCase?>();
+      if (signUpUseCase == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Initializing services, please wait...')));
+
+        if (mounted && _isLoading) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+
+        return;
+      }
+
+      // Se llama al caso de uso para realizar el registro
+      final result = await signUpUseCase.call(signUpRequest);
+
+      if (!mounted) return;
+
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failure.message)));
+        },
+        (authResponse) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Sign up successful for  ${authResponse.user.name}! Token: ${authResponse.accessToken.substring(0, 10)}...',
+              ),
+            ),
+          );
+        },
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -67,6 +154,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
+                controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Name*', border: OutlineInputBorder()),
                 autocorrect: false,
                 enableSuggestions: false,
@@ -80,19 +168,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _surnameController,
                 decoration: const InputDecoration(labelText: 'Surname', border: OutlineInputBorder()),
                 autocorrect: false,
                 enableSuggestions: false,
                 textInputAction: TextInputAction.next,
-                validator: (value) {
-                  // if (value == null || value.isEmpty) {
-                  //   return 'Please enter your surname';
-                  // }
-                  return null;
-                },
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _phoneNumberController,
                 decoration: InputDecoration(
                   labelText: 'Phone number*',
                   prefixIcon: InkWell(
@@ -127,6 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _mailController,
                 decoration: const InputDecoration(labelText: 'Mail*', border: OutlineInputBorder()),
                 autocorrect: false,
                 enableSuggestions: false,
@@ -199,6 +284,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ],
       isSignUp: true,
       onPrimaryAction: _performSignUp,
+      isLoading: _isLoading,
     );
   }
 }
@@ -309,13 +395,15 @@ class _SignUpSignInScreen extends StatelessWidget {
   final List<Widget> formContent;
   final bool isSignUp;
   final VoidCallback? onPrimaryAction; // Callback para la acción principal
+  final bool isLoading;
 
   const _SignUpSignInScreen({
     required this.title,
     required this.subtitle,
     required this.formContent,
     required this.isSignUp,
-    this.onPrimaryAction, // Añadido
+    this.onPrimaryAction,
+    this.isLoading = false,
   });
 
   @override
@@ -385,7 +473,7 @@ class _SignUpSignInScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     FilledButton(
-                      onPressed: onPrimaryAction,
+                      onPressed: isLoading ? null : onPrimaryAction,
                       style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
                       child: Text(isSignUp ? 'Sign up' : 'Sign in'),
                     ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/theme.dart';
+import 'package:frontend/core/providers/dependency_providers.dart';
 import 'package:frontend/features/auth/presentation/screens/screen_signup_signin.dart';
-
-import 'core/constants/theme.dart';
-import 'features/auth/presentation/screens/screen_welcome.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: appProviders, child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TFM',
       theme: theme.light(),
-      // darkTheme: theme.dark(), // Puedes descomentar esto si tienes un tema oscuro
+      // darkTheme: theme.dark(), // TODO: descomentar al finalizar
       home: const SignUpScreen(),
     );
   }
