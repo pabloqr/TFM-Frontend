@@ -212,6 +212,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 autocorrect: false,
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your phone number';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -336,6 +342,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
+        // print(_isLoading);
       });
 
       // Se recogen los datos del formulario
@@ -365,6 +372,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (!mounted) return;
 
+      await Future.delayed(const Duration(seconds: 5));
+
       result.fold(
         (failure) {
           ScaffoldMessenger.of(
@@ -385,6 +394,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
       setState(() {
         _isLoading = false;
+        // print(_isLoading);
       });
     }
   }
@@ -446,6 +456,7 @@ class _SignInScreenState extends State<SignInScreen> {
       ],
       isSignUp: false,
       onPrimaryAction: _performSignIn,
+      isLoading: _isLoading,
     );
   }
 }
@@ -464,7 +475,7 @@ class _SignUpSignInScreen extends StatelessWidget {
     required this.formContent,
     required this.isSignUp,
     this.onPrimaryAction,
-    this.isLoading = false,
+    required this.isLoading,
   });
 
   @override
@@ -536,7 +547,9 @@ class _SignUpSignInScreen extends StatelessWidget {
                     FilledButton(
                       onPressed: isLoading ? null : onPrimaryAction,
                       style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
-                      child: Text(isSignUp ? 'Sign up' : 'Sign in'),
+                      child: isLoading
+                          ? SizedBox(width: 24.0, height: 24.0, child: CircularProgressIndicator())
+                          : Text(isSignUp ? 'Sign up' : 'Sign in'),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -547,13 +560,21 @@ class _SignUpSignInScreen extends StatelessWidget {
                           style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                         TextButton(
-                          onPressed: () {
-                            if (isSignUp) {
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SignInScreen()));
-                            } else {
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SignUpScreen()));
-                            }
-                          },
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  if (isSignUp) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => SignInScreen()),
+                                    );
+                                  } else {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => SignUpScreen()),
+                                    );
+                                  }
+                                },
                           child: Text(
                             isSignUp ? 'Sign in' : 'Sign up',
                             style: textTheme.bodyMedium?.copyWith(
