@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -51,7 +52,11 @@ class WelcomeScreen extends StatelessWidget {
                 Column(
                   children: [
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(
+                          context,
+                        ).pushNamedAndRemoveUntil('${AppConstants.signInEndpoint}/', (route) => false);
+                      },
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         side: BorderSide(color: colorScheme.onPrimary),
@@ -61,7 +66,11 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     FilledButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(
+                          context,
+                        ).pushNamedAndRemoveUntil('${AppConstants.signUpEndpoint}/', (route) => false);
+                      },
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         backgroundColor: colorScheme.onPrimary,
