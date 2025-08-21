@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/error/exceptions.dart';
-import 'package:frontend/features/auth/data/models/model_user.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Clave para almacenar el token de acceso en FlutterSecureStorage.

@@ -1,11 +1,12 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/domain/usecases/usecase_sign_in.dart';
-import 'package:frontend/domain/usecases/usecase_sign_up.dart';
-import 'package:frontend/features/auth/data/models/model_sign_in_request.dart';
-import 'package:frontend/features/auth/data/models/model_sign_up_request.dart';
-import 'package:frontend/features/auth/presentation/widgets/widget_draggable_form_sheet.dart';
+import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/domain/usecases/sign_in_usecase.dart';
+import 'package:frontend/domain/usecases/sign_up_usecase.dart';
+import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
+import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
+import 'package:frontend/features/auth/presentation/widgets/draggable_form_sheet_widget.dart';
 import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -342,7 +343,6 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
-        // print(_isLoading);
       });
 
       // Se recogen los datos del formulario
@@ -372,8 +372,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (!mounted) return;
 
-      await Future.delayed(const Duration(seconds: 5));
-
       result.fold(
         (failure) {
           ScaffoldMessenger.of(
@@ -394,7 +392,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
       setState(() {
         _isLoading = false;
-        // print(_isLoading);
       });
     }
   }
@@ -564,15 +561,13 @@ class _SignUpSignInScreen extends StatelessWidget {
                               ? null
                               : () {
                                   if (isSignUp) {
-                                    Navigator.pushReplacement(
+                                    Navigator.of(
                                       context,
-                                      MaterialPageRoute(builder: (_) => SignInScreen()),
-                                    );
+                                    ).pushNamedAndRemoveUntil('${AppConstants.signInEndpoint}/', (route) => false);
                                   } else {
-                                    Navigator.pushReplacement(
+                                    Navigator.of(
                                       context,
-                                      MaterialPageRoute(builder: (_) => SignUpScreen()),
-                                    );
+                                    ).pushNamedAndRemoveUntil('${AppConstants.signUpEndpoint}/', (route) => false);
                                   }
                                 },
                           child: Text(

@@ -1,9 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/data/repositories/repository_auth.dart';
-import 'package:frontend/domain/usecases/usecase_sign_in.dart';
-import 'package:frontend/domain/usecases/usecase_sign_up.dart';
-import 'package:frontend/features/auth/data/services/service_local_auth.dart';
-import 'package:frontend/features/auth/data/services/service_remote_auth.dart';
+import 'package:frontend/data/repositories/auth_repository.dart';
+import 'package:frontend/domain/usecases/sign_in_usecase.dart';
+import 'package:frontend/domain/usecases/sign_up_usecase.dart';
+import 'package:frontend/features/auth/data/services/auth_local_service.dart';
+import 'package:frontend/features/auth/data/services/auth_remote_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';

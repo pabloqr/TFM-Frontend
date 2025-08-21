@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/core/error/failure.dart';
-import 'package:frontend/features/auth/data/models/model_sign_in_request.dart';
-import 'package:frontend/features/auth/data/models/model_sign_up_request.dart';
-import 'package:frontend/features/auth/data/models/model_auth_response.dart';
-import 'package:frontend/features/auth/data/services/service_local_auth.dart';
-import 'package:frontend/features/auth/data/services/service_remote_auth.dart';
+import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
+import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
+import 'package:frontend/features/auth/data/models/auth_response_model.dart';
+import 'package:frontend/features/auth/data/services/auth_local_service.dart';
+import 'package:frontend/features/auth/data/services/auth_remote_service.dart';
 
 abstract class AuthRepository {
   Future<Either<Failure, AuthResponseModel>> signUp({required SignUpRequestModel request});

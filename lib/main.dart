@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/constants/theme.dart';
 import 'package:frontend/core/providers/dependency_providers.dart';
-import 'package:frontend/features/auth/presentation/screens/screen_signup_signin.dart';
+import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,10 +34,10 @@ class MyApp extends StatelessWidget {
             );
           }
 
-
-          return const SignUpScreen();
+          return const WelcomeScreen();
         },
       ),
+      routes: AppConstants.routes,
     );
   }
 }

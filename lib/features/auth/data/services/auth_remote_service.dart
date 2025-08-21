@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:frontend/features/auth/data/models/model_sign_in_request.dart';
+import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/error/exceptions.dart';
-import 'package:frontend/features/auth/data/models/model_sign_up_request.dart';
-import 'package:frontend/features/auth/data/models/model_auth_response.dart';
+import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
+import 'package:frontend/features/auth/data/models/auth_response_model.dart';
 
 abstract class AuthRemoteService {
   Future<AuthResponseModel> signUp(SignUpRequestModel request);
