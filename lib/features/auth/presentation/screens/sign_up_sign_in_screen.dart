@@ -2,8 +2,7 @@ import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/constants/app_constants.dart';
-import 'package:frontend/domain/usecases/sign_in_usecase.dart';
-import 'package:frontend/domain/usecases/sign_up_usecase.dart';
+import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
 import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
 import 'package:frontend/features/auth/presentation/widgets/draggable_form_sheet_widget.dart';
@@ -104,8 +103,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
-      final signUpUseCase = context.read<SignUpUseCase?>();
-      if (signUpUseCase == null) {
+      final authUseCases = context.read<AuthUseCases?>();
+      if (authUseCases == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Initializing services, please wait...'), behavior: SnackBarBehavior.floating),
         );
@@ -120,7 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       // Se llama al caso de uso para realizar el registro
-      final result = await signUpUseCase.call(signUpRequest);
+      final result = await authUseCases.signUp(signUpRequest);
 
       if (!mounted) return;
 
@@ -352,8 +351,8 @@ class _SignInScreenState extends State<SignInScreen> {
       final signInRequest = SignInRequestModel(mail: mail, password: password);
 
       // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
-      final signInUseCase = context.read<SignInUseCase?>();
-      if (signInUseCase == null) {
+      final authUseCases = context.read<AuthUseCases?>();
+      if (authUseCases == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Initializing services, please wait...'), behavior: SnackBarBehavior.floating),
         );
@@ -368,7 +367,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
 
       // Se llama al caso de uso para realizar el inicio de sesión
-      final result = await signInUseCase.call(signInRequest);
+      final result = await authUseCases.signIn(signInRequest);
 
       if (!mounted) return;
 

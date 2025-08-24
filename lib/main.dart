@@ -3,6 +3,8 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/constants/theme.dart';
 import 'package:frontend/core/providers/dependency_providers.dart';
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:frontend/features/auth/presentation/widgets/auth_guard_widget.dart';
+import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,16 +30,32 @@ class MyApp extends StatelessWidget {
           if (sharedPreferences == null) {
             final colorScheme = Theme.of(context).colorScheme;
 
-            return Container(
-              color: colorScheme.surface,
-              child: Center(child: CircularProgressIndicator()),
+            return Scaffold(
+              body: Container(
+                color: colorScheme.surface,
+                child: Center(child: CircularProgressIndicator()),
+              ),
             );
           }
 
-          return const WelcomeScreen();
+          return const AppInitializer();
         },
       ),
       routes: AppConstants.routes,
     );
+  }
+}
+
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  @override
+  Widget build(BuildContext context) {
+    return AuthGuardWidget(loginScreen: WelcomeScreen(), child: ClientHomeScreen());
   }
 }

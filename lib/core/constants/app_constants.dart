@@ -10,7 +10,7 @@ class AppConstants {
 
   static const String signUpEndpoint = '/auth/signup';
   static const String signInEndpoint = '/auth/signin';
-  static const String refreshTokenEndpoint = '/auth/refresh';
+  static const String refreshTokenEndpoint = '/auth/refresh-token';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
     '/welcome': (context) => const WelcomeScreen(),

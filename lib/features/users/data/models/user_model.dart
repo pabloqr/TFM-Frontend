@@ -3,6 +3,7 @@ import 'dart:convert';
 enum Role { superadmin, admin, client }
 
 class UserModel {
+  final int id;
   final Role role;
   final String name;
   final String? surname;
@@ -13,6 +14,7 @@ class UserModel {
   final DateTime updatedAt;
 
   UserModel({
+    required this.id,
     required this.role,
     required this.name,
     this.surname,
@@ -26,6 +28,7 @@ class UserModel {
   /// Constructor factoría para crear un UserModel a partir de un objeto JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
+      id: json['id'],
       role: Role.values.firstWhere((role) => role.name == json['role'], orElse: () => Role.client),
       name: json['name'],
       surname: json['surname'],
@@ -42,6 +45,7 @@ class UserModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{
+      'id': id,
       'role': role.name,
       'name': name,
       'mail': mail,

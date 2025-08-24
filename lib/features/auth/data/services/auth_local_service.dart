@@ -1,103 +1,101 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/error/exceptions.dart';
+import 'package:frontend/features/auth/data/models/tokens_model.dart';
 import 'package:frontend/features/users/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Clave para almacenar el token de acceso en FlutterSecureStorage.
+/// Key to store the access token in FlutterSecureStorage.
 const String _accessTokenKey = 'access_token';
 
-/// Clave para almacenar el token de refresco en FlutterSecureStorage.
+/// Key to store the refresh token in FlutterSecureStorage.
 const String _refreshTokenKey = 'refresh_token';
 
-/// Clave para almacenar el [UserModel] cacheado en SharedPreferences.
+/// Key to store the token expiration time in FlutterSecureStorage.
+const String _expiresInKey = 'expires_in';
+
+/// Key to store the cached [UserModel] in SharedPreferences.
 const String _userKey = 'user_cache';
 
-/// Interfaz para el servicio de autenticación local.
-/// Define las operaciones para gestionar tokens de autenticación y
-/// la información del usuario en el almacenamiento local seguro y en la caché.
+/// Interface for the local authentication service.
+/// Defines operations to manage authentication tokens and
+/// user information in secure local storage and cache.
 abstract class AuthLocalService {
-  /// Guarda el token de acceso en el almacenamiento seguro.
+  /// Saves authentication tokens in secure storage.
   ///
-  /// Lanza [CacheException] si ocurre un error durante el guardado.
-  Future<void> saveAccessToken(String token);
+  /// Throws [CacheException] if an error occurs during saving.
+  Future<void> saveTokens(TokensModel tokens);
 
-  /// Guarda el token de refresco en el almacenamiento seguro.
+  /// Saves the [UserModel] in the local cache (SharedPreferences).
   ///
-  /// Lanza [CacheException] si ocurre un error durante el guardado.
-  Future<void> saveRefreshToken(String token);
-
-  /// Guarda el [UserModel] en la caché local (SharedPreferences).
-  ///
-  /// Serializa el [UserModel] a JSON antes de guardarlo.
-  /// Lanza [CacheException] si ocurre un error durante el guardado.
+  /// Serializes the [UserModel] to JSON before saving.
+  /// Throws [CacheException] if an error occurs during saving.
   Future<void> saveUser(UserModel user);
 
-  /// Obtiene el token de acceso desde el almacenamiento seguro.
+  /// Gets the access token from secure storage.
   ///
-  /// Lanza [CacheException] si el token no se encuentra o si ocurre un error al leerlo.
-  Future<String> getAccessToken();
+  /// Throws [CacheException] if the token is not found or if an error occurs while reading it.
+  Future<String?> getAccessToken();
 
-  /// Obtiene el token de refresco desde el almacenamiento seguro.
+  /// Gets the refresh token from secure storage.
   ///
-  /// Lanza [CacheException] si el token no se encuentra o si ocurre un error al leerlo.
-  Future<String> getRefreshToken();
+  /// Throws [CacheException] if the token is not found or if an error occurs while reading it.
+  Future<String?> getRefreshToken();
 
-  /// Obtiene el [UserModel] desde la caché local (SharedPreferences).
+  /// Gets the [UserModel] from the local cache (SharedPreferences).
   ///
-  /// Deserializa el JSON a [UserModel].
-  /// Lanza [CacheException] si el usuario no se encuentra en caché o si ocurre un error al leerlo.
-  Future<UserModel> getUser();
+  /// Deserializes JSON to [UserModel].
+  /// Throws [CacheException] if the user is not found in cache or if an error occurs while reading it.
+  Future<UserModel?> getUser();
 
-  /// Elimina el token de acceso del almacenamiento seguro.
+  /// Checks if there are valid tokens in secure storage.
   ///
-  /// Lanza [CacheException] si ocurre un error durante la eliminación.
-  Future<void> deleteAccessToken();
+  /// Returns `true` if there are valid tokens, `false` otherwise.
+  /// Throws [CacheException] if an error occurs during the check.
+  Future<bool> hasValidTokens();
 
-  /// Elimina el token de refresco del almacenamiento seguro.
+  /// Checks if the access token has expired.
   ///
-  /// Lanza [CacheException] si ocurre un error durante la eliminación.
-  Future<void> deleteRefreshToken();
+  /// Returns `true` if the token has expired, `false` otherwise.
+  /// Throws [CacheException] if an error occurs during the check.
+  Future<bool> isTokenExpired();
 
-  /// Elimina todos los tokens (acceso y refresco) y la información del usuario cacheada.
+  /// Deletes all tokens (access and refresh) and cached user information.
   ///
-  /// Lanza [CacheException] si ocurre un error durante la eliminación de alguno de los datos.
+  /// Throws [CacheException] if an error occurs during the deletion of any data.
   Future<void> deleteAllTokens();
 
-  /// Elimina el [UserModel] de la caché local (SharedPreferences).
+  /// Deletes the [UserModel] from the local cache (SharedPreferences).
   ///
-  /// Lanza [CacheException] si ocurre un error durante la eliminación.
+  /// Throws [CacheException] if an error occurs during deletion.
   Future<void> deleteUser();
 }
 
-/// Implementación de [AuthLocalService] que utiliza [FlutterSecureStorage]
-/// para los tokens y [SharedPreferences] para la información del usuario.
+/// Implementation of [AuthLocalService] that uses [FlutterSecureStorage]
+/// for tokens and [SharedPreferences] for user information.
 class AuthLocalServiceImpl implements AuthLocalService {
   final FlutterSecureStorage _secureStorage;
   final SharedPreferences _sharedPreferences;
 
-  /// Crea una instancia de [AuthLocalServiceImpl].
+  /// Creates an instance of [AuthLocalServiceImpl].
   ///
-  /// Requiere una instancia de [FlutterSecureStorage] para el manejo seguro de tokens
-  /// y una instancia de [SharedPreferences] para el cacheo de datos del usuario.
+  /// Requires an instance of [FlutterSecureStorage] for secure token management
+  /// and an instance of [SharedPreferences] for caching user data.
   AuthLocalServiceImpl({required FlutterSecureStorage secureStorage, required SharedPreferences sharedPreferences})
     : _secureStorage = secureStorage,
       _sharedPreferences = sharedPreferences;
 
   @override
-  Future<void> saveAccessToken(String token) async {
+  Future<void> saveTokens(TokensModel tokens) async {
     try {
-      await _secureStorage.write(key: _accessTokenKey, value: token);
-    } catch (e) {
-      throw CacheException(message: 'Error saving access token: ${e.toString()}');
-    }
-  }
+      final expirationTime = DateTime.now().add(Duration(seconds: tokens.expiresIn));
 
-  @override
-  Future<void> saveRefreshToken(String token) async {
-    try {
-      await _secureStorage.write(key: _refreshTokenKey, value: token);
+      Future.wait([
+        _secureStorage.write(key: _accessTokenKey, value: tokens.accessToken),
+        _secureStorage.write(key: _refreshTokenKey, value: tokens.refreshToken),
+        _secureStorage.write(key: _expiresInKey, value: expirationTime.toIso8601String()),
+      ]);
     } catch (e) {
-      throw CacheException(message: 'Error saving refresh token: ${e.toString()}');
+      throw CacheException(message: 'Error saving tokens: ${e.toString()}');
     }
   }
 
@@ -111,14 +109,9 @@ class AuthLocalServiceImpl implements AuthLocalService {
   }
 
   @override
-  Future<String> getAccessToken() async {
+  Future<String?> getAccessToken() async {
     try {
-      final token = await _secureStorage.read(key: _accessTokenKey);
-      if (token != null) {
-        return token;
-      } else {
-        throw CacheException(message: 'Access token not found');
-      }
+      return await _secureStorage.read(key: _accessTokenKey);
     } catch (e) {
       if (e is CacheException) rethrow;
       throw CacheException(message: 'Error reading access token: ${e.toString()}');
@@ -126,14 +119,9 @@ class AuthLocalServiceImpl implements AuthLocalService {
   }
 
   @override
-  Future<String> getRefreshToken() async {
+  Future<String?> getRefreshToken() async {
     try {
-      final token = await _secureStorage.read(key: _refreshTokenKey);
-      if (token != null) {
-        return token;
-      } else {
-        throw CacheException(message: 'Refresh token not found');
-      }
+      return await _secureStorage.read(key: _refreshTokenKey);
     } catch (e) {
       if (e is CacheException) rethrow;
       throw CacheException(message: 'Error reading refresh token: ${e.toString()}');
@@ -141,14 +129,10 @@ class AuthLocalServiceImpl implements AuthLocalService {
   }
 
   @override
-  Future<UserModel> getUser() async {
+  Future<UserModel?> getUser() async {
     try {
       final String? userJson = _sharedPreferences.getString(_userKey);
-      if (userJson != null) {
-        return UserModel.fromJsonString(userJson);
-      } else {
-        throw CacheException(message: 'User not found in cache');
-      }
+      return userJson != null ? UserModel.fromJsonString(userJson) : null;
     } catch (e) {
       if (e is CacheException) rethrow;
       throw CacheException(message: 'Error reading user from cache: ${e.toString()}');
@@ -156,20 +140,22 @@ class AuthLocalServiceImpl implements AuthLocalService {
   }
 
   @override
-  Future<void> deleteAccessToken() async {
-    try {
-      await _secureStorage.delete(key: _accessTokenKey);
-    } catch (e) {
-      throw CacheException(message: 'Error deleting access token: ${e.toString()}');
-    }
+  Future<bool> hasValidTokens() async {
+    final tokens = await Future.wait([getAccessToken(), getRefreshToken()]);
+    return tokens[0] != null && tokens[1] != null;
   }
 
   @override
-  Future<void> deleteRefreshToken() async {
+  Future<bool> isTokenExpired() async {
     try {
-      await _secureStorage.delete(key: _refreshTokenKey);
+      final expirationTimeString = await _secureStorage.read(key: _expiresInKey);
+      if (expirationTimeString == null) return true;
+
+      final expirationTime = DateTime.parse(expirationTimeString);
+      return DateTime.now().isAfter(expirationTime.subtract(Duration(minutes: 1)));
     } catch (e) {
-      throw CacheException(message: 'Error deleting refresh token: ${e.toString()}');
+      if (e is CacheException) rethrow;
+      throw CacheException(message: 'Error reading expiration time: ${e.toString()}');
     }
   }
 
@@ -187,9 +173,11 @@ class AuthLocalServiceImpl implements AuthLocalService {
   @override
   Future<void> deleteAllTokens() async {
     try {
-      await deleteAccessToken();
-      await deleteRefreshToken();
-      await deleteUser();
+      await Future.wait([
+        _secureStorage.delete(key: _accessTokenKey),
+        _secureStorage.delete(key: _refreshTokenKey),
+        _secureStorage.delete(key: _expiresInKey),
+      ]);
     } catch (e) {
       // Si alguna de las operaciones de eliminación falla, se propaga la excepción.
       // Podría ser una CacheException de cualquiera de los métodos anteriores.
