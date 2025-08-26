@@ -348,7 +348,93 @@ class MaterialTheme {
     canvasColor: colorScheme.surface,
   );
 
-  List<ExtendedColor> get extendedColors => [];
+  static const success = ExtendedColor(
+    seed: Color(0xff228b22),
+    value: Color(0xff008a52),
+    light: ColorFamily(
+      color: Color(0xff2b6a46),
+      onColor: Color(0xffffffff),
+      colorContainer: Color(0xffaff2c4),
+      onColorContainer: Color(0xff0c5130),
+    ),
+    lightMediumContrast: ColorFamily(
+      color: Color(0xff2b6a46),
+      onColor: Color(0xffffffff),
+      colorContainer: Color(0xffaff2c4),
+      onColorContainer: Color(0xff0c5130),
+    ),
+    lightHighContrast: ColorFamily(
+      color: Color(0xff2b6a46),
+      onColor: Color(0xffffffff),
+      colorContainer: Color(0xffaff2c4),
+      onColorContainer: Color(0xff0c5130),
+    ),
+    dark: ColorFamily(
+      color: Color(0xff94d5a9),
+      onColor: Color(0xff00391f),
+      colorContainer: Color(0xff0c5130),
+      onColorContainer: Color(0xffaff2c4),
+    ),
+    darkMediumContrast: ColorFamily(
+      color: Color(0xff94d5a9),
+      onColor: Color(0xff00391f),
+      colorContainer: Color(0xff0c5130),
+      onColorContainer: Color(0xffaff2c4),
+    ),
+    darkHighContrast: ColorFamily(
+      color: Color(0xff94d5a9),
+      onColor: Color(0xff00391f),
+      colorContainer: Color(0xff0c5130),
+      onColorContainer: Color(0xffaff2c4),
+    ),
+  );
+
+  static const warning = ExtendedColor(
+    seed: Color(0xfff6d55c),
+    value: Color(0xffdedc68),
+    light: ColorFamily(
+      color: Color(0xff626117),
+      onColor: Color(0xffffffff),
+      colorContainer: Color(0xffe9e78e),
+      onColorContainer: Color(0xff4a4900),
+    ),
+    lightMediumContrast: ColorFamily(
+      color: Color(0xff626117),
+      onColor: Color(0xffffffff),
+      colorContainer: Color(0xffe9e78e),
+      onColorContainer: Color(0xff4a4900),
+    ),
+    lightHighContrast: ColorFamily(
+      color: Color(0xff626117),
+      onColor: Color(0xffffffff),
+      colorContainer: Color(0xffe9e78e),
+      onColorContainer: Color(0xff4a4900),
+    ),
+    dark: ColorFamily(
+      color: Color(0xffcccb75),
+      onColor: Color(0xff333200),
+      colorContainer: Color(0xff4a4900),
+      onColorContainer: Color(0xffe9e78e),
+    ),
+    darkMediumContrast: ColorFamily(
+      color: Color(0xffcccb75),
+      onColor: Color(0xff333200),
+      colorContainer: Color(0xff4a4900),
+      onColorContainer: Color(0xffe9e78e),
+    ),
+    darkHighContrast: ColorFamily(
+      color: Color(0xffcccb75),
+      onColor: Color(0xff333200),
+      colorContainer: Color(0xff4a4900),
+      onColorContainer: Color(0xffe9e78e),
+    ),
+  );
+
+
+  List<ExtendedColor> get extendedColors => [
+    success,
+    warning,
+  ];
 }
 
 class ExtendedColor {
