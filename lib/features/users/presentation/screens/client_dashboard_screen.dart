@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/complexes/presentation/widgets/small_complex_card_widget.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_card_widget.dart';
 
 class ClientDashboardScreen extends StatelessWidget {
@@ -34,7 +35,15 @@ class ClientDashboardScreen extends StatelessWidget {
       spacing: 8.0,
       children: [
         _buildSubheader(context, title: 'Discover', buttonText: 'Explore complexes', onPressed: () {}),
-        const ReservationCardWidget(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 260.0),
+          child: CarouselView(
+            itemExtent: 240.0,
+            children: List<Widget>.generate(10, (int index) {
+              return SmallComplexCardWidget();
+            }),
+          ),
+        ),
       ],
     );
   }
