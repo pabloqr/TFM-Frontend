@@ -13,7 +13,7 @@ class StatusChipWidget extends StatefulWidget {
 }
 
 class _StatusChipWidgetState extends State<StatusChipWidget> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {

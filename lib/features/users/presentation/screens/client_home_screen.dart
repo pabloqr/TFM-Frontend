@@ -16,7 +16,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   // TODO: Replace these with your actual screen widgets
   static const List<Widget> _screens = <Widget>[
-    // Center(child: Text('Home Screen Content')),
     ClientDashboardScreen(),
     Center(child: Text('Reservations Screen Content')),
     Center(child: Text('Explore Screen Content')),

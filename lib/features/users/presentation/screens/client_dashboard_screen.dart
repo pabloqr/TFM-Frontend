@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/complexes/presentation/widgets/small_complex_card_widget.dart';
+import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_card_widget.dart';
 
 class ClientDashboardScreen extends StatelessWidget {
@@ -40,7 +43,16 @@ class ClientDashboardScreen extends StatelessWidget {
           child: CarouselView(
             itemExtent: 240.0,
             children: List<Widget>.generate(10, (int index) {
-              return SmallComplexCardWidget();
+              final random = Random();
+              List<Sport> sports = Sport.values.toList();
+              sports.remove(Sport.padel);
+              sports.shuffle(random);
+
+              return SmallComplexCardWidget(
+                title: 'Complex $index',
+                rating: random.nextInt(11) / 2.0,
+                sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
+              );
             }),
           ),
         ),
