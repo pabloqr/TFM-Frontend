@@ -1,11 +1,9 @@
-import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/data/repositories/auth_repository.dart';
 import 'package:http/http.dart' as http;
 
 class AuthenticatedHttpClient {
   final http.Client _client;
-  final String _baseUrl = AppConstants.baseUrl;
   final AuthRepository _authRepository;
 
   AuthenticatedHttpClient({required http.Client client, required AuthRepository authRepository})
@@ -50,27 +48,19 @@ class AuthenticatedHttpClient {
   //------------------------------------------------------------------------------------------------------------------//
   //------------------------------------------------------------------------------------------------------------------//
 
-  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
-    return _authenticatedRequest(
-      () async => _client.get(Uri.parse('$_baseUrl$endpoint'), headers: await _buildHeaders(headers)),
-    );
+  Future<http.Response> get(Uri uri, {Map<String, String>? headers}) async {
+    return _authenticatedRequest(() async => _client.get(uri, headers: await _buildHeaders(headers)));
   }
 
-  Future<http.Response> post(String endpoint, {Map<String, String>? headers, String? body}) async {
-    return _authenticatedRequest(
-      () async => _client.post(Uri.parse('$_baseUrl$endpoint'), headers: await _buildHeaders(headers), body: body),
-    );
+  Future<http.Response> post(Uri uri, {Map<String, String>? headers, String? body}) async {
+    return _authenticatedRequest(() async => _client.post(uri, headers: await _buildHeaders(headers), body: body));
   }
 
-  Future<http.Response> put(String endpoint, {Map<String, String>? headers, String? body}) async {
-    return _authenticatedRequest(
-      () async => _client.put(Uri.parse('$_baseUrl$endpoint'), headers: await _buildHeaders(headers), body: body),
-    );
+  Future<http.Response> put(Uri uri, {Map<String, String>? headers, String? body}) async {
+    return _authenticatedRequest(() async => _client.put(uri, headers: await _buildHeaders(headers), body: body));
   }
 
-  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
-    return _authenticatedRequest(
-      () async => _client.delete(Uri.parse('$_baseUrl$endpoint'), headers: await _buildHeaders(headers)),
-    );
+  Future<http.Response> delete(Uri uri, {Map<String, String>? headers}) async {
+    return _authenticatedRequest(() async => _client.delete(uri, headers: await _buildHeaders(headers)));
   }
 }

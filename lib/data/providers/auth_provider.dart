@@ -21,7 +21,7 @@ enum AuthState {
 /// Provides authentication-related functionalities and manages the [AuthState].
 ///
 /// It uses [AuthUseCases] to interact with the authentication logic.
-class AuthProvider with ChangeNotifier {
+class AuthProvider extends ChangeNotifier {
   final AuthUseCases _authUseCases;
 
   /// Creates an [AuthProvider].

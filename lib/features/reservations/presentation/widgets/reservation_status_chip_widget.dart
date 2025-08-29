@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/constants/theme.dart';
 
-class StatusChipWidget extends StatefulWidget {
+class ReservationStatusChipWidget extends StatefulWidget {
   final IconData icon;
   final String label;
 
-  const StatusChipWidget({super.key, required this.icon, required this.label});
+  const ReservationStatusChipWidget({super.key, required this.icon, required this.label});
 
   @override
-  State<StatusChipWidget> createState() => _StatusChipWidgetState();
+  State<ReservationStatusChipWidget> createState() => _ReservationStatusChipWidgetState();
 }
 
-class _StatusChipWidgetState extends State<StatusChipWidget> {
+class _ReservationStatusChipWidgetState extends State<ReservationStatusChipWidget> {
   bool _isExpanded = false;
 
   @override
@@ -31,10 +31,10 @@ class _StatusChipWidgetState extends State<StatusChipWidget> {
       child: AnimatedContainer(
         duration: animationDuration,
         curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(horizontal: _isExpanded ? 12.0 : 8.0, vertical: _isExpanded ? 8.0 : 8.0),
+        padding: EdgeInsets.symmetric(horizontal: _isExpanded ? 8.0 : 6.0, vertical: 6.0),
         decoration: BoxDecoration(
-          color: MaterialTheme.success.light.color,
-          borderRadius: BorderRadius.circular(1000.0),
+          color: MaterialTheme.success.light.colorContainer,
+          borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -47,7 +47,7 @@ class _StatusChipWidgetState extends State<StatusChipWidget> {
               weight: 400,
               grade: 0,
               opticalSize: 18,
-              color: MaterialTheme.success.light.onColor,
+              color: MaterialTheme.success.light.onColorContainer,
             ),
             AnimatedSwitcher(
               duration: animationDuration,
@@ -59,7 +59,7 @@ class _StatusChipWidgetState extends State<StatusChipWidget> {
                   child: SizeTransition(
                     sizeFactor: animation,
                     axis: Axis.horizontal,
-                    axisAlignment: -1.0, // Ensures expansion from left to right
+                    axisAlignment: -1.0,
                     child: child,
                   ),
                 );
@@ -75,10 +75,10 @@ class _StatusChipWidgetState extends State<StatusChipWidget> {
                       key: const ValueKey('expanded_label'),
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(width: 4.0), // Space between icon and text
+                        const SizedBox(width: 4.0),
                         Text(
                           widget.label,
-                          style: textTheme.labelSmall?.copyWith(color: MaterialTheme.success.light.onColor),
+                          style: textTheme.labelSmall?.copyWith(color: MaterialTheme.success.light.onColorContainer),
                         ),
                         const SizedBox(width: 4.0),
                       ],

@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/features/complexes/presentation/widgets/small_complex_card_widget.dart';
+import 'package:frontend/features/complexes/presentation/widgets/complex_card_widget.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
+import 'package:frontend/features/news/presentation/widgets/news_card_widget.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_card_widget.dart';
 
 class ClientDashboardScreen extends StatelessWidget {
@@ -39,7 +40,7 @@ class ClientDashboardScreen extends StatelessWidget {
       children: [
         _buildSubheader(context, title: 'Discover', buttonText: 'Explore complexes', onPressed: () {}),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 260.0),
+          constraints: const BoxConstraints(maxHeight: 264.0),
           child: CarouselView(
             itemExtent: 240.0,
             children: List<Widget>.generate(10, (int index) {
@@ -65,7 +66,13 @@ class ClientDashboardScreen extends StatelessWidget {
       spacing: 8.0,
       children: [
         _buildSubheader(context, title: 'News', buttonText: 'More news', onPressed: () {}),
-        const ReservationCardWidget(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 400.0),
+          child: NewsCardWidget(
+            title: 'News title',
+            date: DateTime.now().subtract(Duration(hours: Random().nextInt(8761))),
+          ),
+        ),
       ],
     );
   }
@@ -82,6 +89,7 @@ class ClientDashboardScreen extends StatelessWidget {
             _buildReservationSubsection(context),
             _buildDiscoverSubsection(context),
             _buildNewsSubsection(context),
+            const SizedBox(height: 56.0),
           ],
         ),
       ),

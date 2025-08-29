@@ -55,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(
                           context,
-                        ).pushNamedAndRemoveUntil('${AppConstants.signInEndpoint}/', (route) => false);
+                        ).pushNamedAndRemoveUntil(AppConstants.signInEndpoint, (route) => false);
                       },
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
@@ -69,7 +69,7 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(
                           context,
-                        ).pushNamedAndRemoveUntil('${AppConstants.signUpEndpoint}/', (route) => false);
+                        ).pushNamedAndRemoveUntil(AppConstants.signUpEndpoint, (route) => false);
                       },
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/common/presentation/widgets/card_info_widget.dart';
-import 'package:frontend/features/common/presentation/widgets/status_chip_widget.dart';
+import 'package:frontend/features/reservations/presentation/widgets/reservation_status_chip_widget.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ReservationCardWidget extends StatelessWidget {
@@ -36,7 +36,7 @@ class ReservationCardWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                StatusChipWidget(icon: Symbols.check_circle_rounded, label: 'Completed'),
+                ReservationStatusChipWidget(icon: Symbols.check_circle_rounded, label: 'Completed'),
               ],
             ),
             Row(

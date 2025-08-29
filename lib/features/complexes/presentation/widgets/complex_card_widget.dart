@@ -1,0 +1,234 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:frontend/data/services/utilities.dart';
+import 'package:frontend/features/common/data/models/widget_size.dart';
+import 'package:frontend/features/common/presentation/widgets/card_chip_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/card_info_widget.dart';
+import 'package:frontend/features/courts/data/models/sport_enum.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
+
+class SmallComplexCardWidget extends StatelessWidget {
+  final String title;
+  final double rating;
+  final Set<Sport> sports;
+
+  const SmallComplexCardWidget({super.key, required this.title, required this.rating, required this.sports});
+
+  @override
+  Widget build(BuildContext context) {
+    return ComplexCardWidget.small(title: title, rating: rating, sports: sports);
+  }
+}
+
+class ComplexCardWidget extends StatelessWidget {
+  final WidgetSize size;
+
+  final String title;
+  final double rating;
+  final Set<Sport> sports;
+
+  const ComplexCardWidget._({required this.size, required this.title, required this.rating, required this.sports});
+
+  factory ComplexCardWidget.small({required String title, required double rating, required Set<Sport> sports}) {
+    return ComplexCardWidget._(size: WidgetSize.small, title: title, rating: rating, sports: sports);
+  }
+
+  factory ComplexCardWidget.medium({required String title, required double rating, required Set<Sport> sports}) {
+    return ComplexCardWidget._(size: WidgetSize.medium, title: title, rating: rating, sports: sports);
+  }
+
+  factory ComplexCardWidget.large({required String title, required double rating, required Set<Sport> sports}) {
+    return ComplexCardWidget._(size: WidgetSize.large, title: title, rating: rating, sports: sports);
+  }
+
+  Widget _buildTitle(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: textTheme.titleLarge, softWrap: false),
+        const SizedBox(height: 4.0),
+        ClipRect(
+          child: OverflowBox(
+            alignment: Alignment.centerLeft,
+            maxWidth: double.infinity,
+            fit: OverflowBoxFit.deferToChild,
+            child: Row(
+              spacing: 4.0,
+              children: [
+                Row(
+                  children: List.generate(5, (index) {
+                    IconData icon = Symbols.star_rounded;
+                    double iconFill = 0.0;
+
+                    if (rating >= index + 0.5) {
+                      iconFill = 1.0;
+                      icon = rating >= index + 1 ? icon : Symbols.star_half_rounded;
+                    }
+
+                    return Icon(
+                      icon,
+                      color: colorScheme.primary,
+                      size: 18,
+                      fill: iconFill,
+                      weight: 400,
+                      grade: 0,
+                      opticalSize: 18,
+                    );
+                  }),
+                ),
+                Text(
+                  rating.toString(),
+                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+                  softWrap: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    if (size == WidgetSize.small) {
+      return _buildTitle(context);
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        spacing: 8.0,
+        children: [
+          _buildTitle(context),
+          // TODO: substitute condition with real condition
+          if (size != WidgetSize.small && true) CardChipWidget.success('Available'),
+        ],
+      );
+    }
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16.0,
+      children: [
+        _buildHeader(context),
+        if (size != WidgetSize.small)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 8.0,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 8.0,
+                  children: [
+                    const CardInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00'),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 8.0,
+                  children: [
+                    const CardInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        SizedBox(
+          width: double.infinity,
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: Alignment.centerLeft,
+              maxWidth: double.infinity,
+              fit: OverflowBoxFit.deferToChild,
+              child: _buildSportsRow(context),
+            ),
+          ),
+        ),
+        if (size != WidgetSize.small)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            spacing: 4.0,
+            children: [
+              OutlinedButton(onPressed: () {}, child: const Text('Modify')),
+              FilledButton(onPressed: () {}, child: const Text('More info')),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSportsRow(BuildContext context) {
+    return Row(
+      spacing: 4.0,
+      children: sports.map((sport) {
+        // return Icon(sport.icon, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24);
+        return CardChipWidget.alert(sport.name.toCapitalized());
+      }).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card.filled(
+      margin: EdgeInsetsGeometry.zero,
+      clipBehavior: Clip.antiAlias,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          double imageHeight = constraints.maxHeight;
+          switch (size) {
+            case WidgetSize.small:
+              imageHeight *= 0.5;
+              break;
+            case WidgetSize.medium:
+              imageHeight *= 0.4;
+            case WidgetSize.large:
+              imageHeight *= 0.3;
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: Image.asset(
+                  'assets/images/placeholders/court.jpg',
+                  width: double.infinity,
+                  height: imageHeight,
+                  fit: BoxFit.none,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: size == WidgetSize.small
+                      ? ShaderMask(
+                          shaderCallback: (Rect bounds) {
+                            return LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [colorScheme.surface, colorScheme.surface.withAlpha(0)],
+                              stops: [0.85, 1.0],
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.dstIn,
+                          child: _buildBody(context),
+                        )
+                      : _buildBody(context),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

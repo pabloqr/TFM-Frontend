@@ -1,4 +1,4 @@
-import '../../../users/data/models/user_model.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
 
 class AuthModel {
   final UserModel user;

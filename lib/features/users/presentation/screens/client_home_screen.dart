@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/users/presentation/screens/client_dashboard_screen.dart';
+import 'package:frontend/features/users/presentation/screens/client_explore_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ClientHomeScreen extends StatefulWidget {
@@ -18,7 +19,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   static const List<Widget> _screens = <Widget>[
     ClientDashboardScreen(),
     Center(child: Text('Reservations Screen Content')),
-    Center(child: Text('Explore Screen Content')),
+    // Center(child: Text('Explore Screen Content')),
+    ClientExploreScreen(),
     Center(child: Text('Account Screen Content')),
   ];
 

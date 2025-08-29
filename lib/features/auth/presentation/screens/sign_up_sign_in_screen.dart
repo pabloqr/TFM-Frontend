@@ -562,11 +562,11 @@ class _SignUpSignInScreen extends StatelessWidget {
                                   if (isSignUp) {
                                     Navigator.of(
                                       context,
-                                    ).pushNamedAndRemoveUntil('${AppConstants.signInEndpoint}/', (route) => false);
+                                    ).pushNamedAndRemoveUntil(AppConstants.signInEndpoint, (route) => false);
                                   } else {
                                     Navigator.of(
                                       context,
-                                    ).pushNamedAndRemoveUntil('${AppConstants.signUpEndpoint}/', (route) => false);
+                                    ).pushNamedAndRemoveUntil(AppConstants.signUpEndpoint, (route) => false);
                                   }
                                 },
                           child: Text(
