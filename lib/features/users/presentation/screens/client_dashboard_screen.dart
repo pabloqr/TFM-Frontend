@@ -9,7 +9,16 @@ import 'package:frontend/features/news/presentation/widgets/news_card.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_card.dart';
 
 class ClientDashboardScreen extends StatelessWidget {
-  const ClientDashboardScreen({super.key});
+  final VoidCallback onReservationPressed;
+  final VoidCallback onDiscoverPressed;
+  final VoidCallback onNewsPressed;
+
+  const ClientDashboardScreen({
+    super.key,
+    required this.onReservationPressed,
+    required this.onDiscoverPressed,
+    required this.onNewsPressed,
+  });
 
   Widget _buildReservationSubsection(BuildContext context) {
     return Column(
@@ -19,7 +28,7 @@ class ClientDashboardScreen extends StatelessWidget {
           subheaderText: 'Upcoming reservation',
           showButton: true,
           buttonText: 'See all',
-          onPressed: () {},
+          onPressed: onReservationPressed,
         ),
         const ReservationCard(),
       ],
@@ -30,7 +39,12 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        Subheader(subheaderText: 'Discover', showButton: true, buttonText: 'Explore complexes', onPressed: () {}),
+        Subheader(
+          subheaderText: 'Discover',
+          showButton: true,
+          buttonText: 'Explore complexes',
+          onPressed: onDiscoverPressed,
+        ),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 264.0),
           child: CarouselView(
@@ -60,7 +74,7 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        Subheader(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: () {}),
+        Subheader(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: onNewsPressed),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 400.0),
           child: NewsCard(

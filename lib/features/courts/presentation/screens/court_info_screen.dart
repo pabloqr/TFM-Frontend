@@ -3,6 +3,7 @@ import 'package:frontend/features/common/presentation/widgets/custom_filter_chip
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
+import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
 import 'package:frontend/features/common/presentation/widgets/subheader.dart';
 import 'package:frontend/features/devices/presentation/widgets/device_list_tile.dart';
@@ -108,55 +109,56 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
 
   Widget _buildScrollView() {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        title: const Text('Court details'),
+        actions: [Padding(padding: const EdgeInsets.only(right: 16.0), child: MediumChip.alert('Weather'))],
+      ),
       body: SafeArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-              title: const Text('Court details'),
-              actions: [Padding(padding: const EdgeInsets.only(right: 16.0), child: MediumChip.alert('Weather'))],
-              pinned: true,
-              expandedHeight: 598.0,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 48.0),
-                      child: Column(
-                        children: [
-                          Subheader(
-                            subheaderText: 'Gallery',
-                            showButton: true,
-                            buttonText: 'Manage gallery',
-                            onPressed: () {},
-                          ),
-                          _buildCarouselView(),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        spacing: 16.0,
-                        children: [_buildCourtInfoSubsection(), _buildComplexInfoSubsection()],
-                      ),
-                    ),
-                  ],
+        child: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate([
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: MetaDataCard(
+                    id: '00000000',
+                    createdAt: 'Mon, 00/00/0000, 00:00:00',
+                    updatedAt: 'Mon, 00/00/0000, 00:00:00',
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      Subheader(
+                        subheaderText: 'Gallery',
+                        showButton: true,
+                        buttonText: 'Manage gallery',
+                        onPressed: () {},
+                      ),
+                      _buildCarouselView(),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(spacing: 16.0, children: [_buildCourtInfoSubsection(), _buildComplexInfoSubsection()]),
+                ),
+              ]),
             ),
             SliverPersistentHeader(
               pinned: true,
               delegate: StickyHeaderDelegate(
-                minHeight: 216.0,
-                maxHeight: 216.0,
+                minHeight: 184.0,
+                maxHeight: 184.0,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     spacing: 16.0,
                     children: [
@@ -207,14 +209,14 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                 ),
               ),
             ),
+            SliverList.separated(
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                return DeviceListTile(name: 'Device $index', onTap: () {});
+              },
+              separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+            ),
           ],
-          body: ListView.separated(
-            separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return DeviceListTile(name: 'Device $index', onTap: () {});
-            },
-          ),
         ),
       ),
       floatingActionButton: _isAdmin

@@ -3,6 +3,7 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
 import 'package:frontend/features/common/presentation/widgets/subheader.dart';
 import 'package:frontend/features/courts/presentation/widgets/court_list_tile.dart';
@@ -21,97 +22,98 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
   bool _sportSelected = false;
   bool _capacitySelected = false;
 
+  Widget _buildCarouselView() {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 200.0),
+      child: CarouselView(
+        itemExtent: 200.0,
+        children: List<Widget>.generate(10, (int index) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: Image.asset('assets/images/placeholders/court.jpg', fit: BoxFit.cover),
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        title: const Text('Complex details'),
+      ),
       body: SafeArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-              title: const Text('Complex details'),
-              pinned: true,
-              expandedHeight: _isAdmin ? 390.0 : 348.0,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 56.0),
-                      child: Column(
-                        children: [
-                          if (_isAdmin)
-                            Subheader(
-                              subheaderText: 'Gallery',
-                              showButton: true,
-                              buttonText: 'Manage gallery',
-                              onPressed: () {},
-                            ),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 200.0),
-                            child: CarouselView(
-                              itemExtent: 200.0,
-                              children: List<Widget>.generate(10, (int index) {
-                                return ClipRRect(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  child: Image.asset('assets/images/placeholders/court.jpg', fit: BoxFit.cover),
-                                );
-                              }),
-                            ),
-                          ),
-                        ],
-                      ),
+        child: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate([
+                if (_isAdmin)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: MetaDataCard(
+                      id: '00000000',
+                      createdAt: 'Mon, 00/00/0000, 00:00:00',
+                      updatedAt: 'Mon, 00/00/0000, 00:00:00',
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 8.0,
-                        children: [
-                          if (_isAdmin) const SizedBox(height: 8.0),
-                          if (_isAdmin)
-                            Subheader(subheaderText: 'ComplexName', showButton: false)
-                          else
-                            Subheader(
-                              subheaderText: 'ComplexName',
-                              showButton: true,
-                              buttonText: 'Get directions',
-                              onPressed: () {},
-                            ),
-                          InfoSectionWidget(
-                            leftChildren: [
-                              LabeledInfoWidget(
-                                icon: Symbols.location_on_rounded,
-                                label: 'Address',
-                                text: 'C/XXXX, 00',
-                              ),
-                            ],
-                            rightChildren: [
-                              LabeledInfoWidget(
-                                icon: Symbols.schedule_rounded,
-                                label: 'Schedule',
-                                text: '00:00 - 00:00',
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      if (_isAdmin)
+                        Subheader(
+                          subheaderText: 'Gallery',
+                          showButton: true,
+                          buttonText: 'Manage gallery',
+                          onPressed: () {},
+                        ),
+                      _buildCarouselView(),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8.0,
+                    children: [
+                      if (_isAdmin)
+                        Subheader(subheaderText: 'ComplexName', showButton: false)
+                      else
+                        Subheader(
+                          subheaderText: 'ComplexName',
+                          showButton: true,
+                          buttonText: 'Get directions',
+                          onPressed: () {},
+                        ),
+                      InfoSectionWidget(
+                        leftChildren: [
+                          LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00'),
+                        ],
+                        rightChildren: [
+                          LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
             ),
             SliverPersistentHeader(
               pinned: true,
               delegate: StickyHeaderDelegate(
-                minHeight: _isAdmin ? 216.0 : 210.0,
-                maxHeight: _isAdmin ? 216.0 : 210.0,
+                minHeight: _isAdmin ? 184.0 : 210.0,
+                maxHeight: _isAdmin ? 184.0 : 210.0,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     spacing: 16.0,
                     children: [
@@ -171,20 +173,20 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                 ),
               ),
             ),
+            SliverList.separated(
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                return CourtListTile(
+                  name: 'Court $index',
+                  onTap: () {
+                    Navigator.of(context).pushNamed(AppConstants.courtInfoRoute);
+                  },
+                  isAdmin: _isAdmin,
+                );
+              },
+              separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+            ),
           ],
-          body: ListView.separated(
-            separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return CourtListTile(
-                name: 'Court $index',
-                onTap: () {
-                  Navigator.of(context).pushNamed(AppConstants.courtInfoRoute);
-                },
-                isAdmin: _isAdmin,
-              );
-            },
-          ),
         ),
       ),
       floatingActionButton: _isAdmin
