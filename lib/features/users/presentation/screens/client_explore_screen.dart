@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/data/providers/complexes_provider.dart';
-import 'package:frontend/features/complexes/presentation/widgets/complex_card_widget.dart';
+import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:provider/provider.dart';
 
@@ -53,7 +53,7 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
         final complex = provider.complexes[index];
         return ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 358.0),
-          child: ComplexCardWidget.large(
+          child: ComplexCard.large(
             title: complex.complexName,
             rating: (random.nextInt(5) / 2.0) + 3.0,
             sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),

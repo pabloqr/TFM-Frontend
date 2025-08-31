@@ -3,44 +3,31 @@ import 'package:flutter/rendering.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/data/models/widget_size.dart';
-import 'package:frontend/features/common/presentation/widgets/card_chip_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
-class SmallComplexCardWidget extends StatelessWidget {
-  final String title;
-  final double rating;
-  final Set<Sport> sports;
-
-  const SmallComplexCardWidget({super.key, required this.title, required this.rating, required this.sports});
-
-  @override
-  Widget build(BuildContext context) {
-    return ComplexCardWidget.small(title: title, rating: rating, sports: sports);
-  }
-}
-
-class ComplexCardWidget extends StatelessWidget {
+class ComplexCard extends StatelessWidget {
   final WidgetSize size;
 
   final String title;
   final double rating;
   final Set<Sport> sports;
 
-  const ComplexCardWidget._({required this.size, required this.title, required this.rating, required this.sports});
+  const ComplexCard._({required this.size, required this.title, required this.rating, required this.sports});
 
-  factory ComplexCardWidget.small({required String title, required double rating, required Set<Sport> sports}) {
-    return ComplexCardWidget._(size: WidgetSize.small, title: title, rating: rating, sports: sports);
+  factory ComplexCard.small({required String title, required double rating, required Set<Sport> sports}) {
+    return ComplexCard._(size: WidgetSize.small, title: title, rating: rating, sports: sports);
   }
 
-  factory ComplexCardWidget.medium({required String title, required double rating, required Set<Sport> sports}) {
-    return ComplexCardWidget._(size: WidgetSize.medium, title: title, rating: rating, sports: sports);
+  factory ComplexCard.medium({required String title, required double rating, required Set<Sport> sports}) {
+    return ComplexCard._(size: WidgetSize.medium, title: title, rating: rating, sports: sports);
   }
 
-  factory ComplexCardWidget.large({required String title, required double rating, required Set<Sport> sports}) {
-    return ComplexCardWidget._(size: WidgetSize.large, title: title, rating: rating, sports: sports);
+  factory ComplexCard.large({required String title, required double rating, required Set<Sport> sports}) {
+    return ComplexCard._(size: WidgetSize.large, title: title, rating: rating, sports: sports);
   }
 
   Widget _buildTitle(BuildContext context) {
@@ -104,7 +91,7 @@ class ComplexCardWidget extends StatelessWidget {
         children: [
           _buildTitle(context),
           // TODO: substitute condition with real condition
-          if (size != WidgetSize.small && true) CardChipWidget.success('Available'),
+          if (size != WidgetSize.small && true) SmallChip.success('Available'),
         ],
       );
     }
@@ -118,9 +105,7 @@ class ComplexCardWidget extends StatelessWidget {
         _buildHeader(context),
         if (size != WidgetSize.small)
           const InfoSectionWidget(
-            leftChildren: [
-              LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00'),
-            ],
+            leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
             rightChildren: [
               LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
             ],
@@ -157,7 +142,7 @@ class ComplexCardWidget extends StatelessWidget {
       spacing: 4.0,
       children: sports.map((sport) {
         // return Icon(sport.icon, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24);
-        return CardChipWidget.alert(sport.name.toCapitalized());
+        return SmallChip.alert(sport.name.toCapitalized());
       }).toList(),
     );
   }

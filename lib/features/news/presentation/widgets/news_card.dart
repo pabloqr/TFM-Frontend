@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/news/presentation/widgets/news_status_chip_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 
-class NewsCardWidget extends StatelessWidget {
+class NewsCard extends StatelessWidget {
   final String title;
   final DateTime date;
   late final Duration _dateDifference;
 
-  NewsCardWidget({super.key, required this.title, required this.date}) {
+  NewsCard({super.key, required this.title, required this.date}) {
     _dateDifference = DateTime.now().difference(date);
   }
 
@@ -70,16 +70,14 @@ class NewsCardWidget extends StatelessWidget {
                             Text(_getCreationString(), style: textTheme.labelSmall),
                           ],
                         ),
-                        if (_dateDifference.inDays <= 7) const NewsStatusChipWidget(),
+                        if (_dateDifference.inDays <= 7) SmallChip.alert('NEW'),
                       ],
                     ),
                     Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit.', style: textTheme.bodyMedium),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       spacing: 4.0,
-                      children: [
-                        TextButton(onPressed: () {}, child: const Text('Read more')),
-                      ],
+                      children: [TextButton(onPressed: () {}, child: const Text('Read more'))],
                     ),
                   ],
                 ),

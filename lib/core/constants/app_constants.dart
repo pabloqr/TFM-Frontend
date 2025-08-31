@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:frontend/features/auth/presentation/screens/sign_up_sign_in_screen.dart';
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
+import 'package:frontend/features/courts/presentation/screens/court_info_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 
 class AppConstants {
@@ -139,6 +140,7 @@ class AppConstants {
   static const String clientHomeRoute = '/client/home';
   static const String adminHomeRoute = '/admin/home';
   static const String complexInfoRoute = '$complexesEndpoint/info';
+  static const String courtInfoRoute = '$courtsEndpoint/info';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
     welcomeRoute: (context) => const WelcomeScreen(),
@@ -146,5 +148,6 @@ class AppConstants {
     signInRoute: (context) => const SignInScreen(),
     clientHomeRoute: (context) => const ClientHomeScreen(),
     complexInfoRoute: (context) => const ComplexInfoScreen(),
+    courtInfoRoute: (context) => const CourtInfoScreen(),
   };
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class SubheaderWidget extends StatelessWidget {
+class Subheader extends StatelessWidget {
   final String subheaderText;
   final bool showButton;
   final String? buttonText;
   final VoidCallback? onPressed;
 
-  const SubheaderWidget({
+  const Subheader({
     super.key,
     required this.subheaderText,
     required this.showButton,

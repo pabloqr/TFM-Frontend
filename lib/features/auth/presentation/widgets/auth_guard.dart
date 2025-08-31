@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:frontend/data/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
-class AuthGuardWidget extends StatelessWidget {
+class AuthGuard extends StatelessWidget {
   final Widget child;
   final Widget loginScreen;
 
-  const AuthGuardWidget({super.key, required this.child, required this.loginScreen});
+  const AuthGuard({super.key, required this.child, required this.loginScreen});
 
   @override
   Widget build(BuildContext context) {

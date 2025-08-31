@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
-import 'package:frontend/features/reservations/presentation/widgets/reservation_status_chip_widget.dart';
+import 'package:frontend/features/reservations/presentation/widgets/reservation_status_chip.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
-class ReservationCardWidget extends StatelessWidget {
-  const ReservationCardWidget({super.key});
+class ReservationCard extends StatelessWidget {
+  const ReservationCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class ReservationCardWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                ReservationStatusChipWidget(icon: Symbols.check_circle_rounded, label: 'Completed'),
+                ReservationStatusChip(icon: Symbols.check_circle_rounded, label: 'Completed'),
               ],
             ),
             const InfoSectionWidget(

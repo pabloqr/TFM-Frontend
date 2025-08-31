@@ -1,11 +1,11 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:frontend/features/common/presentation/widgets/card_chip_widget.dart';
+import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
-import 'package:frontend/features/common/presentation/widgets/subheader_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:frontend/features/courts/presentation/widgets/court_list_tile.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ComplexInfoScreen extends StatefulWidget {
@@ -16,7 +16,10 @@ class ComplexInfoScreen extends StatefulWidget {
 }
 
 class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
+  bool _isAdmin = true;
+
   bool _sportSelected = false;
+  bool _capacitySelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,23 +36,34 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
               ),
               title: const Text('Complex details'),
               pinned: true,
-              expandedHeight: 348.0,
+              expandedHeight: _isAdmin ? 390.0 : 348.0,
               flexibleSpace: FlexibleSpaceBar(
                 background: Column(
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 56.0),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 200.0),
-                        child: CarouselView(
-                          itemExtent: 200.0,
-                          children: List<Widget>.generate(10, (int index) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(12.0),
-                              child: Image.asset('assets/images/placeholders/court.jpg', fit: BoxFit.cover),
-                            );
-                          }),
-                        ),
+                      child: Column(
+                        children: [
+                          if (_isAdmin)
+                            Subheader(
+                              subheaderText: 'Gallery',
+                              showButton: true,
+                              buttonText: 'Manage gallery',
+                              onPressed: () {},
+                            ),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 200.0),
+                            child: CarouselView(
+                              itemExtent: 200.0,
+                              children: List<Widget>.generate(10, (int index) {
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Image.asset('assets/images/placeholders/court.jpg', fit: BoxFit.cover),
+                                );
+                              }),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -58,12 +72,16 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 8.0,
                         children: [
-                          SubheaderWidget(
-                            subheaderText: 'ComplexName',
-                            showButton: true,
-                            buttonText: 'Get directions',
-                            onPressed: () {},
-                          ),
+                          if (_isAdmin) const SizedBox(height: 8.0),
+                          if (_isAdmin)
+                            Subheader(subheaderText: 'ComplexName', showButton: false)
+                          else
+                            Subheader(
+                              subheaderText: 'ComplexName',
+                              showButton: true,
+                              buttonText: 'Get directions',
+                              onPressed: () {},
+                            ),
                           InfoSectionWidget(
                             leftChildren: [
                               LabeledInfoWidget(
@@ -90,8 +108,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             SliverPersistentHeader(
               pinned: true,
               delegate: StickyHeaderDelegate(
-                minHeight: 210.0,
-                maxHeight: 210.0,
+                minHeight: _isAdmin ? 216.0 : 210.0,
+                maxHeight: _isAdmin ? 216.0 : 210.0,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -99,38 +117,34 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 8.0,
                         children: [
-                          SubheaderWidget(subheaderText: 'Courts', showButton: false),
+                          if (_isAdmin)
+                            Subheader(
+                              subheaderText: 'Courts',
+                              showButton: true,
+                              buttonText: 'Manage courts',
+                              onPressed: () {},
+                            )
+                          else
+                            Subheader(subheaderText: 'Courts', showButton: false),
+                          if (!_isAdmin) const SizedBox(height: 8.0),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             spacing: 8.0,
                             children: [
-                              FilterChip(
-                                label: Row(
-                                  spacing: 8.0,
-                                  children: [
-                                    Text('Sport'),
-                                    Icon(
-                                      Symbols.arrow_drop_down_rounded,
-                                      size: 18,
-                                      fill: 0,
-                                      weight: 400,
-                                      grade: 0,
-                                      opticalSize: 18,
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 8.0),
-                                selected: _sportSelected,
-                                onSelected: (selected) {
-                                  setState(() {
-                                    _sportSelected = selected;
-                                  });
-                                },
-                              ),
+                              CustomFilterChip.dropDown('Sport', _sportSelected, (selected) {
+                                setState(() {
+                                  _sportSelected = selected;
+                                });
+                              }),
+                              CustomFilterChip.dropDown('Capacity', _capacitySelected, (selected) {
+                                setState(() {
+                                  _capacitySelected = selected;
+                                });
+                              }),
                             ],
                           ),
+                          const SizedBox(height: 8.0),
                           const InfoSectionWidget(
                             leftChildren: [
                               LabeledInfoWidget(icon: Symbols.tag_rounded, label: 'Number of courts', text: '00'),
@@ -162,49 +176,24 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
             itemCount: 10,
             itemBuilder: (context, index) {
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                title: Row(
-                  spacing: 8.0,
-                  children: [
-                    Text(
-                      'Court $index',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Wrap(
-                      spacing: 4.0,
-                      runSpacing: 4.0,
-                      alignment: WrapAlignment.end,
-                      children: [
-                        CardChipWidget.alert('Sport'),
-                        if (Random().nextBool()) CardChipWidget.success('Available'),
-                      ],
-                    ),
-                  ],
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Row(
-                    spacing: 16.0,
-                    children: [
-                      Expanded(
-                        child: LabeledInfoWidget(
-                          icon: Symbols.groups_rounded,
-                          label: 'Capacity',
-                          text: '${4 + Random().nextInt(8)}',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                trailing: Icon(Symbols.chevron_right_rounded),
-                onTap: () {},
+              return CourtListTile(
+                name: 'Court $index',
+                onTap: () {
+                  Navigator.of(context).pushNamed(AppConstants.courtInfoRoute);
+                },
+                isAdmin: _isAdmin,
               );
             },
           ),
         ),
       ),
+      floatingActionButton: _isAdmin
+          ? FloatingActionButton.extended(
+              onPressed: () {},
+              label: Text('Edit complex'),
+              icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+            )
+          : null,
     );
   }
 }

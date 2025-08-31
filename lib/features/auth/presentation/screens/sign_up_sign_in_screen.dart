@@ -5,7 +5,7 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
 import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
-import 'package:frontend/features/auth/presentation/widgets/draggable_form_sheet_widget.dart';
+import 'package:frontend/features/auth/presentation/widgets/draggable_form_sheet.dart';
 import 'package:frontend/features/users/data/models/user_model.dart';
 import 'package:provider/provider.dart';
 

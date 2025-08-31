@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
-import 'package:frontend/features/common/presentation/widgets/subheader_widget.dart';
-import 'package:frontend/features/complexes/presentation/widgets/complex_card_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
-import 'package:frontend/features/news/presentation/widgets/news_card_widget.dart';
-import 'package:frontend/features/reservations/presentation/widgets/reservation_card_widget.dart';
+import 'package:frontend/features/news/presentation/widgets/news_card.dart';
+import 'package:frontend/features/reservations/presentation/widgets/reservation_card.dart';
 
 class ClientDashboardScreen extends StatelessWidget {
   const ClientDashboardScreen({super.key});
@@ -15,13 +15,13 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        SubheaderWidget(
+        Subheader(
           subheaderText: 'Upcoming reservation',
           showButton: true,
           buttonText: 'See all',
           onPressed: () {},
         ),
-        const ReservationCardWidget(),
+        const ReservationCard(),
       ],
     );
   }
@@ -30,7 +30,7 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        SubheaderWidget(subheaderText: 'Discover', showButton: true, buttonText: 'Explore complexes', onPressed: () {}),
+        Subheader(subheaderText: 'Discover', showButton: true, buttonText: 'Explore complexes', onPressed: () {}),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 264.0),
           child: CarouselView(
@@ -44,7 +44,7 @@ class ClientDashboardScreen extends StatelessWidget {
               sports.remove(Sport.padel);
               sports.shuffle(random);
 
-              return SmallComplexCardWidget(
+              return ComplexCard.small(
                 title: 'Complex $index',
                 rating: random.nextInt(11) / 2.0,
                 sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
@@ -60,10 +60,10 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        SubheaderWidget(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: () {}),
+        Subheader(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: () {}),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 400.0),
-          child: NewsCardWidget(
+          child: NewsCard(
             title: 'News title',
             date: DateTime.now().subtract(Duration(hours: Random().nextInt(8761))),
           ),

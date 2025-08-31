@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/theme.dart';
 
-enum WidgetStatus { normal, alert, success, error }
+enum WidgetStatus { neutralSurface, neutralCard, alert, success, error }
 
 extension WidgetStatusColor on WidgetStatus {
   Color colorSurface(BuildContext context) {
@@ -9,7 +9,9 @@ extension WidgetStatusColor on WidgetStatus {
     final brightness = Theme.of(context).brightness;
     
     switch (this) {
-      case WidgetStatus.normal:
+      case WidgetStatus.neutralSurface:
+        return colorScheme.surfaceContainer;
+      case WidgetStatus.neutralCard:
         return colorScheme.surface;
       case WidgetStatus.alert:
         if (brightness == Brightness.light) {
@@ -33,7 +35,9 @@ extension WidgetStatusColor on WidgetStatus {
     final brightness = Theme.of(context).brightness;
 
     switch (this) {
-      case WidgetStatus.normal:
+      case WidgetStatus.neutralSurface:
+        return colorScheme.onSurface;
+      case WidgetStatus.neutralCard:
         return colorScheme.onSurface;
       case WidgetStatus.alert:
         if (brightness == Brightness.light) {

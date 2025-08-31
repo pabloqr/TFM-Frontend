@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/users/presentation/screens/client_dashboard_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_explore_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -182,29 +183,11 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                             child: Row(
                               children: [
-                                FilterChip(
-                                  label: Row(
-                                    spacing: 8.0,
-                                    children: [
-                                      Text('Sport'),
-                                      Icon(
-                                        Symbols.arrow_drop_down_rounded,
-                                        size: 18,
-                                        fill: 0,
-                                        weight: 400,
-                                        grade: 0,
-                                        opticalSize: 18,
-                                      ),
-                                    ],
-                                  ),
-                                  padding: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 8.0),
-                                  selected: _sportSelected,
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _sportSelected = selected;
-                                    });
-                                  },
-                                ),
+                                CustomFilterChip.dropDown('Sport', _sportSelected, (selected) {
+                                  setState(() {
+                                    _sportSelected = selected;
+                                  });
+                                }),
                               ],
                             ),
                           ),

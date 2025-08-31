@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/constants/theme.dart';
 
-class ReservationStatusChipWidget extends StatefulWidget {
+class ReservationStatusChip extends StatefulWidget {
   final IconData icon;
   final String label;
 
-  const ReservationStatusChipWidget({super.key, required this.icon, required this.label});
+  const ReservationStatusChip({super.key, required this.icon, required this.label});
 
   @override
-  State<ReservationStatusChipWidget> createState() => _ReservationStatusChipWidgetState();
+  State<ReservationStatusChip> createState() => _ReservationStatusChipState();
 }
 
-class _ReservationStatusChipWidgetState extends State<ReservationStatusChipWidget> {
+class _ReservationStatusChipState extends State<ReservationStatusChip> {
   bool _isExpanded = false;
 
   @override
