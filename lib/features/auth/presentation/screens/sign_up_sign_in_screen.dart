@@ -6,6 +6,7 @@ import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
 import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
 import 'package:frontend/features/auth/presentation/widgets/draggable_form_sheet_widget.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
 import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -138,6 +139,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               behavior: SnackBarBehavior.floating,
             ),
           );
+
+          if (authResponse.user.role == Role.admin) {
+            // TODO: Change to admin home screen
+            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
+          } else {
+            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
+          }
         },
       );
 
@@ -386,6 +394,13 @@ class _SignInScreenState extends State<SignInScreen> {
               behavior: SnackBarBehavior.floating,
             ),
           );
+
+          if (authResponse.user.role == Role.admin) {
+            // TODO: Change to admin home screen
+            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
+          } else {
+            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
+          }
         },
       );
 
@@ -562,11 +577,11 @@ class _SignUpSignInScreen extends StatelessWidget {
                                   if (isSignUp) {
                                     Navigator.of(
                                       context,
-                                    ).pushNamedAndRemoveUntil(AppConstants.signInEndpoint, (route) => false);
+                                    ).pushNamedAndRemoveUntil(AppConstants.signInRoute, (route) => false);
                                   } else {
                                     Navigator.of(
                                       context,
-                                    ).pushNamedAndRemoveUntil(AppConstants.signUpEndpoint, (route) => false);
+                                    ).pushNamedAndRemoveUntil(AppConstants.signUpRoute, (route) => false);
                                   }
                                 },
                           child: Text(

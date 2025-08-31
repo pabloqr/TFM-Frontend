@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/data/models/widget_size.dart';
 import 'package:frontend/features/common/presentation/widgets/card_chip_widget.dart';
-import 'package:frontend/features/common/presentation/widgets/card_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
@@ -115,28 +117,12 @@ class ComplexCardWidget extends StatelessWidget {
       children: [
         _buildHeader(context),
         if (size != WidgetSize.small)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            spacing: 8.0,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8.0,
-                  children: [
-                    const CardInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00'),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8.0,
-                  children: [
-                    const CardInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
-                  ],
-                ),
-              ),
+          const InfoSectionWidget(
+            leftChildren: [
+              LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00'),
+            ],
+            rightChildren: [
+              LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
             ],
           ),
         SizedBox(
@@ -155,8 +141,11 @@ class ComplexCardWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             spacing: 4.0,
             children: [
-              OutlinedButton(onPressed: () {}, child: const Text('Modify')),
-              FilledButton(onPressed: () {}, child: const Text('More info')),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).pushNamed(AppConstants.complexInfoRoute),
+                child: const Text('More info'),
+              ),
+              FilledButton(onPressed: () {}, child: const Text('Book court')),
             ],
           ),
       ],
@@ -178,7 +167,7 @@ class ComplexCardWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card.filled(
-      margin: EdgeInsetsGeometry.zero,
+      margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
       clipBehavior: Clip.antiAlias,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {

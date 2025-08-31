@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/common/presentation/widgets/card_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_status_chip_widget.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
@@ -39,30 +40,14 @@ class ReservationCardWidget extends StatelessWidget {
                 ReservationStatusChipWidget(icon: Symbols.check_circle_rounded, label: 'Completed'),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              spacing: 8.0,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 8.0,
-                    children: [
-                      const CardInfoWidget(icon: Symbols.location_on_rounded, label: 'Court', text: 'Court name'),
-                      const CardInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport name'),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 8.0,
-                    children: [
-                      const CardInfoWidget(icon: Symbols.calendar_month_rounded, label: 'Date', text: '00/00/0000'),
-                      const CardInfoWidget(icon: Symbols.schedule_rounded, label: 'Time', text: '00:00 - 00:00'),
-                    ],
-                  ),
-                ),
+            const InfoSectionWidget(
+              leftChildren: [
+                LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Court', text: 'Court name'),
+                LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport name'),
+              ],
+              rightChildren: [
+                LabeledInfoWidget(icon: Symbols.calendar_month_rounded, label: 'Date', text: '00/00/0000'),
+                LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Time', text: '00:00 - 00:00'),
               ],
             ),
             Row(

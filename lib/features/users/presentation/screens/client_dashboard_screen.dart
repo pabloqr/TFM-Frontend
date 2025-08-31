@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/features/common/presentation/widgets/subheader_widget.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card_widget.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/news/presentation/widgets/news_card_widget.dart';
@@ -9,26 +11,16 @@ import 'package:frontend/features/reservations/presentation/widgets/reservation_
 class ClientDashboardScreen extends StatelessWidget {
   const ClientDashboardScreen({super.key});
 
-  Widget _buildSubheader(
-    BuildContext context, {
-    required String title,
-    required String buttonText,
-    required void Function() onPressed,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-        TextButton(onPressed: onPressed, child: Text(buttonText)),
-      ],
-    );
-  }
-
   Widget _buildReservationSubsection(BuildContext context) {
     return Column(
       spacing: 8.0,
       children: [
-        _buildSubheader(context, title: 'Upcoming reservation', buttonText: 'See all', onPressed: () {}),
+        SubheaderWidget(
+          subheaderText: 'Upcoming reservation',
+          showButton: true,
+          buttonText: 'See all',
+          onPressed: () {},
+        ),
         const ReservationCardWidget(),
       ],
     );
@@ -38,11 +30,14 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        _buildSubheader(context, title: 'Discover', buttonText: 'Explore complexes', onPressed: () {}),
+        SubheaderWidget(subheaderText: 'Discover', showButton: true, buttonText: 'Explore complexes', onPressed: () {}),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 264.0),
           child: CarouselView(
             itemExtent: 240.0,
+            onTap: (index) {
+              Navigator.of(context).pushNamed(AppConstants.complexInfoRoute);
+            },
             children: List<Widget>.generate(10, (int index) {
               final random = Random();
               List<Sport> sports = Sport.values.toList();
@@ -65,7 +60,7 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        _buildSubheader(context, title: 'News', buttonText: 'More news', onPressed: () {}),
+        SubheaderWidget(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: () {}),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 400.0),
           child: NewsCardWidget(

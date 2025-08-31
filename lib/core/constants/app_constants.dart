@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:frontend/features/auth/presentation/screens/sign_up_sign_in_screen.dart';
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
+import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 
 class AppConstants {
   // TODO: Replace with your actual backend URL
@@ -131,9 +133,18 @@ class AppConstants {
   //------------------------------------------------------------------------------------------------------------------//
   // APP ROUTES
   //------------------------------------------------------------------------------------------------------------------//
+  static const String welcomeRoute = '/welcome';
+  static const String signUpRoute = signUpEndpoint;
+  static const String signInRoute = signInEndpoint;
+  static const String clientHomeRoute = '/client/home';
+  static const String adminHomeRoute = '/admin/home';
+  static const String complexInfoRoute = '$complexesEndpoint/info';
+
   static final Map<String, Widget Function(BuildContext)> routes = {
-    '/welcome': (context) => const WelcomeScreen(),
-    signUpEndpoint: (context) => const SignUpScreen(),
-    signInEndpoint: (context) => const SignInScreen(),
+    welcomeRoute: (context) => const WelcomeScreen(),
+    signUpRoute: (context) => const SignUpScreen(),
+    signInRoute: (context) => const SignInScreen(),
+    clientHomeRoute: (context) => const ClientHomeScreen(),
+    complexInfoRoute: (context) => const ComplexInfoScreen(),
   };
 }

@@ -52,11 +52,7 @@ class WelcomeScreen extends StatelessWidget {
                 Column(
                   children: [
                     OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                        ).pushNamedAndRemoveUntil(AppConstants.signInEndpoint, (route) => false);
-                      },
+                      onPressed: () => Navigator.of(context).pushNamed(AppConstants.signInRoute),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         side: BorderSide(color: colorScheme.onPrimary),
@@ -66,11 +62,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     FilledButton(
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                        ).pushNamedAndRemoveUntil(AppConstants.signUpEndpoint, (route) => false);
-                      },
+                      onPressed: () => Navigator.of(context).pushNamed(AppConstants.signUpRoute),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         backgroundColor: colorScheme.onPrimary,
