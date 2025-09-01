@@ -13,7 +13,7 @@ class ReservationCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Card.filled(
-      margin: EdgeInsetsGeometry.zero,
+      margin: const EdgeInsets.all(4.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
