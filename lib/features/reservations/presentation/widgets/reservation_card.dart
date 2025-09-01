@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_status_chip.dart';
@@ -54,8 +55,13 @@ class ReservationCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               spacing: 4.0,
               children: [
-                OutlinedButton(onPressed: () {}, child: const Text('Modify')),
-                FilledButton(onPressed: () {}, child: const Text('More info')),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(AppConstants.reservationInfoRoute);
+                  },
+                  child: const Text('More info'),
+                ),
+                FilledButton(onPressed: () {}, child: const Text('Modify')),
               ],
             ),
           ],

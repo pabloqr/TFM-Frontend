@@ -17,7 +17,7 @@ class CourtInfoScreen extends StatefulWidget {
 }
 
 class _CourtInfoScreenState extends State<CourtInfoScreen> {
-  bool _isAdmin = true;
+  bool _isAdmin = false;
 
   bool _typeSelected = false;
   bool _statusSelected = false;
@@ -88,7 +88,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
           },
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text('Complex details'),
+        title: const Text('Court details'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -103,6 +103,13 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // TODO: Implement booking action
+        },
+        label: const Text('Book'),
+        icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
     );
   }

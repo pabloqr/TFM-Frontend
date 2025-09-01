@@ -17,7 +17,7 @@ class ComplexInfoScreen extends StatefulWidget {
 }
 
 class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
-  bool _isAdmin = true;
+  bool _isAdmin = false;
 
   bool _sportSelected = false;
   bool _capacitySelected = false;
@@ -110,8 +110,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             SliverPersistentHeader(
               pinned: true,
               delegate: StickyHeaderDelegate(
-                minHeight: _isAdmin ? 184.0 : 210.0,
-                maxHeight: _isAdmin ? 184.0 : 210.0,
+                minHeight: _isAdmin ? 184.0 : 170.0,
+                maxHeight: _isAdmin ? 184.0 : 170.0,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
@@ -195,7 +195,20 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
               label: Text('Edit complex'),
               icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
             )
-          : null,
+          : FloatingActionButton.extended(
+              onPressed: () {
+                // TODO: Implement booking action
+              },
+              label: const Text('Book'),
+              icon: const Icon(
+                Symbols.calendar_add_on_rounded,
+                size: 24,
+                fill: 1,
+                weight: 400,
+                grade: 0,
+                opticalSize: 24,
+              ),
+            ),
     );
   }
 }

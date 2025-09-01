@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
+import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
+import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
+
+class ReservationInfoScreen extends StatefulWidget {
+  const ReservationInfoScreen({super.key});
+
+  @override
+  State<ReservationInfoScreen> createState() => _ReservationInfoScreenState();
+}
+
+class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
+  bool _isAdmin = false;
+
+  Widget _buildComplexInfoSubsection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8.0,
+      children: [
+        if (_isAdmin)
+          Subheader(subheaderText: 'ComplexName', showButton: false)
+        else
+          Subheader(subheaderText: 'ComplexName', showButton: true, buttonText: 'Get directions', onPressed: () {}),
+        InfoSectionWidget(
+          leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
+          rightChildren: [LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00')],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCourtInfoSubsection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8.0,
+      children: [
+        Subheader(subheaderText: 'CourtName', showButton: false),
+        InfoSectionWidget(
+          leftChildren: [
+            LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport'),
+            LabeledInfoWidget(icon: Symbols.groups_rounded, label: 'Capacity', text: '00'),
+          ],
+          rightChildren: [
+            LabeledInfoWidget(icon: Symbols.calendar_month_rounded, label: 'Date', text: 'Mon, 00/00/0000'),
+            LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Reservation time', text: '00:00 - 00:00'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReceiptInfoSubsection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8.0,
+      children: [
+        Subheader(subheaderText: 'Receipt', showButton: true, buttonText: 'Get full receipt', onPressed: () {}),
+        InfoSectionWidget(
+          leftChildren: [LabeledInfoWidget(icon: Symbols.payments_rounded, label: 'Price', text: '00.00 €')],
+          rightChildren: [LabeledInfoWidget(icon: Symbols.credit_card_clock, label: 'Payment status', text: 'Paid')],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        title: const Text('Reservation'),
+        actions: [Padding(padding: const EdgeInsets.only(right: 16.0), child: MediumChip.alert('Weather'))],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16.0,
+          children: [
+            MetaDataCard(
+              id: '00000000',
+              createdAt: 'Mon, 00/00/0000, 00:00:00',
+              updatedAt: 'Mon, 00/00/0000, 00:00:00',
+              additionalMetadata: _isAdmin
+                  ? [LabeledInfoWidget(icon: Symbols.person_rounded, label: 'Created by', text: 'XXXX')]
+                  : null,
+            ),
+            _buildComplexInfoSubsection(),
+            _buildCourtInfoSubsection(),
+            _buildReceiptInfoSubsection(),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {},
+        label: Text('Modify'),
+        icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+      ),
+    );
+  }
+}

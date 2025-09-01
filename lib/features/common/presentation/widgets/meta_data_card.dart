@@ -27,7 +27,7 @@ class MetaDataCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 8.0,
           children: [
-            LabeledInfoWidget(icon: Symbols.tag_rounded, label: 'Reference', text: '00000000'),
+            LabeledInfoWidget(icon: Symbols.tag_rounded, label: 'Reference', text: id),
             ...?additionalMetadata,
             LabeledInfoWidget(icon: Symbols.calendar_add_on_rounded, label: 'Created at', text: createdAt),
             LabeledInfoWidget(icon: Symbols.edit_rounded, label: 'Updated at', text: updatedAt),
