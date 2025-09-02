@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/common/presentation/widgets/expandable_fab.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
@@ -85,30 +86,33 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
         title: const Text('Reservation'),
         actions: [Padding(padding: const EdgeInsets.only(right: 16.0), child: MediumChip.alert('Weather'))],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16.0,
-          children: [
-            MetaDataCard(
-              id: '00000000',
-              createdAt: 'Mon, 00/00/0000, 00:00:00',
-              updatedAt: 'Mon, 00/00/0000, 00:00:00',
-              additionalMetadata: _isAdmin
-                  ? [LabeledInfoWidget(icon: Symbols.person_rounded, label: 'Created by', text: 'XXXX')]
-                  : null,
-            ),
-            _buildComplexInfoSubsection(),
-            _buildCourtInfoSubsection(),
-            _buildReceiptInfoSubsection(),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16.0,
+            children: [
+              MetaDataCard(
+                id: '00000000',
+                createdAt: 'Mon, 00/00/0000, 00:00:00',
+                updatedAt: 'Mon, 00/00/0000, 00:00:00',
+                additionalMetadata: _isAdmin
+                    ? [LabeledInfoWidget(icon: Symbols.person_rounded, label: 'Created by', text: 'XXXX')]
+                    : null,
+              ),
+              _buildComplexInfoSubsection(),
+              _buildCourtInfoSubsection(),
+              _buildReceiptInfoSubsection(),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: Text('Modify'),
-        icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+      floatingActionButton: ExpandableFab(
+        children: [
+          ActionButton(icon: Symbols.delete_rounded, label: 'Cancel reservation'),
+          ActionButton(icon: Symbols.edit_calendar_rounded, label: 'Modify reservation'),
+        ],
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
-import 'package:frontend/features/reservations/presentation/widgets/reservation_status_chip.dart';
+import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ReservationCard extends StatelessWidget {
@@ -38,7 +38,9 @@ class ReservationCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                ReservationStatusChip(icon: Symbols.check_circle_rounded, label: 'Completed'),
+                MediumChip.alert('Scheduled'),
+                // SmallChip.alert('Scheduled'),
+                // ReservationStatusChip(icon: Symbols.check_circle_rounded, label: 'Completed'),
               ],
             ),
             const InfoSectionWidget(

@@ -105,8 +105,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             SliverPersistentHeader(
               pinned: true,
               delegate: StickyHeaderDelegate(
-                minHeight: _isAdmin ? 184.0 : 170.0,
-                maxHeight: _isAdmin ? 184.0 : 170.0,
+                minHeight: _isAdmin ? 184.0 : 171.0,
+                maxHeight: _isAdmin ? 184.0 : 171.0,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
