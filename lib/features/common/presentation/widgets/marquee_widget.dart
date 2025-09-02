@@ -44,9 +44,7 @@ class _MarqueeWidgetState extends State<MarqueeWidget> {
 
     // Verificar si el contenido excede el ancho disponible
     if (_controller.position.maxScrollExtent > 0) {
-      setState(() {
-        _needsScrolling = true;
-      });
+      setState(() => _needsScrolling = true);
       _startScrolling();
     }
   }

@@ -5,7 +5,7 @@ import 'package:frontend/features/common/presentation/widgets/info_section_widge
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
-import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/courts/presentation/widgets/court_list_tile.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
@@ -41,12 +41,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
         title: const Text('Complex details'),
       ),
       body: SafeArea(
@@ -68,7 +63,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                   child: Column(
                     children: [
                       if (_isAdmin)
-                        Subheader(
+                        Header.subheader(
                           subheaderText: 'Gallery',
                           showButton: true,
                           buttonText: 'Manage gallery',
@@ -86,9 +81,9 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                     spacing: 8.0,
                     children: [
                       if (_isAdmin)
-                        Subheader(subheaderText: 'ComplexName', showButton: false)
+                        Header.subheader(subheaderText: 'ComplexName', showButton: false)
                       else
-                        Subheader(
+                        Header.subheader(
                           subheaderText: 'ComplexName',
                           showButton: true,
                           buttonText: 'Get directions',
@@ -121,28 +116,24 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (_isAdmin)
-                            Subheader(
+                            Header.subheader(
                               subheaderText: 'Courts',
                               showButton: true,
                               buttonText: 'Manage courts',
                               onPressed: () {},
                             )
                           else
-                            Subheader(subheaderText: 'Courts', showButton: false),
+                            Header.subheader(subheaderText: 'Courts', showButton: false),
                           if (!_isAdmin) const SizedBox(height: 8.0),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             spacing: 8.0,
                             children: [
                               CustomFilterChip.dropDown('Sport', _sportSelected, (selected) {
-                                setState(() {
-                                  _sportSelected = selected;
-                                });
+                                setState(() => _sportSelected = selected);
                               }),
                               CustomFilterChip.dropDown('Capacity', _capacitySelected, (selected) {
-                                setState(() {
-                                  _capacitySelected = selected;
-                                });
+                                setState(() => _capacitySelected = selected);
                               }),
                             ],
                           ),
@@ -178,9 +169,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
               itemBuilder: (context, index) {
                 return CourtListTile(
                   name: 'Court $index',
-                  onTap: () {
-                    Navigator.of(context).pushNamed(AppConstants.courtInfoRoute);
-                  },
+                  onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
                   isAdmin: _isAdmin,
                 );
               },

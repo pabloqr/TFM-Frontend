@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/users/presentation/screens/client_dashboard_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_explore_screen.dart';
@@ -41,9 +42,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   ];
 
   void _onDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
   }
 
   bool _shouldShowAvatar() {
@@ -92,9 +91,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   Widget? _buildFloatingActionButton() {
     return _shouldShowFloatingActionButton()
         ? FloatingActionButton.extended(
-            onPressed: () {
-              // TODO: Implement booking action
-            },
+            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
             label: const Text('Book'),
             icon: const Icon(
               Symbols.calendar_add_on_rounded,
@@ -181,34 +178,22 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           spacing: 4.0,
           children: [
             CustomFilterChip.dropDown('Status', _statusSelected, (selected) {
-              setState(() {
-                _statusSelected = selected;
-              });
+              setState(() => _statusSelected = selected);
             }),
             CustomFilterChip.dropDown('Complex', _complexSelected, (selected) {
-              setState(() {
-                _complexSelected = selected;
-              });
+              setState(() => _complexSelected = selected);
             }),
             CustomFilterChip.dropDown('Sport', _sportSelected, (selected) {
-              setState(() {
-                _sportSelected = selected;
-              });
+              setState(() => _sportSelected = selected);
             }),
             CustomFilterChip.dropDown('Date', _dateSelected, (selected) {
-              setState(() {
-                _dateSelected = selected;
-              });
+              setState(() => _dateSelected = selected);
             }),
             CustomFilterChip.dropDown('Start time', _timeIniSelected, (selected) {
-              setState(() {
-                _timeIniSelected = selected;
-              });
+              setState(() => _timeIniSelected = selected);
             }),
             CustomFilterChip.dropDown('End time', _timeEndSelected, (selected) {
-              setState(() {
-                _timeEndSelected = selected;
-              });
+              setState(() => _timeEndSelected = selected);
             }),
           ],
         ),
@@ -219,9 +204,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         child: Row(
           children: [
             CustomFilterChip.dropDown('Sport', _sportSelected, (selected) {
-              setState(() {
-                _sportSelected = selected;
-              });
+              setState(() => _sportSelected = selected);
             }),
           ],
         ),

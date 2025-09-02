@@ -1,136 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:frontend/core/constants/app_constants.dart';
-import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/data/models/widget_size.dart';
-import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
-import 'package:frontend/features/courts/data/models/sport_enum.dart';
+import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
-class ComplexCard extends StatelessWidget {
+class CourtCard extends StatelessWidget {
   final WidgetSize size;
 
   final String title;
-  final double rating;
-  final Set<Sport> sports;
+  final Set<TimeOfDay> times;
 
   final int? index;
   final ValueNotifier<int> selectedIndex;
 
-  const ComplexCard._(
+  const CourtCard._(
     this.size, {
     required this.title,
-    required this.rating,
-    required this.sports,
+    required this.times,
     this.index,
     required this.selectedIndex,
   });
 
-  factory ComplexCard.small({
+  factory CourtCard.small({
     required String title,
-    required double rating,
-    required Set<Sport> sports,
+    required Set<TimeOfDay> times,
     int? index,
     ValueNotifier<int>? selectedIndex,
   }) {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
-    return ComplexCard._(
+    return CourtCard._(
       WidgetSize.small,
       title: title,
-      rating: rating,
-      sports: sports,
+      times: times,
       index: index,
       selectedIndex: notifier,
     );
   }
 
-  factory ComplexCard.medium({
+  factory CourtCard.medium({
     required String title,
-    required double rating,
-    required Set<Sport> sports,
+    required Set<TimeOfDay> times,
     int? index,
     ValueNotifier<int>? selectedIndex,
   }) {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
-    return ComplexCard._(
+    return CourtCard._(
       WidgetSize.medium,
       title: title,
-      rating: rating,
-      sports: sports,
+      times: times,
       index: index,
       selectedIndex: notifier,
     );
   }
 
-  factory ComplexCard.large({
+  factory CourtCard.large({
     required String title,
-    required double rating,
-    required Set<Sport> sports,
+    required Set<TimeOfDay> times,
     int? index,
     ValueNotifier<int>? selectedIndex,
   }) {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
-    return ComplexCard._(
+    return CourtCard._(
       WidgetSize.large,
       title: title,
-      rating: rating,
-      sports: sports,
+      times: times,
       index: index,
       selectedIndex: notifier,
     );
   }
 
   Widget _buildTitle(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: textTheme.titleLarge, softWrap: false),
-        const SizedBox(height: 4.0),
-        ClipRect(
-          child: OverflowBox(
-            alignment: Alignment.centerLeft,
-            maxWidth: double.infinity,
-            fit: OverflowBoxFit.deferToChild,
-            child: Row(
-              spacing: 4.0,
-              children: [
-                Row(
-                  children: List.generate(5, (index) {
-                    IconData icon = Symbols.star_rounded;
-                    double iconFill = 0.0;
-
-                    if (rating >= index + 0.5) {
-                      iconFill = 1.0;
-                      icon = rating >= index + 1 ? icon : Symbols.star_half_rounded;
-                    }
-
-                    return Icon(
-                      icon,
-                      color: colorScheme.primary,
-                      size: 18,
-                      fill: iconFill,
-                      weight: 400,
-                      grade: 0,
-                      opticalSize: 18,
-                    );
-                  }),
-                ),
-                Text(
-                  rating.toString(),
-                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
-                  softWrap: false,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+    return Text(title, style: textTheme.titleLarge, softWrap: false);
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -157,9 +102,18 @@ class ComplexCard extends StatelessWidget {
         _buildHeader(context),
         if (size != WidgetSize.small)
           const InfoSectionWidget(
-            leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
+            leftChildren: [
+              LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport'),
+              LabeledInfoWidget(icon: Symbols.payments_rounded, label: 'Price per hour', text: '00.00 €'),
+            ],
             rightChildren: [
-              LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
+              LabeledInfoWidget(icon: Symbols.groups_rounded, label: 'Capacity', text: '00'),
+              LabeledInfoWidget(
+                icon: Symbols.payments_rounded,
+                filledIcon: true,
+                label: 'Price per hour (with light)',
+                text: '00.00 €',
+              ),
             ],
           ),
         SizedBox(
@@ -169,7 +123,7 @@ class ComplexCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               maxWidth: double.infinity,
               fit: OverflowBoxFit.deferToChild,
-              child: _buildSportsRow(context),
+              child: _buildTimesRow(context),
             ),
           ),
         ),
@@ -189,12 +143,11 @@ class ComplexCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSportsRow(BuildContext context) {
+  Widget _buildTimesRow(BuildContext context) {
     return Row(
       spacing: 4.0,
-      children: sports.map((sport) {
-        // return Icon(sport.icon, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24);
-        return SmallChip.alert(sport.name.toCapitalized());
+      children: times.map((time) {
+        return SmallChip.alert(time.format(context));
       }).toList(),
     );
   }

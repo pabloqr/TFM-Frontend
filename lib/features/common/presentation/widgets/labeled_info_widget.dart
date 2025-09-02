@@ -35,7 +35,7 @@ class LabeledInfoWidget extends StatelessWidget {
                   softWrap: false,
                 ),
               ),
-              Text(text, style: textTheme.bodyMedium),
+              MarqueeWidget(child: Text(text, style: textTheme.bodyMedium, softWrap: false)),
             ],
           ),
         ),

@@ -5,7 +5,7 @@ import 'package:frontend/features/common/presentation/widgets/labeled_info_widge
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
-import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/devices/presentation/widgets/device_list_tile.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
@@ -41,7 +41,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Subheader(subheaderText: 'CourtName', showButton: true, buttonText: 'Get directions', onPressed: () {}),
+        Header.subheader(subheaderText: 'CourtName', showButton: true, buttonText: 'Get directions', onPressed: () {}),
         const Text(
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis in ligula purus. Ut mattis ut dolor quis porta. Phasellus rutrum arcu tortor, sed placerat lectus vestibulum eget.',
         ),
@@ -70,7 +70,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
-        Subheader(subheaderText: 'ComplexName', showButton: false),
+        Header.subheader(subheaderText: 'ComplexName', showButton: false),
         InfoSectionWidget(
           leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
           rightChildren: [LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00')],
@@ -83,9 +83,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         title: const Text('Court details'),
@@ -118,9 +116,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         title: const Text('Court details'),
@@ -143,7 +139,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     children: [
-                      Subheader(
+                      Header.subheader(
                         subheaderText: 'Gallery',
                         showButton: true,
                         buttonText: 'Manage gallery',
@@ -172,7 +168,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Subheader(
+                          Header.subheader(
                             subheaderText: 'Devices',
                             showButton: true,
                             buttonText: 'Manage devices',
@@ -183,14 +179,10 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                             spacing: 8.0,
                             children: [
                               CustomFilterChip.dropDown('Type', _typeSelected, (selected) {
-                                setState(() {
-                                  _typeSelected = selected;
-                                });
+                                setState(() => _typeSelected = selected);
                               }),
                               CustomFilterChip.dropDown('Status', _statusSelected, (selected) {
-                                setState(() {
-                                  _statusSelected = selected;
-                                });
+                                setState(() => _statusSelected = selected);
                               }),
                             ],
                           ),

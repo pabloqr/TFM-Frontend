@@ -114,9 +114,7 @@ class _DraggableFormSheetState extends State<DraggableFormSheet> {
       newMax = math.min(newMax, widget.maxSheetHeightProportionCap);
 
       if ((_calculatedMaxChildSize - newMax).abs() > 0.01 || _isSheetSizeDirty) {
-        setState(() {
-          _calculatedMaxChildSize = newMax;
-        });
+        setState(() => _calculatedMaxChildSize = newMax);
       }
       _isSheetSizeDirty = false;
     }

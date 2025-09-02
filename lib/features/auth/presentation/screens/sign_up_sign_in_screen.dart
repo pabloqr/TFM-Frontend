@@ -57,22 +57,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _togglePasswordVisibility() {
-    setState(() {
-      _isPasswordObscured = !_isPasswordObscured;
-    });
+    setState(() => _isPasswordObscured = !_isPasswordObscured);
   }
 
   void _toggleConfirmPasswordVisibility() {
-    setState(() {
-      _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
-    });
+    setState(() => _isConfirmPasswordObscured = !_isConfirmPasswordObscured);
   }
 
   Future<void> _performSignUp() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
 
       // Se recogen los datos del formulario
       final name = _nameController.text;
@@ -88,9 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Invalid phone number'), behavior: SnackBarBehavior.floating));
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         return;
       }
 
@@ -111,9 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
 
         if (mounted && _isLoading) {
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
         }
 
         return;
@@ -149,9 +139,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         },
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -238,7 +226,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your mail';
                   }
-                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                  final emailRegex = RegExp(r"^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$");
                   if (!emailRegex.hasMatch(value)) {
                     return 'Please enter a valid email address';
                   }
@@ -341,16 +329,12 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _togglePasswordVisibility() {
-    setState(() {
-      _isPasswordObscured = !_isPasswordObscured;
-    });
+    setState(() => _isPasswordObscured = !_isPasswordObscured);
   }
 
   Future<void> _performSignIn() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
 
       // Se recogen los datos del formulario
       final mail = _mailController.text;
@@ -366,9 +350,7 @@ class _SignInScreenState extends State<SignInScreen> {
         );
 
         if (mounted && _isLoading) {
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
         }
 
         return;
@@ -404,9 +386,7 @@ class _SignInScreenState extends State<SignInScreen> {
         },
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -430,7 +410,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your mail';
                   }
-                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                  final emailRegex = RegExp(r"^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$");
                   if (!emailRegex.hasMatch(value)) {
                     return 'Please enter a valid email address';
                   }

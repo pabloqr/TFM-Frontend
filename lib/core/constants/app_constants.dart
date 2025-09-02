@@ -3,13 +3,14 @@ import 'package:frontend/features/auth/presentation/screens/sign_up_sign_in_scre
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
 import 'package:frontend/features/courts/presentation/screens/court_info_screen.dart';
+import 'package:frontend/features/reservations/presentation/screens/new_reservation_screen.dart';
 import 'package:frontend/features/reservations/presentation/screens/reservation_info_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 
 class AppConstants {
   // TODO: Replace with your actual backend URL
-  static const String baseUrl = 'http://192.168.1.35:3000'; // IP local del dispositivo
-  // static const String baseUrl = 'http://100.70.62.176:3000'; // IP NetBird
+  // static const String baseUrl = 'http://192.168.1.35:3000'; // IP local del dispositivo
+  static const String baseUrl = 'http://100.70.62.176:3000'; // IP NetBird
   // static const String baseUrl = 'http://10.0.2.2:3000'; // 10.0.2.2 es localhost para el emulador Android
   // static const String baseUrl = 'http://localhost:3000'; // Para iOS emulador o web
 
@@ -142,6 +143,7 @@ class AppConstants {
   static const String adminHomeRoute = '/admin/home';
   static const String complexInfoRoute = '$complexesEndpoint/info';
   static const String courtInfoRoute = '$courtsEndpoint/info';
+  static const String reservationNewRoute = '$reservationsEndpoint/new';
   static const String reservationInfoRoute = '$reservationsEndpoint/info';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
@@ -151,6 +153,7 @@ class AppConstants {
     clientHomeRoute: (context) => const ClientHomeScreen(),
     complexInfoRoute: (context) => const ComplexInfoScreen(),
     courtInfoRoute: (context) => const CourtInfoScreen(),
+    reservationNewRoute: (context) => NewReservationScreen(),
     reservationInfoRoute: (context) => const ReservationInfoScreen(),
   };
 }

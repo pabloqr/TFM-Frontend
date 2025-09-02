@@ -56,9 +56,7 @@ class ReservationCard extends StatelessWidget {
               spacing: 4.0,
               children: [
                 OutlinedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(AppConstants.reservationInfoRoute);
-                  },
+                  onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationInfoRoute),
                   child: const Text('More info'),
                 ),
                 FilledButton(onPressed: () {}, child: const Text('Modify')),

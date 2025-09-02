@@ -1,5 +1,27 @@
-extension StringCasingExtension on String {
+import 'package:flutter/material.dart';
+
+extension DoubleExtension on double {
+  String formatAsTime() {
+    final hours = floor();
+    final minutes = ((this - hours) * 60).round();
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
+}
+
+extension StringExtension on String {
   String toCapitalized() => length > 0 ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
+}
+
+extension RangeValuesExtension on RangeValues {
+  Duration get duration {
+    final duration = end - start;
+    final hours = duration.floor();
+    return Duration(hours: hours, minutes: ((duration - hours) * 60).round());
+  }
+
+  bool contains(double time) => time >= start && time <= end;
+
+  bool overlaps(RangeValues other) => start <= other.end && end >= other.start;
 }
 
 class Utilities {

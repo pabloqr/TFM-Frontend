@@ -3,7 +3,7 @@ import 'package:frontend/features/common/presentation/widgets/info_section_widge
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
-import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ReservationInfoScreen extends StatefulWidget {
@@ -22,9 +22,14 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
       spacing: 8.0,
       children: [
         if (_isAdmin)
-          Subheader(subheaderText: 'ComplexName', showButton: false)
+          Header.subheader(subheaderText: 'ComplexName', showButton: false)
         else
-          Subheader(subheaderText: 'ComplexName', showButton: true, buttonText: 'Get directions', onPressed: () {}),
+          Header.subheader(
+            subheaderText: 'ComplexName',
+            showButton: true,
+            buttonText: 'Get directions',
+            onPressed: () {},
+          ),
         InfoSectionWidget(
           leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
           rightChildren: [LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00')],
@@ -38,7 +43,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
-        Subheader(subheaderText: 'CourtName', showButton: false),
+        Header.subheader(subheaderText: 'CourtName', showButton: false),
         InfoSectionWidget(
           leftChildren: [
             LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport'),
@@ -58,7 +63,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
-        Subheader(subheaderText: 'Receipt', showButton: true, buttonText: 'Get full receipt', onPressed: () {}),
+        Header.subheader(subheaderText: 'Receipt', showButton: true, buttonText: 'Get full receipt', onPressed: () {}),
         InfoSectionWidget(
           leftChildren: [LabeledInfoWidget(icon: Symbols.payments_rounded, label: 'Price', text: '00.00 €')],
           rightChildren: [LabeledInfoWidget(icon: Symbols.credit_card_clock, label: 'Payment status', text: 'Paid')],

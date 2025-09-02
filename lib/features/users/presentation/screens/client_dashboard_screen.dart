@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
-import 'package:frontend/features/common/presentation/widgets/subheader.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/news/presentation/widgets/news_card.dart';
@@ -24,7 +24,7 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        Subheader(
+        Header.subheader(
           subheaderText: 'Upcoming reservation',
           showButton: true,
           buttonText: 'See all',
@@ -39,7 +39,7 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        Subheader(
+        Header.subheader(
           subheaderText: 'Discover',
           showButton: true,
           buttonText: 'Explore complexes',
@@ -49,9 +49,7 @@ class ClientDashboardScreen extends StatelessWidget {
           constraints: const BoxConstraints(maxHeight: 264.0),
           child: CarouselView(
             itemExtent: 240.0,
-            onTap: (index) {
-              Navigator.of(context).pushNamed(AppConstants.complexInfoRoute);
-            },
+            onTap: (index) => Navigator.of(context).pushNamed(AppConstants.complexInfoRoute),
             children: List<Widget>.generate(10, (int index) {
               final random = Random();
               List<Sport> sports = Sport.values.toList();
@@ -74,7 +72,7 @@ class ClientDashboardScreen extends StatelessWidget {
     return Column(
       spacing: 8.0,
       children: [
-        Subheader(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: onNewsPressed),
+        Header.subheader(subheaderText: 'News', showButton: true, buttonText: 'More news', onPressed: onNewsPressed),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 400.0),
           child: NewsCard(

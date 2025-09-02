@@ -8,6 +8,7 @@ import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/domain/usecases/complexes_use_cases.dart';
 import 'package:frontend/features/auth/data/services/auth_local_service.dart';
 import 'package:frontend/features/auth/data/services/auth_remote_service.dart';
+import 'package:frontend/features/common/presentation/widgets/time_range_selector.dart';
 import 'package:frontend/features/complexes/data/services/complexes_remote_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -116,5 +117,7 @@ List<SingleChildWidget> get appProviders {
         return ComplexesProvider(complexesUseCases: complexesUseCases);
       },
     ),
+
+    ChangeNotifierProvider<TimeRangeController>(create: (_) => TimeRangeController()),
   ];
 }

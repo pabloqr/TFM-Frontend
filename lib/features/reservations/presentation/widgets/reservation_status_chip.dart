@@ -24,9 +24,7 @@ class _ReservationStatusChipState extends State<ReservationStatusChip> {
       onTap: () {
         HapticFeedback.heavyImpact();
 
-        setState(() {
-          _isExpanded = !_isExpanded;
-        });
+        setState(() => _isExpanded = !_isExpanded);
       },
       child: AnimatedContainer(
         duration: animationDuration,
