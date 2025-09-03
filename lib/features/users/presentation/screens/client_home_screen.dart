@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
-import 'package:frontend/domain/usecases/auth_use_cases.dart';
+import 'package:frontend/data/providers/auth_provider.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/list_tile_rounded.dart';
 import 'package:frontend/features/common/presentation/widgets/side_sheet.dart';
@@ -70,28 +70,12 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   void _performSignOut() async {
-    final authUseCases = context.read<AuthUseCases?>();
-    if (authUseCases == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to load services, please try again.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
+    Navigator.of(context).pop();
 
-    final result = await authUseCases.signOut();
-    result.fold(
-      (failure) {
-        print('not redirecting');
-        const SnackBar(content: Text('Failed to sign out, please try again.'), behavior: SnackBarBehavior.floating);
-      },
-      (_) {
-        print('redirecting');
-        Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.welcomeRoute, (route) => false);
-      },
-    );
+    final authProvider = context.read<AuthProvider?>();
+    if (authProvider == null) return;
+
+    await authProvider.signOut();
   }
 
   @override

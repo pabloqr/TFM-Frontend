@@ -58,6 +58,8 @@ class AuthGuard extends StatelessWidget {
                     return loginScreen;
                   },
                   (user) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+
                     // Successfully fetched user, now check role and return appropriate screen
                     switch (user.role) {
                       case Role.client:

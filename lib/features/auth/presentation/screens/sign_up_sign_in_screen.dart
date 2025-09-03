@@ -2,11 +2,10 @@ import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/constants/app_constants.dart';
-import 'package:frontend/domain/usecases/auth_use_cases.dart';
+import 'package:frontend/data/providers/auth_provider.dart';
 import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
 import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
 import 'package:frontend/features/auth/presentation/widgets/draggable_form_sheet.dart';
-import 'package:frontend/features/users/data/models/user_model.dart';
 import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -95,9 +94,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: password,
       );
 
-      // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
-      final authUseCases = context.read<AuthUseCases?>();
-      if (authUseCases == null) {
+      final authProvider = context.read<AuthProvider?>();
+      if (authProvider == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Initializing services, please wait...'), behavior: SnackBarBehavior.floating),
         );
@@ -109,34 +107,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return;
       }
 
-      // Se llama al caso de uso para realizar el registro
-      final result = await authUseCases.signUp(signUpRequest);
+      final signedIn = await authProvider.signUp(signUpRequest);
 
       if (!mounted) return;
 
-      result.fold(
-        (failure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(failure.message), behavior: SnackBarBehavior.floating));
-        },
-        (authResponse) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Sign up successful for  ${authResponse.user.name}! Token: ${authResponse.accessToken.substring(0, 10)}...',
-              ),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-
-          if (authResponse.user.role == Role.admin) {
-            // TODO: Change to admin home screen
-            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
-          } else {
-            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
-          }
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign up ${signedIn ? 'successful' : 'failed'}'), behavior: SnackBarBehavior.floating),
       );
 
       setState(() => _isLoading = false);
@@ -342,9 +318,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
       final signInRequest = SignInRequestModel(mail: mail, password: password);
 
-      // Se obtiene el repositorio de autenticación a partir de la información proporcionada por el provider
-      final authUseCases = context.read<AuthUseCases?>();
-      if (authUseCases == null) {
+      final authProvider = context.read<AuthProvider?>();
+      if (authProvider == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Initializing services, please wait...'), behavior: SnackBarBehavior.floating),
         );
@@ -356,34 +331,12 @@ class _SignInScreenState extends State<SignInScreen> {
         return;
       }
 
-      // Se llama al caso de uso para realizar el inicio de sesión
-      final result = await authUseCases.signIn(signInRequest);
+      final signedIn = await authProvider.signIn(signInRequest);
 
       if (!mounted) return;
 
-      result.fold(
-        (failure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(failure.message), behavior: SnackBarBehavior.floating));
-        },
-        (authResponse) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Sign in successful for ${authResponse.user.name}! Token: ${authResponse.accessToken.substring(0, 10)}...',
-              ),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-
-          if (authResponse.user.role == Role.admin) {
-            // TODO: Change to admin home screen
-            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
-          } else {
-            Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.clientHomeRoute, (route) => false);
-          }
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign in ${signedIn ? 'successful' : 'failed'}'), behavior: SnackBarBehavior.floating),
       );
 
       setState(() => _isLoading = false);

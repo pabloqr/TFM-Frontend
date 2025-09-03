@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
-// import 'package:frontend/features/users/data/models/user_model.dart';
+import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
 
 /// Represents the different states of authentication.
 enum AuthState {
@@ -62,6 +62,30 @@ class AuthProvider extends ChangeNotifier {
       (failure) => state = AuthState.unauthenticated,
       // En caso de éxito, establecer el estado a autenticado.
       (value) => state = AuthState.authenticated,
+    );
+  }
+
+  /// Signs up the user with the provided [request].
+  ///
+  /// Sets the state to [AuthState.loading] during the operation.
+  /// Returns `true` and sets the state to [AuthState.authenticated] on successful sign-up.
+  /// Returns `false` and sets the state to [AuthState.unauthenticated] on failure.
+  Future<bool> signUp(SignUpRequestModel request) async {
+    // Establecer el estado a cargando mientras se procesa la solicitud de inicio de sesión.
+    state = AuthState.loading;
+
+    final result = await _authUseCases.signUp(request);
+    return result.fold(
+      (failure) {
+        // Si el inicio de sesión falla, actualizar el estado a no autenticado.
+        state = AuthState.unauthenticated;
+        return false;
+      },
+      (value) {
+        // Si el inicio de sesión es exitoso, actualizar el estado a autenticado.
+        state = AuthState.authenticated;
+        return true;
+      },
     );
   }
 
