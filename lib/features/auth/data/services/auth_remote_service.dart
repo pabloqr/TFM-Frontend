@@ -177,9 +177,35 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
   ///
   /// This method is not yet implemented.
   @override
-  Future<void> signOut(String accessToken) {
-    // TODO: implement signOut
-    // Implementar la lógica para invalidar el token en el backend.
-    throw UnimplementedError();
+  Future<void> signOut(String accessToken) async {
+    final Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.signOutEndpoint}');
+
+    try {
+      final response = await _client.post(
+        uri,
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        final Map<String, dynamic> data;
+        try {
+          // Decodificar la respuesta JSON.
+          data = json.decode(utf8.decode(response.bodyBytes));
+        } catch (e) {
+          // Manejar errores de decodificación.
+          throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+        }
+
+        throw ServerException(
+          message: data['message'] ?? 'Error signing out: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error signing out: ${e.toString()}');
+    }
   }
 }

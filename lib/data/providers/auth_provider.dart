@@ -31,23 +31,14 @@ class AuthProvider extends ChangeNotifier {
 
   AuthState _state = AuthState.initial;
 
-  // UserModel? _user;
-
   /// The current authentication state.
   AuthState get state => _state;
-
-  // UserModel? get user => _user;
 
   /// Sets the authentication state and notifies listeners.
   set state(AuthState value) {
     _state = value;
     notifyListeners();
   }
-
-  // set user(UserModel value) {
-  //   _user = value;
-  //   notifyListeners();
-  // }
 
   /// Returns `true` if the user is currently authenticated.
   bool get isAuthenticated => _state == AuthState.authenticated;

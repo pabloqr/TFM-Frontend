@@ -56,6 +56,6 @@ class AppInitializer extends StatefulWidget {
 class _AppInitializerState extends State<AppInitializer> {
   @override
   Widget build(BuildContext context) {
-    return AuthGuard(loginScreen: WelcomeScreen(), child: ClientHomeScreen());
+    return AuthGuard(loginScreen: WelcomeScreen(), clientApp: ClientHomeScreen(), adminApp: Placeholder());
   }
 }

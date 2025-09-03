@@ -4,6 +4,7 @@ import 'package:frontend/data/repositories/auth_repository.dart';
 import 'package:frontend/features/auth/data/models/auth_model.dart';
 import 'package:frontend/features/auth/data/models/sign_in_request_model.dart';
 import 'package:frontend/features/auth/data/models/sign_up_request_model.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
 
 class AuthUseCases {
   final AuthRepository _repository;
@@ -31,6 +32,13 @@ class AuthUseCases {
   /// Returns a [Future] containing a [Either] with a [Failure] or [bool].
   Future<Either<Failure, bool>> autoSignIn() async {
     return await _repository.autoSignIn();
+  }
+
+  /// Get the authenticated user.
+  ///
+  /// Returns a [Future] containing a [Either] with a [Failure] or [UserModel].
+  Future<Either<Failure, UserModel>> getAuthenticatedUser() async {
+    return await _repository.getAuthenticatedUser();
   }
 
   /// Refresh the access token.

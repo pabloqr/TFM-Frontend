@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
+import 'package:frontend/features/common/presentation/widgets/list_tile_rounded.dart';
+import 'package:frontend/features/common/presentation/widgets/side_sheet.dart';
 import 'package:frontend/features/users/presentation/screens/client_dashboard_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_explore_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_reservations_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:provider/provider.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key});
@@ -65,6 +69,31 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     return _selectedIndex == 1 || _selectedIndex == 2;
   }
 
+  void _performSignOut() async {
+    final authUseCases = context.read<AuthUseCases?>();
+    if (authUseCases == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load services, please try again.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final result = await authUseCases.signOut();
+    result.fold(
+      (failure) {
+        print('not redirecting');
+        const SnackBar(content: Text('Failed to sign out, please try again.'), behavior: SnackBarBehavior.floating);
+      },
+      (_) {
+        print('redirecting');
+        Navigator.of(context).pushNamedAndRemoveUntil(AppConstants.welcomeRoute, (route) => false);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_needsScrollBehavior()) {
@@ -74,18 +103,59 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     }
   }
 
-  Widget _buildAppBarTrailingIcon() {
+  Widget _buildAppBarTrailingIcon(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return _shouldShowAvatar()
         ? Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: GestureDetector(
-              onTap: () {
-                // TODO: Implement account action / navigation
-              },
-              child: const CircleAvatar(
-                radius: 24.0,
-                // TODO: Replace with user's actual avatar or initials
-                child: Icon(Icons.person),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(1000),
+              onTap: () => showSideSheet(
+                context,
+                title: 'Account',
+                content: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text('My account', style: textTheme.titleMedium),
+                  ),
+                  Column(
+                    children: [
+                      ListTileRounded(title: 'Edit profile', icon: Symbols.person_rounded, onTap: () {}),
+                      ListTileRounded(title: 'My payments', icon: Symbols.payments_rounded, onTap: () {}),
+                      ListTileRounded(title: 'Notifications', icon: Symbols.notifications_rounded, onTap: () {}),
+                      ListTileRounded(title: 'Settings', icon: Symbols.settings_rounded, onTap: () {}),
+                    ],
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text('Support', style: textTheme.titleMedium),
+                  ),
+                  Column(
+                    children: [
+                      ListTileRounded(title: 'Help', icon: Symbols.help_rounded, onTap: () {}),
+                      ListTileRounded(title: 'FAQ', icon: Symbols.question_mark_rounded, onTap: () {}),
+                      ListTileRounded(title: 'About this app', icon: Symbols.info_rounded, onTap: () {}),
+                    ],
+                  ),
+                  Divider(),
+                  ListTileRounded(
+                    title: 'Sign out',
+                    icon: Symbols.logout_rounded,
+                    contentColor: colorScheme.error,
+                    onTap: _performSignOut,
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: const CircleAvatar(
+                  radius: 16.0,
+                  // TODO: Replace with user's actual avatar or initials
+                  child: Icon(Icons.person_rounded, size: 18.0, opticalSize: 18.0),
+                ),
               ),
             ),
           )
@@ -225,7 +295,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   Widget _buildRegularScaffold(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex]), actions: [_buildAppBarTrailingIcon()]),
+      appBar: AppBar(title: Text(_titles[_selectedIndex]), actions: [_buildAppBarTrailingIcon(context)]),
       body: _screens.elementAt(_selectedIndex),
       floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -247,7 +317,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               snap: true,
               pinned: true,
               expandedHeight: expandedHeight,
-              actions: [_buildAppBarTrailingIcon()],
+              actions: [_buildAppBarTrailingIcon(context)],
               flexibleSpace: _shouldShowSearchBar() || _shouldShowFilterChips()
                   ? FlexibleSpaceBar(
                       collapseMode: CollapseMode.parallax,
