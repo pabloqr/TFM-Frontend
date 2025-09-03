@@ -82,6 +82,31 @@ class ComplexCard extends StatelessWidget {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: selectedIndex,
+      builder: (context, currentIndex, _) {
+        return index == currentIndex
+            ? Card.outlined(
+                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                  side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: _buildContent(context),
+              )
+            : Card.filled(
+                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0)),
+                clipBehavior: Clip.antiAlias,
+                child: _buildContent(context),
+              );
+      },
+    );
+  }
+
   Widget _buildTitle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -182,7 +207,10 @@ class ComplexCard extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pushNamed(AppConstants.complexInfoRoute),
                 child: const Text('More info'),
               ),
-              FilledButton(onPressed: () {}, child: const Text('Book court')),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+                child: const Text('Book court'),
+              ),
             ],
           ),
       ],
@@ -249,31 +277,6 @@ class ComplexCard extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: selectedIndex,
-      builder: (context, currentIndex, _) {
-        return index == currentIndex
-            ? Card.outlined(
-                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.0),
-                  side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: _buildContent(context),
-              )
-            : Card.filled(
-                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0)),
-                clipBehavior: Clip.antiAlias,
-                child: _buildContent(context),
-              );
       },
     );
   }

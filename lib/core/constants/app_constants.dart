@@ -3,7 +3,7 @@ import 'package:frontend/features/auth/presentation/screens/sign_up_sign_in_scre
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
 import 'package:frontend/features/courts/presentation/screens/court_info_screen.dart';
-import 'package:frontend/features/reservations/presentation/screens/new_reservation_screen.dart';
+import 'package:frontend/features/reservations/presentation/screens/reservation_screen.dart';
 import 'package:frontend/features/reservations/presentation/screens/reservation_info_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 
@@ -144,6 +144,7 @@ class AppConstants {
   static const String complexInfoRoute = '$complexesEndpoint/info';
   static const String courtInfoRoute = '$courtsEndpoint/info';
   static const String reservationNewRoute = '$reservationsEndpoint/new';
+  static const String reservationModifyRoute = '$reservationsEndpoint/modify';
   static const String reservationInfoRoute = '$reservationsEndpoint/info';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
@@ -153,7 +154,8 @@ class AppConstants {
     clientHomeRoute: (context) => const ClientHomeScreen(),
     complexInfoRoute: (context) => const ComplexInfoScreen(),
     courtInfoRoute: (context) => const CourtInfoScreen(),
-    reservationNewRoute: (context) => NewReservationScreen(),
+    reservationNewRoute: (context) => ReservationScreen.create(),
+    reservationModifyRoute: (context) => ReservationScreen.modify(),
     reservationInfoRoute: (context) => const ReservationInfoScreen(),
   };
 }

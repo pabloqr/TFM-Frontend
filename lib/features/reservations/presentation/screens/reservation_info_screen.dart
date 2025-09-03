@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/core/constants/theme.dart';
+import 'package:frontend/features/common/presentation/widgets/custom_dialog.dart';
 import 'package:frontend/features/common/presentation/widgets/expandable_fab.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
@@ -110,8 +113,39 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
       ),
       floatingActionButton: ExpandableFab(
         children: [
-          ActionButton(icon: Symbols.delete_rounded, label: 'Cancel reservation'),
-          ActionButton(icon: Symbols.edit_calendar_rounded, label: 'Modify reservation'),
+          ActionButton(
+            icon: Symbols.free_cancellation_rounded,
+            label: 'Cancel reservation',
+            onPressed: () {
+              final brightness = Theme.of(context).brightness;
+              final headerColor = brightness == Brightness.light
+                  ? MaterialTheme.warning.light.colorContainer
+                  : MaterialTheme.warning.dark.colorContainer;
+              final iconColor = brightness == Brightness.light
+                  ? MaterialTheme.warning.light.onColorContainer
+                  : MaterialTheme.warning.dark.onColorContainer;
+
+              showCustomAlertDialog(
+                context,
+                icon: Symbols.warning_rounded,
+                headline: 'Cancel reservation?',
+                supportingText: 'You\'re about to cancel your reservation. This action is cost free but irreversible,',
+                headerColor: headerColor,
+                iconColor: iconColor,
+                actions: [
+                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Go back')),
+                  TextButton(onPressed: () {
+                    // TODO: Cancel reservation
+                  }, child: const Text('Yes, cancel')),
+                ],
+              );
+            },
+          ),
+          ActionButton(
+            icon: Symbols.edit_calendar_rounded,
+            label: 'Modify reservation',
+            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
+          ),
         ],
       ),
     );

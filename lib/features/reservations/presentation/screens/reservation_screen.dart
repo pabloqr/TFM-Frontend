@@ -18,18 +18,24 @@ import 'package:provider/provider.dart';
 ///
 /// This screen guides the user through selecting a complex, sport, court,
 /// date, and time, and finally shows a summary before confirmation.
-class NewReservationScreen extends StatefulWidget {
-  /// Creates a [NewReservationScreen].
-  const NewReservationScreen({super.key});
+class ReservationScreen extends StatefulWidget {
+  final bool isNew;
+
+  /// Creates a [ReservationScreen].
+  const ReservationScreen._({required this.isNew});
+
+  factory ReservationScreen.create() => const ReservationScreen._(isNew: true);
+
+  factory ReservationScreen.modify() => const ReservationScreen._(isNew: false);
 
   @override
-  State<NewReservationScreen> createState() => _NewReservationScreenState();
+  State<ReservationScreen> createState() => _ReservationScreenState();
 }
 
-/// The state for the [NewReservationScreen].
+/// The state for the [ReservationScreen].
 ///
 /// Manages the current step of the reservation process and the user's selections.
-class _NewReservationScreenState extends State<NewReservationScreen> {
+class _ReservationScreenState extends State<ReservationScreen> {
   /// The current active step in the stepper.
   int _currentStep = 0;
 
@@ -257,11 +263,14 @@ class _NewReservationScreenState extends State<NewReservationScreen> {
         ? MaterialTheme.warning.light.onColorContainer
         : MaterialTheme.success.dark.onColorContainer;
 
+    final String text = widget.isNew ? 'Creation' : 'Modification';
+
     showCustomAlertDialog(
       context,
       icon: Symbols.warning_rounded,
-      headline: 'Leave reservation creation?',
-      supportingText: 'You are about to exit the reservation creation process. All unsaved changes will be lost.',
+      headline: 'Leave reservation ${text.toLowerCase()}?',
+      supportingText:
+          'You are about to exit the reservation ${text.toLowerCase()} process. All unsaved changes will be lost.',
       headerColor: headerColor,
       iconColor: iconColor,
       actions: [
@@ -271,6 +280,25 @@ class _NewReservationScreenState extends State<NewReservationScreen> {
           child: const Text('Leave'),
         ),
       ],
+    );
+  }
+
+  /// Builds the main widget tree for the screen.
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: _cancelReservation, icon: const Icon(Icons.arrow_back_rounded)),
+        title: Text(widget.isNew ? 'New reservation' : 'Modify reservation'),
+      ),
+      body: SafeArea(
+        child: Stepper(
+          currentStep: _currentStep,
+          onStepTapped: _onStepTapped,
+          controlsBuilder: (context, details) => _buildStepControls(context, details),
+          steps: _steps,
+        ),
+      ),
     );
   }
 
@@ -503,25 +531,6 @@ class _NewReservationScreenState extends State<NewReservationScreen> {
           if (details.stepIndex == _steps.length - 1)
             FilledButton(onPressed: () => _confirmReservation(), child: const Text('Confirm reservation')),
         ],
-      ),
-    );
-  }
-
-  /// Builds the main widget tree for the screen.
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(onPressed: _cancelReservation, icon: const Icon(Icons.arrow_back_rounded)),
-        title: const Text('New Reservation'),
-      ),
-      body: SafeArea(
-        child: Stepper(
-          currentStep: _currentStep,
-          onStepTapped: _onStepTapped,
-          controlsBuilder: (context, details) => _buildStepControls(context, details),
-          steps: _steps,
-        ),
       ),
     );
   }

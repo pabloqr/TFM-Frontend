@@ -65,6 +65,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     return _selectedIndex == 1 || _selectedIndex == 2;
   }
 
+  @override
+  Widget build(BuildContext context) {
+    if (_needsScrollBehavior()) {
+      return _buildSliverScaffold(context);
+    } else {
+      return _buildRegularScaffold(context);
+    }
+  }
+
   Widget _buildAppBarTrailingIcon() {
     return _shouldShowAvatar()
         ? Padding(
@@ -142,6 +151,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       child: SearchBar(
         padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
         elevation: WidgetStateProperty.all(0),
+        hintText: 'Search complexes...',
         leading: Icon(
           Symbols.search_rounded,
           size: 24,
@@ -257,14 +267,5 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_needsScrollBehavior()) {
-      return _buildSliverScaffold(context);
-    } else {
-      return _buildRegularScaffold(context);
-    }
   }
 }
