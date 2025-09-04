@@ -4,6 +4,7 @@ import 'package:frontend/core/constants/theme.dart';
 import 'package:frontend/core/providers/dependency_providers.dart';
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:frontend/features/auth/presentation/widgets/auth_guard.dart';
+import 'package:frontend/features/users/presentation/screens/admin_home_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,6 +57,6 @@ class AppInitializer extends StatefulWidget {
 class _AppInitializerState extends State<AppInitializer> {
   @override
   Widget build(BuildContext context) {
-    return AuthGuard(loginScreen: WelcomeScreen(), clientApp: ClientHomeScreen(), adminApp: Placeholder());
+    return AuthGuard(loginScreen: WelcomeScreen(), clientApp: ClientHomeScreen(), adminApp: AdminHomeScreen());
   }
 }

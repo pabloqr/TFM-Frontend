@@ -5,6 +5,7 @@ import 'package:frontend/features/complexes/presentation/screens/complex_info_sc
 import 'package:frontend/features/courts/presentation/screens/court_info_screen.dart';
 import 'package:frontend/features/reservations/presentation/screens/reservation_screen.dart';
 import 'package:frontend/features/reservations/presentation/screens/reservation_info_screen.dart';
+import 'package:frontend/features/users/presentation/screens/admin_home_screen.dart';
 import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 
 class AppConstants {
@@ -152,6 +153,7 @@ class AppConstants {
     signUpRoute: (context) => const SignUpScreen(),
     signInRoute: (context) => const SignInScreen(),
     clientHomeRoute: (context) => const ClientHomeScreen(),
+    adminHomeRoute: (context) => const AdminHomeScreen(),
     complexInfoRoute: (context) => const ComplexInfoScreen(),
     courtInfoRoute: (context) => const CourtInfoScreen(),
     reservationNewRoute: (context) => ReservationScreen.create(),

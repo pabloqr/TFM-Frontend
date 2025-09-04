@@ -29,7 +29,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   static const List<String> _titles = <String>['Dashboard', 'Reservations', 'Explore', 'Account'];
 
-  // TODO: Replace these with your actual screen widgets
   late final List<Widget> _screens = <Widget>[
     ClientDashboardScreen(
       onReservationPressed: () {
