@@ -168,7 +168,7 @@ class ComplexCard extends StatelessWidget {
         children: [
           _buildTitle(context),
           // TODO: substitute condition with real condition
-          if (size != WidgetSize.small && true) SmallChip.success('Available'),
+          if (size != WidgetSize.small && true) SmallChip.success(label: 'Available'),
         ],
       );
     }
@@ -222,7 +222,7 @@ class ComplexCard extends StatelessWidget {
       spacing: 4.0,
       children: sports.map((sport) {
         // return Icon(sport.icon, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24);
-        return SmallChip.alert(sport.name.toCapitalized());
+        return SmallChip.alert(label: sport.name.toCapitalized());
       }).toList(),
     );
   }

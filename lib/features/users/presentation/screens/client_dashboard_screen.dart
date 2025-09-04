@@ -20,6 +20,25 @@ class ClientDashboardScreen extends StatelessWidget {
     required this.onNewsPressed,
   });
 
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16.0,
+          children: [
+            _buildReservationSubsection(context),
+            _buildDiscoverSubsection(context),
+            _buildNewsSubsection(context),
+            const SizedBox(height: 56.0),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildReservationSubsection(BuildContext context) {
     return Column(
       spacing: 8.0,
@@ -81,25 +100,6 @@ class ClientDashboardScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16.0,
-          children: [
-            _buildReservationSubsection(context),
-            _buildDiscoverSubsection(context),
-            _buildNewsSubsection(context),
-            const SizedBox(height: 56.0),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -30,8 +30,11 @@ class CourtListTile extends StatelessWidget {
             runSpacing: 4.0,
             alignment: WrapAlignment.end,
             children: [
-              if (isAdmin) SmallChip.neutralSurface('Sport') else SmallChip.alert('Sport'),
-              if (isAdmin) SmallChip.error('Maintenance') else if (Random().nextBool()) SmallChip.success('Available'),
+              if (isAdmin) SmallChip.neutralSurface(label: 'Sport') else SmallChip.alert(label: 'Sport'),
+              if (isAdmin)
+                SmallChip.error(label: 'Maintenance')
+              else if (Random().nextBool())
+                SmallChip.success(label: 'Available'),
             ],
           ),
         ],

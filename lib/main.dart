@@ -32,9 +32,11 @@ class MyApp extends StatelessWidget {
             final colorScheme = Theme.of(context).colorScheme;
 
             return Scaffold(
-              body: Container(
-                color: colorScheme.surface,
-                child: Center(child: CircularProgressIndicator()),
+              body: SafeArea(
+                child: Container(
+                  color: colorScheme.surface,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
               ),
             );
           }

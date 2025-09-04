@@ -44,8 +44,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     const Center(child: Text('Account Screen Content')),
   ];
 
-  void _onDestinationSelected(int index) {
-    setState(() => _selectedIndex = index);
+  bool _needsScrollBehavior() {
+    return _selectedIndex == 1 || _selectedIndex == 2;
   }
 
   bool _shouldShowAvatar() {
@@ -56,16 +56,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     return _selectedIndex == 0 || _selectedIndex == 1;
   }
 
-  bool _needsScrollBehavior() {
-    return _selectedIndex == 1 || _selectedIndex == 2;
-  }
-
   bool _shouldShowSearchBar() {
     return _selectedIndex == 2;
   }
 
   bool _shouldShowFilterChips() {
     return _selectedIndex == 1 || _selectedIndex == 2;
+  }
+
+  void _onDestinationSelected(int index) {
+    setState(() => _selectedIndex = index);
   }
 
   void _performSignOut() async {
@@ -79,11 +79,53 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_needsScrollBehavior()) {
-      return _buildSliverScaffold(context);
-    } else {
-      return _buildRegularScaffold(context);
-    }
+    return _needsScrollBehavior() ? _buildSliverScaffold(context) : _buildRegularScaffold(context);
+  }
+
+  Widget _buildSliverScaffold(BuildContext context) {
+    final searchBarHeight = _shouldShowSearchBar() ? 64.0 : 0.0;
+    final filterChipsHeight = _shouldShowFilterChips() ? 58.0 : 0.0;
+    final expandedHeight = 56.0 + searchBarHeight + filterChipsHeight;
+
+    return Scaffold(
+      bottomNavigationBar: _buildBottomNavigationBar(),
+      floatingActionButton: _buildFloatingActionButton(),
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              title: Text(_titles[_selectedIndex]),
+              floating: true,
+              snap: true,
+              pinned: true,
+              expandedHeight: expandedHeight,
+              actions: [_buildAppBarTrailingIcon(context)],
+              flexibleSpace: _shouldShowSearchBar() || _shouldShowFilterChips()
+                  ? FlexibleSpaceBar(
+                collapseMode: CollapseMode.parallax,
+                background: Column(
+                  children: [
+                    if (_shouldShowSearchBar()) _buildSearchBar(context),
+                    if (_shouldShowFilterChips()) _buildFilterChips()!,
+                  ],
+                ),
+              )
+                  : null,
+            ),
+          ];
+        },
+        body: _screens.elementAt(_selectedIndex),
+      ),
+    );
+  }
+
+  Widget _buildRegularScaffold(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(_titles[_selectedIndex]), actions: [_buildAppBarTrailingIcon(context)]),
+      body: _screens.elementAt(_selectedIndex),
+      floatingActionButton: _buildFloatingActionButton(),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
   }
 
   Widget _buildAppBarTrailingIcon(BuildContext context) {
@@ -274,51 +316,5 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       );
     }
     return null;
-  }
-
-  Widget _buildRegularScaffold(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex]), actions: [_buildAppBarTrailingIcon(context)]),
-      body: _screens.elementAt(_selectedIndex),
-      floatingActionButton: _buildFloatingActionButton(),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildSliverScaffold(BuildContext context) {
-    final searchBarHeight = _shouldShowSearchBar() ? 64.0 : 0.0;
-    final filterChipsHeight = _shouldShowFilterChips() ? 58.0 : 0.0;
-    final expandedHeight = 56.0 + searchBarHeight + filterChipsHeight;
-
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              title: Text(_titles[_selectedIndex]),
-              floating: true,
-              snap: true,
-              pinned: true,
-              expandedHeight: expandedHeight,
-              actions: [_buildAppBarTrailingIcon(context)],
-              flexibleSpace: _shouldShowSearchBar() || _shouldShowFilterChips()
-                  ? FlexibleSpaceBar(
-                      collapseMode: CollapseMode.parallax,
-                      background: Column(
-                        children: [
-                          if (_shouldShowSearchBar()) _buildSearchBar(context),
-                          if (_shouldShowFilterChips()) _buildFilterChips()!,
-                        ],
-                      ),
-                    )
-                  : null,
-            ),
-          ];
-        },
-        body: _screens.elementAt(_selectedIndex),
-      ),
-      floatingActionButton: _buildFloatingActionButton(),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
   }
 }

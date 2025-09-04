@@ -31,6 +31,27 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
     });
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ComplexesProvider?>(
+      builder: (context, provider, _) {
+        if (provider == null) return _buildLoadingState(context);
+
+        switch (provider.state) {
+          case ComplexesState.initial:
+          case ComplexesState.loading:
+            return _buildLoadingState(context);
+          case ComplexesState.empty:
+            return const Center(child: Text('No complexes found'));
+          case ComplexesState.error:
+            return const Center(child: Text('Error loading complexes'));
+          case ComplexesState.loaded:
+            return _buildLoadedState(context, provider);
+        }
+      },
+    );
+  }
+
   Widget _buildLoadingState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -59,27 +80,6 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
             sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
           ),
         );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ComplexesProvider?>(
-      builder: (context, provider, _) {
-        if (provider == null) return _buildLoadingState(context);
-
-        switch (provider.state) {
-          case ComplexesState.initial:
-          case ComplexesState.loading:
-            return _buildLoadingState(context);
-          case ComplexesState.empty:
-            return const Center(child: Text('No complexes found'));
-          case ComplexesState.error:
-            return const Center(child: Text('Error loading complexes'));
-          case ComplexesState.loaded:
-            return _buildLoadedState(context, provider);
-        }
       },
     );
   }

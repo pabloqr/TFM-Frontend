@@ -16,13 +16,7 @@ class CourtCard extends StatelessWidget {
   final int? index;
   final ValueNotifier<int> selectedIndex;
 
-  const CourtCard._(
-    this.size, {
-    required this.title,
-    required this.times,
-    this.index,
-    required this.selectedIndex,
-  });
+  const CourtCard._(this.size, {required this.title, required this.times, this.index, required this.selectedIndex});
 
   factory CourtCard.small({
     required String title,
@@ -31,13 +25,7 @@ class CourtCard extends StatelessWidget {
     ValueNotifier<int>? selectedIndex,
   }) {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
-    return CourtCard._(
-      WidgetSize.small,
-      title: title,
-      times: times,
-      index: index,
-      selectedIndex: notifier,
-    );
+    return CourtCard._(WidgetSize.small, title: title, times: times, index: index, selectedIndex: notifier);
   }
 
   factory CourtCard.medium({
@@ -47,13 +35,7 @@ class CourtCard extends StatelessWidget {
     ValueNotifier<int>? selectedIndex,
   }) {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
-    return CourtCard._(
-      WidgetSize.medium,
-      title: title,
-      times: times,
-      index: index,
-      selectedIndex: notifier,
-    );
+    return CourtCard._(WidgetSize.medium, title: title, times: times, index: index, selectedIndex: notifier);
   }
 
   factory CourtCard.large({
@@ -63,12 +45,31 @@ class CourtCard extends StatelessWidget {
     ValueNotifier<int>? selectedIndex,
   }) {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
-    return CourtCard._(
-      WidgetSize.large,
-      title: title,
-      times: times,
-      index: index,
-      selectedIndex: notifier,
+    return CourtCard._(WidgetSize.large, title: title, times: times, index: index, selectedIndex: notifier);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: selectedIndex,
+      builder: (context, currentIndex, _) {
+        return index == currentIndex
+            ? Card.outlined(
+                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                  side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: _buildContent(context),
+              )
+            : Card.filled(
+                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0)),
+                clipBehavior: Clip.antiAlias,
+                child: _buildContent(context),
+              );
+      },
     );
   }
 
@@ -88,7 +89,7 @@ class CourtCard extends StatelessWidget {
         children: [
           _buildTitle(context),
           // TODO: substitute condition with real condition
-          if (size != WidgetSize.small && true) SmallChip.success('Available'),
+          if (size != WidgetSize.small && true) SmallChip.success(label: 'Available'),
         ],
       );
     }
@@ -147,7 +148,7 @@ class CourtCard extends StatelessWidget {
     return Row(
       spacing: 4.0,
       children: times.map((time) {
-        return SmallChip.alert(time.format(context));
+        return SmallChip.alert(label: time.format(context));
       }).toList(),
     );
   }
@@ -202,31 +203,6 @@ class CourtCard extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: selectedIndex,
-      builder: (context, currentIndex, _) {
-        return index == currentIndex
-            ? Card.outlined(
-                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.0),
-                  side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: _buildContent(context),
-              )
-            : Card.filled(
-                margin: size == WidgetSize.small ? EdgeInsetsGeometry.zero : const EdgeInsets.all(4.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0)),
-                clipBehavior: Clip.antiAlias,
-                child: _buildContent(context),
-              );
       },
     );
   }

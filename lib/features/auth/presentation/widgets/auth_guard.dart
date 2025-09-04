@@ -22,9 +22,11 @@ class AuthGuard extends StatelessWidget {
           case AuthState.loading:
             final colorScheme = Theme.of(context).colorScheme;
             return Scaffold(
-              body: Container(
-                color: colorScheme.surface,
-                child: Center(child: CircularProgressIndicator()),
+              body: SafeArea(
+                child: Container(
+                  color: colorScheme.surface,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
               ),
             );
           case AuthState.unauthenticated:
@@ -41,9 +43,11 @@ class AuthGuard extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   final colorScheme = Theme.of(context).colorScheme;
                   return Scaffold(
-                    body: Container(
-                      color: colorScheme.surface,
-                      child: Center(child: CircularProgressIndicator()),
+                    body: SafeArea(
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                     ),
                   );
                 } else if (snapshot.hasError || !snapshot.hasData) {

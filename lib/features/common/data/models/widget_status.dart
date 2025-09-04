@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/theme.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 enum WidgetStatus { neutralSurface, neutralCard, alert, success, error }
 
@@ -7,7 +8,7 @@ extension WidgetStatusColor on WidgetStatus {
   Color colorSurface(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final brightness = Theme.of(context).brightness;
-    
+
     switch (this) {
       case WidgetStatus.neutralSurface:
         return colorScheme.surfaceContainer;
@@ -53,6 +54,20 @@ extension WidgetStatusColor on WidgetStatus {
         }
       case WidgetStatus.error:
         return colorScheme.onErrorContainer;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case WidgetStatus.neutralSurface:
+      case WidgetStatus.neutralCard:
+        return Symbols.info_rounded;
+      case WidgetStatus.alert:
+        return Symbols.warning_rounded;
+      case WidgetStatus.success:
+        return Symbols.check_circle_rounded;
+      case WidgetStatus.error:
+        return Symbols.error_outline_rounded;
     }
   }
 }

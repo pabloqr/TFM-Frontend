@@ -28,7 +28,7 @@ class DeviceListTile extends StatelessWidget {
             runSpacing: 4.0,
             alignment: WrapAlignment.end,
             // TODO: Chip based on device status
-            children: [SmallChip.neutralSurface('Type'), SmallChip.alert('Warning')],
+            children: [SmallChip.neutralSurface(label: 'Type'), SmallChip.alert(label: 'Warning')],
           ),
         ],
       ),

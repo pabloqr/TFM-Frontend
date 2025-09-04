@@ -69,7 +69,7 @@ class NewsCard extends StatelessWidget {
                             Text(_getCreationString(), style: textTheme.labelSmall),
                           ],
                         ),
-                        if (_dateDifference.inDays <= 7) SmallChip.alert('NEW'),
+                        if (_dateDifference.inDays <= 7) SmallChip.alert(label: 'NEW'),
                       ],
                     ),
                     Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit.', style: textTheme.bodyMedium),
