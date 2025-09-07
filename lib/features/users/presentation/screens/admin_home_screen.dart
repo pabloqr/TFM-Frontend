@@ -9,7 +9,9 @@ import 'package:frontend/features/common/presentation/widgets/side_sheet.dart';
 import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
 import 'package:frontend/features/devices/data/models/weather_enum.dart';
 import 'package:frontend/features/devices/presentation/widgets/weather_card.dart';
+import 'package:frontend/features/users/presentation/screens/admin_courts.dart';
 import 'package:frontend/features/users/presentation/screens/admin_dashboard_screen.dart';
+import 'package:frontend/features/users/presentation/screens/admin_devices.dart';
 import 'package:frontend/features/users/presentation/screens/admin_reservations_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
@@ -57,8 +59,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
     ),
     _Destination(
       title: 'Courts',
-      icon: Icon(Symbols.sports_rounded, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24),
-      selectedIcon: Icon(Symbols.sports_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+      icon: Icon(Symbols.location_on_rounded, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24),
+      selectedIcon: Icon(Symbols.location_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
     ),
     _Destination(
       title: 'Devices',
@@ -75,8 +77,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
     ),
     _Destination(
       title: 'Courts',
-      icon: Icon(Symbols.sports_rounded, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24),
-      selectedIcon: Icon(Symbols.sports_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+      icon: Icon(Symbols.location_on_rounded, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24),
+      selectedIcon: Icon(Symbols.location_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
     ),
     _Destination(
       title: 'Devices',
@@ -94,8 +96,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   ];
 
   late final List<List<Widget>> _subScreens = [
-    [Center(child: Text('Courts Telemetry Screen Content')), Center(child: Text('Courts List Screen Content'))],
-    [Center(child: Text('Devices Telemetry Screen Content')), Center(child: Text('Devices List Screen Content'))],
+    [AdminCourts.telemetry(), AdminCourts.list()],
+    [AdminDevices.telemetry(), AdminDevices.list()],
   ];
 
   @override

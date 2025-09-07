@@ -3,6 +3,7 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
+import 'package:frontend/features/common/presentation/widgets/image_carousel.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
@@ -116,7 +117,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildCarouselView(),
+              ImageCarousel(isAdmin: false),
               _buildCourtInfoSubsection(),
               const SizedBox(height: 16.0),
               _buildComplexInfoSubsection(),
@@ -152,20 +153,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                     updatedAt: 'Mon, 00/00/0000, 00:00:00',
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      Header.subheader(
-                        subheaderText: 'Gallery',
-                        showButton: true,
-                        buttonText: 'Manage gallery',
-                        onPressed: () {},
-                      ),
-                      _buildCarouselView(),
-                    ],
-                  ),
-                ),
+                Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0), child: ImageCarousel(isAdmin: true)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(spacing: 16.0, children: [_buildCourtInfoSubsection(), _buildComplexInfoSubsection()]),
@@ -228,7 +216,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
             SliverList.separated(
               itemCount: 10,
               itemBuilder: (context, index) {
-                return DeviceListTile(name: 'Device $index', onTap: () {});
+                return DeviceListTile.list(name: 'Device $index', onTap: () {});
               },
               separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
             ),
@@ -239,21 +227,6 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
         label: Text('Edit court'),
         icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
-      ),
-    );
-  }
-
-  Widget _buildCarouselView() {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 200.0),
-      child: CarouselView(
-        itemExtent: 200.0,
-        children: List<Widget>.generate(10, (int index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: Image.asset('assets/images/placeholders/court.jpg', fit: BoxFit.cover),
-          );
-        }),
       ),
     );
   }

@@ -126,15 +126,15 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       child: CustomScrollView(
         primary: !isAdmin,
         slivers: [
-          _buildSliverList(context, isAdmin),
-          _buildSliverHeader(context, isAdmin),
-          _buildSliverContent(context, isAdmin),
+          _buildHeader(context, isAdmin),
+          _buildPinnedHeader(context, isAdmin),
+          _buildScrollableList(context, isAdmin),
         ],
       ),
     );
   }
 
-  Widget _buildSliverList(BuildContext context, bool isAdmin) {
+  Widget _buildHeader(BuildContext context, bool isAdmin) {
     return SliverList(
       delegate: SliverChildListDelegate([
         if (isAdmin)
@@ -181,7 +181,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     );
   }
 
-  Widget _buildSliverHeader(BuildContext context, bool isAdmin) {
+  Widget _buildPinnedHeader(BuildContext context, bool isAdmin) {
     return SliverPersistentHeader(
       pinned: true,
       delegate: StickyHeaderDelegate(
@@ -242,11 +242,11 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     );
   }
 
-  Widget _buildSliverContent(BuildContext context, bool isAdmin) {
+  Widget _buildScrollableList(BuildContext context, bool isAdmin) {
     return SliverList.separated(
       itemCount: 10,
       itemBuilder: (context, index) {
-        return CourtListTile(
+        return CourtListTile.telemetry(
           name: 'Court $index',
           onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
           isAdmin: isAdmin,
