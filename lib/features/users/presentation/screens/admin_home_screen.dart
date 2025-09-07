@@ -6,6 +6,7 @@ import 'package:frontend/features/common/presentation/widgets/info_section_widge
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/list_tile_rounded.dart';
 import 'package:frontend/features/common/presentation/widgets/side_sheet.dart';
+import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
 import 'package:frontend/features/devices/data/models/weather_enum.dart';
 import 'package:frontend/features/devices/presentation/widgets/weather_card.dart';
 import 'package:frontend/features/users/presentation/screens/admin_dashboard_screen.dart';
@@ -89,7 +90,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
     AdminReservationsScreen(),
     Center(child: Text('Courts Screen Content')),
     Center(child: Text('Devices Screen Content')),
-    Center(child: Text('Complex Screen Content')),
+    ComplexInfoScreen(),
   ];
 
   late final List<List<Widget>> _subScreens = [

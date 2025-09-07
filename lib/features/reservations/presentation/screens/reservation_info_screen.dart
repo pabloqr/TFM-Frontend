@@ -195,7 +195,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
   Widget _buildFloatingActionButton(BuildContext context, bool isAdmin) {
     return isAdmin
         ? FloatingActionButton.extended(
-            onPressed: () {},
+            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
             label: const Text('Modify reservation'),
             icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
           )

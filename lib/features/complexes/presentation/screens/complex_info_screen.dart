@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
+import 'package:frontend/features/common/presentation/widgets/image_carousel.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
@@ -104,21 +105,32 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
-        title: const Text('Complex details'),
+    return isAdmin
+        ? _buildContent(context, isAdmin)
+        : Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+              title: const Text('Complex details'),
+            ),
+            body: _buildContent(context, isAdmin),
+            floatingActionButton: _buildFloatingActionButton(context, isAdmin),
+          );
+  }
+
+  Widget _buildContent(BuildContext context, bool isAdmin) {
+    return SafeArea(
+      top: false,
+      child: CustomScrollView(
+        primary: !isAdmin,
+        slivers: [
+          _buildSliverList(context, isAdmin),
+          _buildSliverHeader(context, isAdmin),
+          _buildSliverContent(context, isAdmin),
+        ],
       ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            _buildSliverList(context, isAdmin),
-            _buildSliverHeader(context, isAdmin),
-            _buildSliverContent(context, isAdmin),
-          ],
-        ),
-      ),
-      floatingActionButton: _buildFloatingActionButton(context, isAdmin),
     );
   }
 
@@ -127,7 +139,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       delegate: SliverChildListDelegate([
         if (isAdmin)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
             child: MetaDataCard(
               id: '00000000',
               createdAt: 'Mon, 00/00/0000, 00:00:00',
@@ -136,18 +148,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
           ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              if (isAdmin)
-                Header.subheader(
-                  subheaderText: 'Gallery',
-                  showButton: true,
-                  buttonText: 'Manage gallery',
-                  onPressed: () {},
-                ),
-              _buildCarouselView(),
-            ],
-          ),
+          child: ImageCarousel(isAdmin: isAdmin),
         ),
         const SizedBox(height: 16.0),
         Padding(
@@ -255,41 +256,11 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     );
   }
 
-  Widget _buildCarouselView() {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 200.0),
-      child: CarouselView(
-        itemExtent: 200.0,
-        children: List<Widget>.generate(10, (int index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: Image.asset('assets/images/placeholders/court.jpg', fit: BoxFit.cover),
-          );
-        }),
-      ),
-    );
-  }
-
   Widget _buildFloatingActionButton(BuildContext context, bool isAdmin) {
-    return isAdmin
-        ? FloatingActionButton.extended(
-            onPressed: () {},
-            label: Text('Edit complex'),
-            icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
-          )
-        : FloatingActionButton.extended(
-            onPressed: () {
-              // TODO: Implement booking action
-            },
-            label: const Text('Book'),
-            icon: const Icon(
-              Symbols.calendar_add_on_rounded,
-              size: 24,
-              fill: 1,
-              weight: 400,
-              grade: 0,
-              opticalSize: 24,
-            ),
-          );
+    return FloatingActionButton.extended(
+      onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+      label: const Text('Book'),
+      icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+    );
   }
 }

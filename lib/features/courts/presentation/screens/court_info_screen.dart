@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
@@ -124,9 +125,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Implement booking action
-        },
+        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
         label: const Text('Book'),
         icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
@@ -237,7 +236,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
         label: Text('Edit court'),
         icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
