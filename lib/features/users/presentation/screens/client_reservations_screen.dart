@@ -7,7 +7,7 @@ class ClientReservationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 12.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
       itemCount: 10,
       itemBuilder: (context, index) {
         return ConstrainedBox(constraints: const BoxConstraints(maxHeight: 252.0), child: ReservationCard());

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/constants/theme.dart';
+import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_dialog.dart';
 import 'package:frontend/features/common/presentation/widgets/expandable_fab.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
-import 'package:frontend/features/common/presentation/widgets/header.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:provider/provider.dart';
 
 class ReservationInfoScreen extends StatefulWidget {
   const ReservationInfoScreen({super.key});
@@ -18,14 +21,127 @@ class ReservationInfoScreen extends StatefulWidget {
 }
 
 class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
-  bool _isAdmin = false;
+  bool _loadingError = false;
 
-  Widget _buildComplexInfoSubsection() {
+  Future<bool> _checkIfUserIsAdmin() async {
+    final authUseCases = context.read<AuthUseCases?>();
+
+    if (authUseCases == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _loadingError = true);
+        }
+      });
+
+      return false;
+    }
+
+    final result = await authUseCases.getAuthenticatedUser();
+    return result.fold((error) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _loadingError = true);
+        }
+      });
+
+      return false;
+    }, (user) => user.role == Role.admin || user.role == Role.superadmin);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _checkIfUserIsAdmin(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingState(context);
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() => _loadingError = true);
+            }
+          });
+
+          return _buildScaffold(context, false);
+        }
+
+        final isAdmin = snapshot.data!;
+        return _buildScaffold(context, isAdmin);
+      },
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
+        title: const Text('Reservation'),
+      ),
+      body: SafeArea(
+        child: Container(
+          color: colorScheme.surface,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, bool isAdmin) {
+    if (_loadingError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load user data. Continuing with limited information.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      });
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
+        title: const Text('Reservation'),
+        actions: [Padding(padding: const EdgeInsets.only(right: 16.0), child: MediumChip.alert('Weather'))],
+      ),
+      body: SafeArea(child: _buildLoadedState(context, isAdmin)),
+      floatingActionButton: _buildFloatingActionButton(context, isAdmin),
+    );
+  }
+
+  Widget _buildLoadedState(BuildContext context, bool isAdmin) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16.0,
+        children: [
+          MetaDataCard(
+            id: '00000000',
+            createdAt: 'Mon, 00/00/0000, 00:00:00',
+            updatedAt: 'Mon, 00/00/0000, 00:00:00',
+            additionalMetadata: isAdmin
+                ? [LabeledInfoWidget(icon: Symbols.person_rounded, label: 'Created by', text: 'XXXX')]
+                : null,
+          ),
+          _buildComplexInfoSubsection(isAdmin),
+          _buildCourtInfoSubsection(),
+          _buildReceiptInfoSubsection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComplexInfoSubsection(bool isAdmin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
-        if (_isAdmin)
+        if (isAdmin)
           Header.subheader(subheaderText: 'ComplexName', showButton: false)
         else
           Header.subheader(
@@ -76,78 +192,53 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        title: const Text('Reservation'),
-        actions: [Padding(padding: const EdgeInsets.only(right: 16.0), child: MediumChip.alert('Weather'))],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 16.0,
+  Widget _buildFloatingActionButton(BuildContext context, bool isAdmin) {
+    return isAdmin
+        ? FloatingActionButton.extended(
+            onPressed: () {},
+            label: const Text('Modify reservation'),
+            icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+          )
+        : ExpandableFab(
             children: [
-              MetaDataCard(
-                id: '00000000',
-                createdAt: 'Mon, 00/00/0000, 00:00:00',
-                updatedAt: 'Mon, 00/00/0000, 00:00:00',
-                additionalMetadata: _isAdmin
-                    ? [LabeledInfoWidget(icon: Symbols.person_rounded, label: 'Created by', text: 'XXXX')]
-                    : null,
-              ),
-              _buildComplexInfoSubsection(),
-              _buildCourtInfoSubsection(),
-              _buildReceiptInfoSubsection(),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: ExpandableFab(
-        children: [
-          ActionButton(
-            icon: Symbols.free_cancellation_rounded,
-            label: 'Cancel reservation',
-            onPressed: () {
-              final brightness = Theme.of(context).brightness;
-              final headerColor = brightness == Brightness.light
-                  ? MaterialTheme.warning.light.colorContainer
-                  : MaterialTheme.warning.dark.colorContainer;
-              final iconColor = brightness == Brightness.light
-                  ? MaterialTheme.warning.light.onColorContainer
-                  : MaterialTheme.warning.dark.onColorContainer;
+              ActionButton(
+                icon: Symbols.free_cancellation_rounded,
+                label: 'Cancel reservation',
+                onPressed: () {
+                  final brightness = Theme.of(context).brightness;
+                  final headerColor = brightness == Brightness.light
+                      ? MaterialTheme.warning.light.colorContainer
+                      : MaterialTheme.warning.dark.colorContainer;
+                  final iconColor = brightness == Brightness.light
+                      ? MaterialTheme.warning.light.onColorContainer
+                      : MaterialTheme.warning.dark.onColorContainer;
 
-              showCustomAlertDialog(
-                context,
-                icon: Symbols.warning_rounded,
-                headline: 'Cancel reservation?',
-                supportingText: 'You\'re about to cancel your reservation. This action is cost free but irreversible,',
-                headerColor: headerColor,
-                iconColor: iconColor,
-                actions: [
-                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Go back')),
-                  TextButton(onPressed: () {
-                    // TODO: Cancel reservation
-                  }, child: const Text('Yes, cancel')),
-                ],
-              );
-            },
-          ),
-          ActionButton(
-            icon: Symbols.edit_calendar_rounded,
-            label: 'Modify reservation',
-            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
-          ),
-        ],
-      ),
-    );
+                  showCustomAlertDialog(
+                    context,
+                    icon: Symbols.warning_rounded,
+                    headline: 'Cancel reservation?',
+                    supportingText:
+                        'You\'re about to cancel your reservation. This action is cost free but irreversible,',
+                    headerColor: headerColor,
+                    iconColor: iconColor,
+                    actions: [
+                      TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Go back')),
+                      TextButton(
+                        onPressed: () {
+                          // TODO: Cancel reservation
+                        },
+                        child: const Text('Yes, cancel'),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              ActionButton(
+                icon: Symbols.edit_calendar_rounded,
+                label: 'Modify reservation',
+                onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
+              ),
+            ],
+          );
   }
 }
