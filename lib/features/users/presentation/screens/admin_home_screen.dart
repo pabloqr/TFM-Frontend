@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/data/providers/auth_provider.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/expandable_fab.dart';
@@ -429,10 +430,32 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   }
 
   Widget? _buildFloatingActionButton() {
+    if (_selectedIndex == 1) {
+      return FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+        label: const Text('Book'),
+        icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+      );
+    }
+
+    if (_selectedIndex == 4) {
+      return FloatingActionButton.extended(
+        onPressed: () {},
+        label: const Text('Edit data'),
+        icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+      );
+    }
+
     return ExpandableFab(
       children: [
-        ActionButton(icon: Symbols.lightbulb_rounded, label: 'Assign device', onPressed: () {}),
-        ActionButton(icon: Symbols.domain_add_rounded, label: 'Create court', onPressed: () {}),
+        if (_selectedIndex == 0)
+          ActionButton(icon: Symbols.lightbulb_rounded, label: 'Assign device', onPressed: () {})
+        else if (_selectedIndex == 2 || _selectedIndex == 3)
+          ActionButton(icon: Symbols.timeline_rounded, label: 'Post telemetry', onPressed: () {}),
+        if (_selectedIndex == 0 || _selectedIndex == 2)
+          ActionButton(icon: Symbols.add_location_alt_rounded, label: 'Create court', onPressed: () {})
+        else if (_selectedIndex == 3)
+          ActionButton(icon: Symbols.lightbulb_rounded, label: 'Assign device', onPressed: () {}),
       ],
     );
   }
