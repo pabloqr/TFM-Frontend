@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/constants/theme.dart';
 import 'package:frontend/core/providers/dependency_providers.dart';
+import 'package:frontend/data/providers/settings_provider.dart';
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:frontend/features/auth/presentation/widgets/auth_guard.dart';
 import 'package:frontend/features/users/presentation/screens/admin_home_screen.dart';
@@ -26,25 +27,30 @@ class MyApp extends StatelessWidget {
       title: 'TFM',
       theme: theme.light(),
       // darkTheme: theme.dark(), // TODO: descomentar al finalizar
-      home: Consumer<SharedPreferences?>(
-        builder: (context, sharedPreferences, child) {
-          if (sharedPreferences == null) {
-            final colorScheme = Theme.of(context).colorScheme;
+      home: Consumer2<SharedPreferences?, SettingsProvider?>(
+        builder: (context, sharedPreferences, settingsProvider, child) {
+          if (sharedPreferences == null || settingsProvider == null) return _buildLoadingScreen(context);
 
-            return Scaffold(
-              body: SafeArea(
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-            );
-          }
+          AppConstants.baseUrl = settingsProvider.currentBaseUrl;
+          print(AppConstants.baseUrl);
 
           return const AppInitializer();
         },
       ),
       routes: AppConstants.routes,
+    );
+  }
+
+  Widget _buildLoadingScreen(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          color: colorScheme.surface,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
     );
   }
 }

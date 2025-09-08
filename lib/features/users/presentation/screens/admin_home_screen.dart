@@ -308,7 +308,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
               children: [
                 ListTileRounded(title: 'Edit profile', icon: Symbols.person_rounded, onTap: () {}),
                 ListTileRounded(title: 'Notifications', icon: Symbols.notifications_rounded, onTap: () {}),
-                ListTileRounded(title: 'Settings', icon: Symbols.settings_rounded, onTap: () {}),
+                ListTileRounded(
+                  title: 'Settings',
+                  icon: Symbols.settings_rounded,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamed(AppConstants.adminSettingsRoute);
+                  },
+                ),
               ],
             ),
             Divider(),
@@ -432,7 +439,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   Widget? _buildFloatingActionButton() {
     if (_selectedIndex == 1) {
       return FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationAdminNewRoute),
         label: const Text('Book'),
         icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       );
@@ -441,7 +448,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
     if (_selectedIndex == 4) {
       return FloatingActionButton.extended(
         onPressed: () {},
-        label: const Text('Edit data'),
+        label: const Text('Edit complex'),
         icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       );
     }

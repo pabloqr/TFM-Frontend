@@ -126,7 +126,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientNewRoute),
         label: const Text('Book'),
         icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
@@ -224,7 +224,9 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
+        onPressed: () {
+          // TODO: Add logic to edit court info
+        },
         label: Text('Edit court'),
         icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),

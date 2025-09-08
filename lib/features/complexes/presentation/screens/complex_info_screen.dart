@@ -246,7 +246,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     return SliverList.separated(
       itemCount: 10,
       itemBuilder: (context, index) {
-        return CourtListTile.telemetry(
+        return CourtListTile.list(
           name: 'Court $index',
           onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
           isAdmin: isAdmin,
@@ -258,7 +258,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
 
   Widget _buildFloatingActionButton(BuildContext context, bool isAdmin) {
     return FloatingActionButton.extended(
-      onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+      onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientNewRoute),
       label: const Text('Book'),
       icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
     );

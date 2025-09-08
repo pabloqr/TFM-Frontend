@@ -20,15 +20,7 @@ class AuthGuard extends StatelessWidget {
         switch (authProvider.state) {
           case AuthState.initial:
           case AuthState.loading:
-            final colorScheme = Theme.of(context).colorScheme;
-            return Scaffold(
-              body: SafeArea(
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-            );
+            return _buildLoadingScreen(context);
           case AuthState.unauthenticated:
             return loginScreen;
           case AuthState.authenticated:
@@ -41,15 +33,7 @@ class AuthGuard extends StatelessWidget {
               future: authUseCases.getAuthenticatedUser(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  final colorScheme = Theme.of(context).colorScheme;
-                  return Scaffold(
-                    body: SafeArea(
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    ),
-                  );
+                  return _buildLoadingScreen(context);
                 } else if (snapshot.hasError || !snapshot.hasData) {
                   // Handle error or no data case, potentially redirect to login
                   return loginScreen;
@@ -78,6 +62,18 @@ class AuthGuard extends StatelessWidget {
             );
         }
       },
+    );
+  }
+
+  Widget _buildLoadingScreen(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          color: colorScheme.surface,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
     );
   }
 }

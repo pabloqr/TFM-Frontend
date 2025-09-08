@@ -20,13 +20,14 @@ import 'package:provider/provider.dart';
 /// date, and time, and finally shows a summary before confirmation.
 class ReservationScreen extends StatefulWidget {
   final bool isNew;
+  final bool isAdmin;
 
   /// Creates a [ReservationScreen].
-  const ReservationScreen._({required this.isNew});
+  const ReservationScreen._(this.isNew, {required this.isAdmin});
 
-  factory ReservationScreen.create() => const ReservationScreen._(isNew: true);
+  factory ReservationScreen.create({required bool isAdmin}) => ReservationScreen._(true, isAdmin: isAdmin);
 
-  factory ReservationScreen.modify() => const ReservationScreen._(isNew: false);
+  factory ReservationScreen.modify({required bool isAdmin}) => ReservationScreen._(false, isAdmin: isAdmin);
 
   @override
   State<ReservationScreen> createState() => _ReservationScreenState();
@@ -41,42 +42,59 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   /// Defines the steps in the reservation process.
   List<Step> get _steps => [
+    if (widget.isAdmin)
+      Step(
+        title: const Text('Select user'),
+        subtitle: const Text('Select the user to assign the reservation to'),
+        content: _buildUserSelector(),
+        isActive: _currentStep >= 0,
+        state: _getStepState(0),
+      ),
     Step(
       title: const Text('Select complex'),
       subtitle: const Text('Select a complex to book a court'),
       content: _buildComplexSelector(),
       isActive: _currentStep >= 0,
-      state: _getStepState(0),
+      state: _getStepState(_stepOffset),
     ),
     Step(
       title: const Text('Select sport'),
       subtitle: const Text('Select a sport to book a court'),
       content: _buildSportSelector(),
       isActive: _currentStep >= 1,
-      state: _getStepState(1),
+      state: _getStepState(1 + _stepOffset),
     ),
     Step(
       title: const Text('Select court'),
       subtitle: const Text('Select a court to book'),
       content: _buildCourtSelector(),
       isActive: _currentStep >= 2,
-      state: _getStepState(2),
+      state: _getStepState(2 + _stepOffset),
     ),
     Step(
       title: const Text('Select date and time'),
       subtitle: const Text('Select date and time to complete your reservation'),
-      content: _buildDateAndTimeSelector(),
+      content: _buildDateAndTimeSelector(context),
       isActive: _currentStep >= 3,
-      state: _getStepState(3),
+      state: _getStepState(3 + _stepOffset),
     ),
     Step(
       title: const Text('Summary'),
       subtitle: const Text('Check your selection and confirm your reservation'),
       content: _buildSummary(),
       isActive: _currentStep >= 4,
-      state: _getStepState(4),
+      state: _getStepState(4 + _stepOffset),
     ),
   ];
+
+  /// Form key for user validation
+  final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
+
+  /// Controller for the user input field
+  final TextEditingController _userIdController = TextEditingController();
+
+  /// Notifier for the selected user ID.
+  // final ValueNotifier<String?> _selectedUserId = ValueNotifier(null);
 
   /// Notifier for the index of the selected complex.
   final ValueNotifier<int> _selectedComplexIndex = ValueNotifier(-1);
@@ -92,6 +110,20 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   /// The selected end date for the reservation.
   DateTime? _selectedDateEnd;
+
+  @override
+  void dispose() {
+    _userIdController.dispose();
+    // _selectedUserId.dispose();
+    _selectedComplexIndex.dispose();
+    _selectedSportIndex.dispose();
+    _selectedCourtIndex.dispose();
+
+    super.dispose();
+  }
+
+  /// Dynamic offset based on admin status
+  int get _stepOffset => widget.isAdmin ? 1 : 0;
 
   /// Determines the maximum step the user is allowed to navigate to.
   ///
@@ -109,43 +141,79 @@ class _ReservationScreenState extends State<ReservationScreen> {
   ///
   /// A step is disabled if any of the preceding steps are not yet completed.
   bool _isStepDisabled(int step) {
-    switch (step) {
-      case 0:
-        // First step is always enabled.
-        return false;
-      case 1:
-        // Depends on complex selection.
-        return !_isStepCompleted(0);
-      case 2:
-        // Depends on complex and sport selection.
-        return !_isStepCompleted(0) || !_isStepCompleted(1);
-      case 3:
-        // Depends on complex, sport, and court selection.
-        return !_isStepCompleted(0) || !_isStepCompleted(1) || !_isStepCompleted(2);
-      case 4:
-        // Depends on all previous selections.
-        return !_isStepCompleted(0) || !_isStepCompleted(1) || !_isStepCompleted(2) || !_isStepCompleted(3);
-      default:
-        // Any other step index is considered disabled.
-        return true;
+    if (widget.isAdmin) {
+      switch (step) {
+        case 0: // User selection
+          return false;
+        case 1: // Complex selection
+          return !_isStepCompleted(0);
+        case 2: // Sport selection
+          return !_isStepCompleted(0) || !_isStepCompleted(1);
+        case 3: // Court selection
+          return !_isStepCompleted(0) || !_isStepCompleted(1) || !_isStepCompleted(2);
+        case 4: // Date and time selection
+          return !_isStepCompleted(0) || !_isStepCompleted(1) || !_isStepCompleted(2) || !_isStepCompleted(3);
+        case 5: // Summary
+          return !_isStepCompleted(0) ||
+              !_isStepCompleted(1) ||
+              !_isStepCompleted(2) ||
+              !_isStepCompleted(3) ||
+              !_isStepCompleted(4);
+        default:
+          return true;
+      }
+    } else {
+      switch (step) {
+        case 0: // Complex selection
+          return false;
+        case 1: // Sport selection
+          return !_isStepCompleted(0);
+        case 2: // Court selection
+          return !_isStepCompleted(0) || !_isStepCompleted(1);
+        case 3: // Date and time selection
+          return !_isStepCompleted(0) || !_isStepCompleted(1) || !_isStepCompleted(2);
+        case 4: // Summary
+          return !_isStepCompleted(0) || !_isStepCompleted(1) || !_isStepCompleted(2) || !_isStepCompleted(3);
+        default:
+          return true;
+      }
     }
   }
 
   /// Checks if a specific step has been completed.
   bool _isStepCompleted(int step) {
-    switch (step) {
-      case 0:
-        return _selectedComplexIndex.value != -1;
-      case 1:
-        return _selectedSportIndex.value != -1;
-      case 2:
-        return _selectedCourtIndex.value != -1;
-      case 3:
-        return _selectedDateIni != null && _selectedDateEnd != null;
-      case 4:
-        return true; // Summary step is always considered completed if reached.
-      default:
-        return false;
+    if (widget.isAdmin) {
+      switch (step) {
+        case 0: // User selection
+          return _userIdController.text.isNotEmpty;
+        case 1: // Complex selection
+          return _selectedComplexIndex.value != -1;
+        case 2: // Sport selection
+          return _selectedSportIndex.value != -1;
+        case 3: // Court selection
+          return _selectedCourtIndex.value != -1;
+        case 4: // Date and time selection
+          return _selectedDateIni != null && _selectedDateEnd != null;
+        case 5: // Summary
+          return true;
+        default:
+          return false;
+      }
+    } else {
+      switch (step) {
+        case 0: // Complex selection
+          return _selectedComplexIndex.value != -1;
+        case 1: // Sport selection
+          return _selectedSportIndex.value != -1;
+        case 2: // Court selection
+          return _selectedCourtIndex.value != -1;
+        case 3: // Date and time selection
+          return _selectedDateIni != null && _selectedDateEnd != null;
+        case 4: // Summary
+          return true;
+        default:
+          return false;
+      }
     }
   }
 
@@ -165,10 +233,37 @@ class _ReservationScreenState extends State<ReservationScreen> {
   void _onStepTapped(int step) {
     // Allow navigation only to steps that are not disabled and are at or before the current step.
     if (step <= _maxAllowedStep && step <= _currentStep) {
-      setState(() {
-        _currentStep = step;
-      });
+      setState(() => _currentStep = step);
     }
+  }
+
+  /// Validates email format
+  bool _isValidEmail(String email) {
+    return RegExp(r"^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$").hasMatch(email);
+  }
+
+  /// Validates phone format (basic validation)
+  bool _isValidPhone(String phone) {
+    return RegExp(r'^[+]?[0-9]{9,15}$').hasMatch(phone.replaceAll(' ', ''));
+  }
+
+  /// Validates user input (email or phone)
+  void _validateUser() {
+    if (_userFormKey.currentState!.validate()) {
+      String input = _userIdController.text.trim();
+      // Generate a mock user ID based on input
+      String userId = 'user_${input.hashCode.abs()}';
+      _onUserValidated(userId);
+    }
+  }
+
+  /// Callback for when a user is validated and selected.
+  void _onUserValidated(String userId) {
+    setState(() {
+      // _selectedUserId.value = userId;
+      // If currently on the user selection step, move to the complex selection step.
+      if (_currentStep == 0) _currentStep = 1;
+    });
   }
 
   /// Callback for when a complex is selected.
@@ -184,7 +279,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       _selectedDateEnd = null;
 
       // If currently on the complex selection step, move to the sport selection step.
-      if (_currentStep == 0) _currentStep = 1;
+      if (_currentStep == _stepOffset) _currentStep = 1 + _stepOffset;
     });
   }
 
@@ -200,7 +295,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       _selectedDateEnd = null;
 
       // If currently on the sport selection step, move to the court selection step.
-      if (_currentStep == 1) _currentStep = 2;
+      if (_currentStep == 1 + _stepOffset) _currentStep = 2 + _stepOffset;
     });
   }
 
@@ -215,7 +310,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       _selectedDateEnd = null;
 
       // If currently on the court selection step, move to the date/time selection step.
-      if (_currentStep == 2) _currentStep = 3;
+      if (_currentStep == 2 + _stepOffset) _currentStep = 3 + _stepOffset;
     });
   }
 
@@ -239,7 +334,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
       // If currently on the court selection step (before date/time), move to date/time selection.
       // This condition might need adjustment based on flow, as date selection is part of step 3.
-      if (_currentStep == 2) _currentStep = 3;
+      if (_currentStep == 2 + _stepOffset) _currentStep = 3 + _stepOffset;
     });
   }
 
@@ -298,6 +393,49 @@ class _ReservationScreenState extends State<ReservationScreen> {
           controlsBuilder: (context, details) => _buildStepControls(context, details),
           steps: _steps,
         ),
+      ),
+    );
+  }
+
+  /// Builds the widget for selecting/validating a user.
+  Widget _buildUserSelector() {
+    return Form(
+      key: _userFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16.0,
+        children: [
+          const SizedBox(height: 2.0),
+          TextFormField(
+            controller: _userIdController,
+            decoration: InputDecoration(labelText: 'Mail or Phone number', border: OutlineInputBorder()),
+            autocorrect: false,
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter an email or a phone number';
+              }
+
+              String trimmed = value.trim();
+              if (!_isValidEmail(trimmed) && !_isValidPhone(trimmed)) {
+                return 'Please enter a valid email or phone number';
+              }
+
+              return null;
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            spacing: 8.0,
+            children: [
+              FilledButton.icon(
+                onPressed: _validateUser,
+                icon: Icon(Symbols.check_circle_rounded, size: 18, fill: 0, weight: 400, grade: 0, opticalSize: 18),
+                label: Text('Validate User'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -383,7 +521,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   }
 
   /// Builds the widget for selecting the date and time range.
-  Widget _buildDateAndTimeSelector() {
+  Widget _buildDateAndTimeSelector(BuildContext context) {
     final controller = Provider.of<TimeRangeController>(context, listen: false);
 
     return Column(
@@ -508,29 +646,32 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   /// Builds the control buttons for the stepper (Previous, Next, Confirm).
   Widget _buildStepControls(BuildContext context, ControlsDetails details) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Wrap(
-        alignment: WrapAlignment.end,
-        spacing: 8.0,
-        children: [
-          if (details.stepIndex > 0)
-            TextButton(
-              onPressed: () {
-                setState(() => _currentStep = details.stepIndex - 1);
-              },
-              child: const Text('Previous'),
-            ),
-          if (_isStepCompleted(details.stepIndex) && details.stepIndex < _steps.length - 1)
-            FilledButton(
-              onPressed: () {
-                setState(() => _currentStep = details.stepIndex + 1);
-              },
-              child: const Text('Next'),
-            ),
-          if (details.stepIndex == _steps.length - 1)
-            FilledButton(onPressed: () => _confirmReservation(), child: const Text('Confirm reservation')),
-        ],
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 8.0,
+          children: [
+            if (details.stepIndex > 0)
+              TextButton(
+                onPressed: () {
+                  setState(() => _currentStep = details.stepIndex - 1);
+                },
+                child: const Text('Previous'),
+              ),
+            if (_isStepCompleted(details.stepIndex) && details.stepIndex < _steps.length - 1)
+              FilledButton(
+                onPressed: () {
+                  setState(() => _currentStep = details.stepIndex + 1);
+                },
+                child: const Text('Next'),
+              ),
+            if (details.stepIndex == _steps.length - 1)
+              FilledButton(onPressed: () => _confirmReservation(), child: const Text('Confirm reservation')),
+          ],
+        ),
       ),
     );
   }

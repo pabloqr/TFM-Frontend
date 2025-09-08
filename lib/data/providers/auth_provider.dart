@@ -70,7 +70,7 @@ class AuthProvider extends ChangeNotifier {
   /// Sets the state to [AuthState.loading] during the operation.
   /// Returns `true` and sets the state to [AuthState.authenticated] on successful sign-up.
   /// Returns `false` and sets the state to [AuthState.unauthenticated] on failure.
-  Future<bool> signUp(SignUpRequestModel request) async {
+  Future<Map<String, dynamic>> signUp(SignUpRequestModel request) async {
     // Establecer el estado a cargando mientras se procesa la solicitud de inicio de sesión.
     state = AuthState.loading;
 
@@ -79,12 +79,12 @@ class AuthProvider extends ChangeNotifier {
       (failure) {
         // Si el inicio de sesión falla, actualizar el estado a no autenticado.
         state = AuthState.unauthenticated;
-        return false;
+        return {'success': false, 'message': 'Sign up failed: ${failure.message}'};
       },
       (value) {
         // Si el inicio de sesión es exitoso, actualizar el estado a autenticado.
         state = AuthState.authenticated;
-        return true;
+        return {'success': true, 'message': 'Sign up successful'};
       },
     );
   }
@@ -94,23 +94,29 @@ class AuthProvider extends ChangeNotifier {
   /// Sets the state to [AuthState.loading] during the operation.
   /// Returns `true` and sets the state to [AuthState.authenticated] on successful sign-in.
   /// Returns `false` and sets the state to [AuthState.unauthenticated] on failure.
-  Future<bool> signIn(SignInRequestModel request) async {
+  Future<Map<String, dynamic>> signIn(SignInRequestModel request) async {
     // Establecer el estado a cargando mientras se procesa la solicitud de inicio de sesión.
     state = AuthState.loading;
 
-    final result = await _authUseCases.signIn(request);
-    return result.fold(
-      (failure) {
-        // Si el inicio de sesión falla, actualizar el estado a no autenticado.
-        state = AuthState.unauthenticated;
-        return false;
-      },
-      (value) {
-        // Si el inicio de sesión es exitoso, actualizar el estado a autenticado.
-        state = AuthState.authenticated;
-        return true;
-      },
-    );
+    try {
+      final result = await _authUseCases.signIn(request);
+      return result.fold(
+        (failure) {
+          // Si el inicio de sesión falla, actualizar el estado a no autenticado.
+          state = AuthState.unauthenticated;
+          return {'success': false, 'message': 'Sign in failed: ${failure.message}'};
+        },
+        (value) {
+          // Si el inicio de sesión es exitoso, actualizar el estado a autenticado.
+          state = AuthState.authenticated;
+          return {'success': true, 'message': 'Sign in successful'};
+        },
+      );
+    } catch (e) {
+      // Si ocurre un error durante el inicio de sesión, actualizar el estado a no autenticado.
+      state = AuthState.unauthenticated;
+      return {'success': false, 'message': 'Sign in failed: ${e.toString()}'};
+    }
   }
 
   /// Signs out the current user.

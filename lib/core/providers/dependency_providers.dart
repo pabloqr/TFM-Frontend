@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/data/providers/settings_provider.dart'; // AÑADIDO
 import 'package:frontend/data/providers/auth_provider.dart';
 import 'package:frontend/data/providers/complexes_provider.dart';
 import 'package:frontend/data/repositories/auth_repository.dart';
@@ -94,6 +95,17 @@ List<SingleChildWidget> get appProviders {
     // ---------------------------------------------------------------------------------------------------------------//
     // PROVIDERS (ChangeNotifiers)
     // ---------------------------------------------------------------------------------------------------------------//
+    ChangeNotifierProxyProvider<SharedPreferences?, SettingsProvider?>(
+      create: (_) => null,
+      update: (context, sharedPreferences, previousSettingsProvider) {
+        if (sharedPreferences == null || previousSettingsProvider != null) {
+          return previousSettingsProvider;
+        }
+
+        return SettingsProvider(sharedPreferences: sharedPreferences)..initialize();
+      },
+    ),
+
     ChangeNotifierProxyProvider<AuthUseCases?, AuthProvider?>(
       create: (context) => null,
       update: (context, authUseCases, previousAuthProvider) {

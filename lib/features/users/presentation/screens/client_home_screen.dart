@@ -102,14 +102,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               actions: [_buildAppBarTrailingIcon(context)],
               flexibleSpace: _shouldShowSearchBar() || _shouldShowFilterChips()
                   ? FlexibleSpaceBar(
-                collapseMode: CollapseMode.parallax,
-                background: Column(
-                  children: [
-                    if (_shouldShowSearchBar()) _buildSearchBar(context),
-                    if (_shouldShowFilterChips()) _buildFilterChips()!,
-                  ],
-                ),
-              )
+                      collapseMode: CollapseMode.parallax,
+                      background: Column(
+                        children: [
+                          if (_shouldShowSearchBar()) _buildSearchBar(context),
+                          if (_shouldShowFilterChips()) _buildFilterChips()!,
+                        ],
+                      ),
+                    )
                   : null,
             ),
           ];
@@ -150,7 +150,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       ListTileRounded(title: 'Edit profile', icon: Symbols.person_rounded, onTap: () {}),
                       ListTileRounded(title: 'My payments', icon: Symbols.payments_rounded, onTap: () {}),
                       ListTileRounded(title: 'Notifications', icon: Symbols.notifications_rounded, onTap: () {}),
-                      ListTileRounded(title: 'Settings', icon: Symbols.settings_rounded, onTap: () {}),
+                      ListTileRounded(
+                        title: 'Settings',
+                        icon: Symbols.settings_rounded,
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pushNamed(AppConstants.clientSettingsRoute);
+                        },
+                      ),
                     ],
                   ),
                   Divider(),
@@ -195,7 +202,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   Widget? _buildFloatingActionButton() {
     return _shouldShowFloatingActionButton()
         ? FloatingActionButton.extended(
-            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute),
+            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientNewRoute),
             label: const Text('Book'),
             icon: const Icon(
               Symbols.calendar_add_on_rounded,

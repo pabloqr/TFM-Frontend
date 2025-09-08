@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:frontend/features/auth/presentation/screens/sign_up_sign_in_screen.dart';
 import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:frontend/features/common/presentation/screens/settings_screen.dart';
 import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
 import 'package:frontend/features/courts/presentation/screens/court_info_screen.dart';
 import 'package:frontend/features/reservations/presentation/screens/reservation_screen.dart';
@@ -9,11 +10,9 @@ import 'package:frontend/features/users/presentation/screens/admin_home_screen.d
 import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
 
 class AppConstants {
-  // TODO: Replace with your actual backend URL
-  // static const String baseUrl = 'http://192.168.1.35:3000'; // IP local del dispositivo
-  static const String baseUrl = 'http://100.70.62.176:3000'; // IP NetBird
-  // static const String baseUrl = 'http://10.0.2.2:3000'; // 10.0.2.2 es localhost para el emulador Android
-  // static const String baseUrl = 'http://localhost:3000'; // Para iOS emulador o web
+  static String baseUrl = _defaultBaseUrl;
+
+  static const String _defaultBaseUrl = 'http://100.70.62.176:3000';
 
   // Definición de los endpoints de la API del backend del sistema, para evitar la duplicidad de las entradas en el
   // código, los métodos CRUD se agruparán para cada uno de los módulos del sistema de la siguiente manera:
@@ -142,10 +141,14 @@ class AppConstants {
   static const String signInRoute = signInEndpoint;
   static const String clientHomeRoute = '/client/home';
   static const String adminHomeRoute = '/admin/home';
+  static const String clientSettingsRoute = '/client/settings';
+  static const String adminSettingsRoute = '/admin/settings';
   static const String complexInfoRoute = '$complexesEndpoint/info';
   static const String courtInfoRoute = '$courtsEndpoint/info';
-  static const String reservationNewRoute = '$reservationsEndpoint/new';
-  static const String reservationModifyRoute = '$reservationsEndpoint/modify';
+  static const String reservationClientNewRoute = '/client$reservationsEndpoint/new';
+  static const String reservationAdminNewRoute = '/admin$reservationsEndpoint/new';
+  static const String reservationClientModifyRoute = '/client$reservationsEndpoint/modify';
+  static const String reservationAdminModifyRoute = '/admin$reservationsEndpoint/modify';
   static const String reservationInfoRoute = '$reservationsEndpoint/info';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
@@ -154,10 +157,14 @@ class AppConstants {
     signInRoute: (context) => const SignInScreen(),
     clientHomeRoute: (context) => const ClientHomeScreen(),
     adminHomeRoute: (context) => const AdminHomeScreen(),
+    clientSettingsRoute: (context) => const SettingsScreen(),
+    adminSettingsRoute: (context) => const SettingsScreen(),
     complexInfoRoute: (context) => const ComplexInfoScreen(),
     courtInfoRoute: (context) => const CourtInfoScreen(),
-    reservationNewRoute: (context) => ReservationScreen.create(),
-    reservationModifyRoute: (context) => ReservationScreen.modify(),
+    reservationClientNewRoute: (context) => ReservationScreen.create(isAdmin: false),
+    reservationAdminNewRoute: (context) => ReservationScreen.create(isAdmin: true),
+    reservationClientModifyRoute: (context) => ReservationScreen.modify(isAdmin: false),
+    reservationAdminModifyRoute: (context) => ReservationScreen.modify(isAdmin: true),
     reservationInfoRoute: (context) => const ReservationInfoScreen(),
   };
 }

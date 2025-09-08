@@ -107,13 +107,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return;
       }
 
-      final signedIn = await authProvider.signUp(signUpRequest);
+      final signedUp = await authProvider.signUp(signUpRequest);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign up ${signedIn ? 'successful' : 'failed'}'), behavior: SnackBarBehavior.floating),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(signedUp['message']), behavior: SnackBarBehavior.floating));
 
       setState(() => _isLoading = false);
     }
@@ -335,9 +335,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign in ${signedIn ? 'successful' : 'failed'}'), behavior: SnackBarBehavior.floating),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(signedIn['message']), behavior: SnackBarBehavior.floating));
 
       setState(() => _isLoading = false);
     }

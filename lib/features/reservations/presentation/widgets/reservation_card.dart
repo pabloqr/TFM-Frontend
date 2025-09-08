@@ -62,7 +62,7 @@ class ReservationCard extends StatelessWidget {
                   child: const Text('More info'),
                 ),
                 FilledButton(
-                  onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute),
+                  onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientModifyRoute),
                   child: const Text('Modify'),
                 ),
               ],

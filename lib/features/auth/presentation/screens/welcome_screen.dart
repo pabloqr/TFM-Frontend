@@ -50,6 +50,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 Column(
+                  spacing: 16.0,
                   children: [
                     OutlinedButton(
                       onPressed: () => Navigator.of(context).pushNamed(AppConstants.signInRoute),
@@ -60,7 +61,6 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       child: Text('Sign in'),
                     ),
-                    const SizedBox(height: 16),
                     FilledButton(
                       onPressed: () => Navigator.of(context).pushNamed(AppConstants.signUpRoute),
                       style: FilledButton.styleFrom(
@@ -69,6 +69,13 @@ class WelcomeScreen extends StatelessWidget {
                         foregroundColor: colorScheme.primary,
                       ),
                       child: Text('Sign up'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pushNamed(AppConstants.adminSettingsRoute),
+                      child: Text(
+                        'Settings',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary),
+                      ),
                     ),
                   ],
                 ),

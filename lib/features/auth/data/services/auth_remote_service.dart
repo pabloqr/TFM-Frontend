@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:frontend/core/constants/app_constants.dart';
@@ -47,11 +48,12 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
 
     try {
       // Realizar la solicitud POST al backend.
-      final response = await _client.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: request.toJsonString(),
-      );
+      final response = await _client
+          .post(uri, headers: {'Content-Type': 'application/json'}, body: request.toJsonString())
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Connection timeout', const Duration(seconds: 10)),
+          );
 
       final Map<String, dynamic> data;
       try {
@@ -72,6 +74,8 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
           statusCode: response.statusCode,
         );
       }
+    } on TimeoutException catch (e) {
+      throw NetworkException(message: 'Connection timeout during sign up: ${e.message}');
     } catch (e) {
       // Relanzar ServerException si ya es de ese tipo.
       if (e is ServerException) rethrow;
@@ -92,11 +96,12 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
 
     try {
       // Realizar la solicitud POST al backend.
-      final response = await _client.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: request.toJsonString(),
-      );
+      final response = await _client
+          .post(uri, headers: {'Content-Type': 'application/json'}, body: request.toJsonString())
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Connection timeout', const Duration(seconds: 10)),
+          );
 
       final Map<String, dynamic> data;
       try {
@@ -117,6 +122,8 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
           statusCode: response.statusCode,
         );
       }
+    } on TimeoutException catch (e) {
+      throw NetworkException(message: 'Connection timeout during sign up: ${e.message}');
     } catch (e) {
       // Relanzar ServerException si ya es de ese tipo.
       if (e is ServerException) rethrow;
@@ -137,14 +144,19 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
 
     try {
       // Realizar la solicitud POST al backend.
-      final response = await _client.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          // Asegurarse que el cuerpo es un string JSON
-          'refreshToken': refreshToken,
-        }),
-      );
+      final response = await _client
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              // Asegurarse que el cuerpo es un string JSON
+              'refreshToken': refreshToken,
+            }),
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Connection timeout', const Duration(seconds: 10)),
+          );
 
       final Map<String, dynamic> data;
       try {
@@ -165,6 +177,8 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
           statusCode: response.statusCode,
         );
       }
+    } on TimeoutException catch (e) {
+      throw NetworkException(message: 'Connection timeout during sign up: ${e.message}');
     } catch (e) {
       // Relanzar ServerException si ya es de ese tipo.
       if (e is ServerException) rethrow;
@@ -181,10 +195,12 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
     final Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.signOutEndpoint}');
 
     try {
-      final response = await _client.post(
-        uri,
-        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
-      );
+      final response = await _client
+          .post(uri, headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'})
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Connection timeout', const Duration(seconds: 10)),
+          );
 
       if (response.statusCode == 200) {
         return;
@@ -203,6 +219,8 @@ class AuthRemoteServiceImpl implements AuthRemoteService {
           statusCode: response.statusCode,
         );
       }
+    } on TimeoutException catch (e) {
+      throw NetworkException(message: 'Connection timeout during sign up: ${e.message}');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw NetworkException(message: 'Network error signing out: ${e.toString()}');

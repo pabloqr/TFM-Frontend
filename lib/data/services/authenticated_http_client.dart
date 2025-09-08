@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/data/repositories/auth_repository.dart';
 import 'package:http/http.dart' as http;
@@ -30,16 +32,24 @@ class AuthenticatedHttpClient {
 
   Future<http.Response> _authenticatedRequest(Future<http.Response> Function() request) async {
     try {
-      final response = await request();
+      final response = await request().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('Connection timeout', const Duration(seconds: 10)),
+      );
 
       if (response.statusCode == 401) {
         final refreshTokenResult = await _authRepository.refreshToken();
         refreshTokenResult.fold((failure) => throw failure, (tokens) async {
-          return await request();
+          return await request().timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Connection timeout', const Duration(seconds: 10)),
+          );
         });
       }
 
       return response;
+    } on TimeoutException catch (e) {
+      throw NetworkException(message: 'Connection timeout during sign up: ${e.message}');
     } catch (e) {
       throw NetworkException(message: 'Network error: ${e.toString()}');
     }
