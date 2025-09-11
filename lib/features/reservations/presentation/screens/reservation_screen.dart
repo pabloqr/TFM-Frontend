@@ -7,6 +7,7 @@ import 'package:frontend/features/common/presentation/widgets/info_section_widge
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/common/presentation/widgets/time_range_selector.dart';
+import 'package:frontend/features/complexes/data/models/complex_model.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/courts/presentation/widgets/court_card.dart';
@@ -453,7 +454,16 @@ class _ReservationScreenState extends State<ReservationScreen> {
           sports.shuffle(random);
 
           return ComplexCard.small(
-            title: 'Complex $index',
+            complex: ComplexModel(
+              id: 0,
+              complexName: 'Complex $index',
+              timeIni: '00:00',
+              timeEnd: '00:00',
+              locLongitude: null,
+              locLatitude: null,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
             rating: random.nextInt(11) / 2.0,
             sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
             index: index,

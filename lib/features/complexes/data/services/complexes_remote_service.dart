@@ -8,6 +8,8 @@ import 'package:frontend/features/complexes/data/models/complex_model.dart';
 
 abstract class ComplexesRemoteService {
   Future<List<ComplexModel>> getComplexes({Map<String, dynamic>? query});
+
+  Future<ComplexModel> getComplex(int complexId);
 }
 
 class ComplexesRemoteServiceImpl implements ComplexesRemoteService {
@@ -28,7 +30,7 @@ class ComplexesRemoteServiceImpl implements ComplexesRemoteService {
 
   @override
   Future<List<ComplexModel>> getComplexes({Map<String, dynamic>? query}) async {
-    Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.complexesEndpoint}');
+    Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.complexesCREndpoint}');
 
     if (query != null && query.isNotEmpty) {
       Map<String, String> queryParameters = {};
@@ -36,7 +38,7 @@ class ComplexesRemoteServiceImpl implements ComplexesRemoteService {
         if (!_queryValidator.containsKey(key)) return;
 
         Type type = _queryValidator[key]!;
-        String? valueString = Utilities.validateQueryValue(type: type, value: value);
+        String? valueString = NetworkUtilities.validateQueryValue(type: type, value: value);
 
         if (valueString != null) queryParameters[key] = valueString;
       });
@@ -72,6 +74,41 @@ class ComplexesRemoteServiceImpl implements ComplexesRemoteService {
     } catch (e) {
       if (e is ServerException) rethrow;
       throw NetworkException(message: 'Network error getting complexes: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<ComplexModel> getComplex(int complexId) async {
+    Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.complexesUDEndpoint(complexId.toString())}');
+
+    try {
+      final response = await _client.get(uri);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data;
+        try {
+          data = json.decode(utf8.decode(response.bodyBytes));
+        } catch (e) {
+          throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+        }
+
+        return ComplexModel.fromJson(data);
+      } else {
+        final Map<String, dynamic> data;
+        try {
+          data = json.decode(utf8.decode(response.bodyBytes));
+        } catch (e) {
+          throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+        }
+
+        throw ServerException(
+          message: data['message'] ?? 'Error getting complex: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error getting complex: ${e.toString()}');
     }
   }
 }

@@ -29,14 +29,11 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'],
-      role: Role.values.firstWhere(
-        (role) {
-          final String roleName = role.name.toLowerCase();
-          final String jsonRoleName = (json['role'] as String).toLowerCase();
-          return roleName == jsonRoleName;
-        },
-        orElse: () => Role.client,
-      ),
+      role: Role.values.firstWhere((role) {
+        final String name = role.name.toLowerCase();
+        final String jsonName = (json['role'] as String).toLowerCase();
+        return name == jsonName;
+      }, orElse: () => Role.client),
       name: json['name'],
       surname: json['surname'],
       mail: json['mail'],

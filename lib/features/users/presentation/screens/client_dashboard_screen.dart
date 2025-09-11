@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
+import 'package:frontend/features/complexes/data/models/complex_model.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/news/presentation/widgets/news_card.dart';
@@ -76,7 +77,16 @@ class ClientDashboardScreen extends StatelessWidget {
               sports.shuffle(random);
 
               return ComplexCard.small(
-                title: 'Complex $index',
+                complex: ComplexModel(
+                  id: 0,
+                  complexName: 'Complex $index',
+                  timeIni: '00:00',
+                  timeEnd: '00:00',
+                  locLongitude: null,
+                  locLatitude: null,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                ),
                 rating: random.nextInt(11) / 2.0,
                 sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
               );

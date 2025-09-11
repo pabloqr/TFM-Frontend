@@ -11,4 +11,8 @@ class ComplexesUseCases {
   Future<Either<Failure, List<ComplexModel>>> getComplexes({Map<String, dynamic>? query}) async {
     return await _repository.getComplexes(query: query);
   }
+
+  Future<Either<Failure, ComplexModel>> getComplex(int complexId) async {
+    return await _repository.getComplex(complexId);
+  }
 }

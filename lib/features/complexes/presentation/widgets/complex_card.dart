@@ -6,13 +6,14 @@ import 'package:frontend/features/common/data/models/widget_size.dart';
 import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/complexes/data/models/complex_model.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ComplexCard extends StatelessWidget {
   final WidgetSize size;
 
-  final String title;
+  final ComplexModel complex;
   final double rating;
   final Set<Sport> sports;
 
@@ -21,7 +22,7 @@ class ComplexCard extends StatelessWidget {
 
   const ComplexCard._(
     this.size, {
-    required this.title,
+    required this.complex,
     required this.rating,
     required this.sports,
     this.index,
@@ -29,7 +30,7 @@ class ComplexCard extends StatelessWidget {
   });
 
   factory ComplexCard.small({
-    required String title,
+    required ComplexModel complex,
     required double rating,
     required Set<Sport> sports,
     int? index,
@@ -38,7 +39,7 @@ class ComplexCard extends StatelessWidget {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
     return ComplexCard._(
       WidgetSize.small,
-      title: title,
+      complex: complex,
       rating: rating,
       sports: sports,
       index: index,
@@ -47,7 +48,7 @@ class ComplexCard extends StatelessWidget {
   }
 
   factory ComplexCard.medium({
-    required String title,
+    required ComplexModel complex,
     required double rating,
     required Set<Sport> sports,
     int? index,
@@ -56,7 +57,7 @@ class ComplexCard extends StatelessWidget {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
     return ComplexCard._(
       WidgetSize.medium,
-      title: title,
+      complex: complex,
       rating: rating,
       sports: sports,
       index: index,
@@ -65,7 +66,7 @@ class ComplexCard extends StatelessWidget {
   }
 
   factory ComplexCard.large({
-    required String title,
+    required ComplexModel complex,
     required double rating,
     required Set<Sport> sports,
     int? index,
@@ -74,7 +75,7 @@ class ComplexCard extends StatelessWidget {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
     return ComplexCard._(
       WidgetSize.large,
-      title: title,
+      complex: complex,
       rating: rating,
       sports: sports,
       index: index,
@@ -114,7 +115,7 @@ class ComplexCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: textTheme.titleLarge, softWrap: false),
+        Text(complex.complexName, style: textTheme.titleLarge, softWrap: false),
         const SizedBox(height: 4.0),
         ClipRect(
           child: OverflowBox(
@@ -181,10 +182,14 @@ class ComplexCard extends StatelessWidget {
       children: [
         _buildHeader(context),
         if (size != WidgetSize.small)
-          const InfoSectionWidget(
+          InfoSectionWidget(
             leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
             rightChildren: [
-              LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00'),
+              LabeledInfoWidget(
+                icon: Symbols.schedule_rounded,
+                label: 'Schedule',
+                text: '${complex.timeIni} - ${complex.timeEnd}',
+              ),
             ],
           ),
         SizedBox(

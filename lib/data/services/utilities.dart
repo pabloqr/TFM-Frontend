@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 
 extension DoubleExtension on double {
   String formatAsTime() {
@@ -24,7 +25,7 @@ extension RangeValuesExtension on RangeValues {
   bool overlaps(RangeValues other) => start <= other.end && end >= other.start;
 }
 
-class Utilities {
+class NetworkUtilities {
   static String? validateQueryValue({required Type type, required dynamic value}) {
     if (type == String) {
       if (value is String) return value;
@@ -50,5 +51,21 @@ class Utilities {
       }
     }
     return null;
+  }
+}
+
+class WidgetUtilities {
+  static Future<String> getAddressFromLatLng(double lat, double lng) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+      Placemark place = placemarks.first;
+
+      final parts = [place.street, place.name, place.locality];
+      final address = parts.where((p) => p != null && p.trim().isNotEmpty).join(", ");
+
+      return address.isNotEmpty ? address : 'C/XXXXXXXX XXXXXXXX, 00';
+    } catch (e) {
+      return 'C/XXXXXXXX XXXXXXXX, 00';
+    }
   }
 }

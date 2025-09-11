@@ -73,16 +73,16 @@ class AppConstants {
   //------------------------------------------------------------------------------------------------------------------//
   // COURTS ENDPOINTS
   //------------------------------------------------------------------------------------------------------------------//
-  static String courtsCREndpoint(String complexId) => '${complexesByIdEndpoint(complexId)}/$courtsEndpoint';
+  static String courtsCREndpoint(String complexId) => '${complexesByIdEndpoint(complexId)}$courtsEndpoint';
 
   static String courtsUDEndpoint(String complexId, String courtId) =>
-      '${complexesByIdEndpoint(complexId)}/${courtsByIdEndpoint(courtId)}';
+      '${complexesByIdEndpoint(complexId)}${courtsByIdEndpoint(courtId)}';
 
   static String courtStatusEndpoint(String complexId, String courtId) =>
-      '${complexesByIdEndpoint(complexId)}/${courtsByIdEndpoint(courtId)}/status';
+      '${complexesByIdEndpoint(complexId)}${courtsByIdEndpoint(courtId)}/status';
 
   static String courtAvailabilityEndpoint(String complexId, String courtId) =>
-      '${complexesByIdEndpoint(complexId)}/${courtsByIdEndpoint(courtId)}/availability';
+      '${complexesByIdEndpoint(complexId)}${courtsByIdEndpoint(courtId)}/availability';
 
   //------------------------------------------------------------------------------------------------------------------//
   // DEVICES ENDPOINTS
@@ -90,16 +90,16 @@ class AppConstants {
   static String devicesCREndpoint(String complexId) => '${complexesByIdEndpoint(complexId)}/$devicesEndpoint';
 
   static String devicesUDEndpoint(String complexId, String deviceId) =>
-      '${complexesByIdEndpoint(complexId)}/${devicesByIdEndpoint(deviceId)}';
+      '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}';
 
   static String devicesTelemetryEndpoint(String complexId, String deviceId) =>
-      '${complexesByIdEndpoint(complexId)}/${devicesByIdEndpoint(deviceId)}/telemetry';
+      '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}/telemetry';
 
   static String devicesStatusEndpoint(String complexId, String deviceId) =>
-      '${complexesByIdEndpoint(complexId)}/${devicesByIdEndpoint(deviceId)}/status';
+      '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}/status';
 
   static String devicesCourtsEndpoint(String complexId, String deviceId) =>
-      '${complexesByIdEndpoint(complexId)}/${devicesByIdEndpoint(deviceId)}/courts';
+      '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}/courts';
 
   //------------------------------------------------------------------------------------------------------------------//
   // NEWS ENDPOINTS
@@ -114,9 +114,9 @@ class AppConstants {
   static String reservationsUDEndpoint(String reservationId) => reservationsByIdEndpoint(reservationId);
 
   static String reservationsComplexesCREndpoint(String complexId) =>
-      '${complexesByIdEndpoint(complexId)}/$reservationsEndpoint';
+      '${complexesByIdEndpoint(complexId)}$reservationsEndpoint';
 
-  static String reservationsUsersEndpoint(String userId) => '${usersByIdEndpoint(userId)}/$reservationsEndpoint';
+  static String reservationsUsersEndpoint(String userId) => '${usersByIdEndpoint(userId)}$reservationsEndpoint';
 
   //------------------------------------------------------------------------------------------------------------------//
   // USERS ENDPOINTS

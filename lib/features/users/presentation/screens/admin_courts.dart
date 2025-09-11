@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
+import 'package:frontend/features/courts/data/models/court_status_model.dart';
+import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/courts/presentation/widgets/court_list_tile.dart';
 
 class AdminCourts extends StatelessWidget {
@@ -18,9 +21,31 @@ class AdminCourts extends StatelessWidget {
       itemCount: 10,
       itemBuilder: (context, index) {
         return isTelemetryView
-            ? CourtListTile.telemetry(name: 'Court $index', onTap: () {}, isAdmin: true)
+            ? CourtListTile.telemetry(
+                court: CourtModel(
+                  id: 0,
+                  sport: Sport.tennis,
+                  name: 'Court $index',
+                  description: 'Lorem ipsum',
+                  maxPeople: 0,
+                  status: CourtStatus.open,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                ),
+                onTap: () {},
+                isAdmin: true,
+              )
             : CourtListTile.list(
-                name: 'Court $index',
+                court: CourtModel(
+                  id: 0,
+                  sport: Sport.tennis,
+                  name: 'Court $index',
+                  description: 'Lorem ipsum',
+                  maxPeople: 0,
+                  status: CourtStatus.open,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                ),
                 onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
                 isAdmin: true,
               );

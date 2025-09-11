@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
           if (sharedPreferences == null || settingsProvider == null) return _buildLoadingScreen(context);
 
           AppConstants.baseUrl = settingsProvider.currentBaseUrl;
-          print(AppConstants.baseUrl);
 
           return const AppInitializer();
         },

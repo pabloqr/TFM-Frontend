@@ -6,6 +6,8 @@ import 'package:frontend/features/complexes/data/services/complexes_remote_servi
 
 abstract class ComplexesRepository {
   Future<Either<Failure, List<ComplexModel>>> getComplexes({Map<String, dynamic>? query});
+
+  Future<Either<Failure, ComplexModel>> getComplex(int complexId);
 }
 
 class ComplexesRepositoryImpl implements ComplexesRepository {
@@ -24,6 +26,20 @@ class ComplexesRepositoryImpl implements ComplexesRepository {
       return Left(NetworkFailure(message: e.message));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Unexpected error during getting complexes: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ComplexModel>> getComplex(int complexId) async {
+    try {
+      final response = await _remoteService.getComplex(complexId);
+      return Right(response);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(message: 'Unexpected error during getting complex: ${e.toString()}'));
     }
   }
 }
