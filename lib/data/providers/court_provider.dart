@@ -3,7 +3,6 @@ import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/domain/usecases/courts_use_cases.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
-import 'package:frontend/features/courts/data/models/court_status_model.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 
 class CourtProvider extends ChangeNotifier {

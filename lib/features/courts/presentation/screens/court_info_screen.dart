@@ -16,7 +16,7 @@ import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
 import 'package:frontend/features/complexes/data/models/complex_model.dart';
-import 'package:frontend/features/courts/data/models/court_status_model.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
 import 'package:frontend/features/devices/presentation/widgets/device_list_tile.dart';
 import 'package:frontend/features/users/data/models/user_model.dart';

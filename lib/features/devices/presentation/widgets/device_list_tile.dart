@@ -6,7 +6,6 @@ import 'package:frontend/features/common/presentation/widgets/info_section_widge
 import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
-import 'package:frontend/features/devices/data/models/device_status_enum.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class DeviceListTile extends StatelessWidget {

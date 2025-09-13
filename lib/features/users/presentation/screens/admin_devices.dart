@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
-import 'package:frontend/features/devices/data/models/device_status_enum.dart';
-import 'package:frontend/features/devices/data/models/device_type_enum.dart';
 import 'package:frontend/features/devices/presentation/widgets/device_list_tile.dart';
 
 class AdminDevices extends StatelessWidget {

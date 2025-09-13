@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
-import 'package:frontend/features/courts/data/models/court_status_model.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/courts/presentation/widgets/court_list_tile.dart';
 

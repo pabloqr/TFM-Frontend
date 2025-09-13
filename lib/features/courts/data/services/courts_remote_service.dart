@@ -5,7 +5,6 @@ import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/data/services/authenticated_http_client.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
-import 'package:frontend/features/courts/data/models/court_status_model.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
 

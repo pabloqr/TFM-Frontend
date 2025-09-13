@@ -1,5 +1,6 @@
-import 'package:frontend/features/courts/data/models/court_status_model.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
+
+enum CourtStatus { open, maintenance, blocked, weather }
 
 class CourtModel {
   final int id;

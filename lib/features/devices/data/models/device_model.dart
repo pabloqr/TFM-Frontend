@@ -1,5 +1,6 @@
-import 'package:frontend/features/devices/data/models/device_status_enum.dart';
-import 'package:frontend/features/devices/data/models/device_type_enum.dart';
+enum DeviceType { presence, rain }
+
+enum DeviceStatus { normal, off, battery, error }
 
 class DeviceModel {
   final int id;

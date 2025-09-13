@@ -3,10 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
-import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
-import 'package:frontend/features/courts/data/models/court_status_model.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class CourtListTile extends StatelessWidget {
