@@ -3,6 +3,7 @@ import 'package:frontend/features/courts/data/models/sport_enum.dart';
 
 class CourtModel {
   final int id;
+  final int complexId;
   final Sport sport;
   final String name;
   final String description;
@@ -13,6 +14,7 @@ class CourtModel {
 
   CourtModel({
     required this.id,
+    required this.complexId,
     required this.sport,
     required this.name,
     required this.description,
@@ -25,6 +27,7 @@ class CourtModel {
   factory CourtModel.fromJson(Map<String, dynamic> json) {
     return CourtModel(
       id: json['id'] as int,
+      complexId: json['complexId'] as int,
       sport: Sport.values.firstWhere((sport) {
         final String name = sport.name.toLowerCase();
         final String jsonName = (json['sport'] as String).toLowerCase();

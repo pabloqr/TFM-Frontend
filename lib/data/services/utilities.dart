@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:intl/intl.dart';
 
 extension DoubleExtension on double {
   String formatAsTime() {
@@ -11,6 +12,12 @@ extension DoubleExtension on double {
 
 extension StringExtension on String {
   String toCapitalized() => length > 0 ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
+}
+
+extension DateTimeExtension on DateTime {
+  String toFormattedString() {
+    return DateFormat("E, dd/MM/yyyy, HH:mm:ss").format(this);
+  }
 }
 
 extension RangeValuesExtension on RangeValues {

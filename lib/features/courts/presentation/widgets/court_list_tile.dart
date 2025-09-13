@@ -63,7 +63,7 @@ class CourtListTile extends StatelessWidget {
                   LabeledInfoWidget(
                     icon: Symbols.groups_rounded,
                     label: 'Capacity',
-                    text: court.maxPeople.toString(),
+                    text: court.maxPeople.toString().padLeft(2, '0'),
                   ),
                 ],
           rightChildren: isTelemetryView

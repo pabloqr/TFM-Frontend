@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
-import 'package:frontend/data/providers/complexes_provider.dart';
+import 'package:frontend/data/providers/complexes_list_provider.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:provider/provider.dart';

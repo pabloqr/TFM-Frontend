@@ -1,9 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/data/providers/complex_provider.dart';
-import 'package:frontend/data/providers/courts_provider.dart';
+import 'package:frontend/data/providers/court_provider.dart';
+import 'package:frontend/data/providers/courts_list_provider.dart';
+import 'package:frontend/data/providers/devices_list_provider.dart';
 import 'package:frontend/data/providers/settings_provider.dart'; // AÑADIDO
 import 'package:frontend/data/providers/auth_provider.dart';
-import 'package:frontend/data/providers/complexes_provider.dart';
+import 'package:frontend/data/providers/complexes_list_provider.dart';
 import 'package:frontend/data/repositories/auth_repository.dart';
 import 'package:frontend/data/repositories/complexes_repository.dart';
 import 'package:frontend/data/repositories/courts_repository.dart';
@@ -165,7 +167,7 @@ List<SingleChildWidget> get appProviders {
       },
     ),
 
-    ChangeNotifierProxyProvider<CourtsUseCases?, CourtsProvider?>(
+    ChangeNotifierProxyProvider<CourtsUseCases?, CourtsListProvider?>(
       create: (context) => null,
       update: (context, useCases, previousProvider) {
         // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
@@ -173,7 +175,31 @@ List<SingleChildWidget> get appProviders {
           return previousProvider;
         }
 
-        return CourtsProvider(courtsUseCases: useCases);
+        return CourtsListProvider(courtsUseCases: useCases);
+      },
+    ),
+
+    ChangeNotifierProxyProvider<CourtsUseCases?, CourtProvider?>(
+      create: (context) => null,
+      update: (context, useCases, previousProvider) {
+        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
+        if (useCases == null || previousProvider != null) {
+          return previousProvider;
+        }
+
+        return CourtProvider(courtsUseCases: useCases);
+      },
+    ),
+
+    ChangeNotifierProxyProvider<CourtsUseCases?, DevicesListProvider?>(
+      create: (context) => null,
+      update: (context, useCases, previousProvider) {
+        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
+        if (useCases == null || previousProvider != null) {
+          return previousProvider;
+        }
+
+        return DevicesListProvider(courtsUseCases: useCases);
       },
     ),
 

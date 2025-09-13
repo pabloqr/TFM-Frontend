@@ -24,6 +24,7 @@ class AdminCourts extends StatelessWidget {
             ? CourtListTile.telemetry(
                 court: CourtModel(
                   id: 0,
+                  complexId: 0,
                   sport: Sport.tennis,
                   name: 'Court $index',
                   description: 'Lorem ipsum',
@@ -38,6 +39,7 @@ class AdminCourts extends StatelessWidget {
             : CourtListTile.list(
                 court: CourtModel(
                   id: 0,
+                  complexId: 0,
                   sport: Sport.tennis,
                   name: 'Court $index',
                   description: 'Lorem ipsum',

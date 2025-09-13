@@ -54,7 +54,7 @@ class ComplexProvider extends ChangeNotifier {
         _complex = value;
         // Clear any previous failure on successful fetch
         _failure = null;
-        state = complex.id != -1 ? ProviderState.loaded : ProviderState.empty;
+        state = _complex.id != -1 ? ProviderState.loaded : ProviderState.empty;
       },
     );
   }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/features/devices/data/models/device_model.dart';
+import 'package:frontend/features/devices/data/models/device_status_enum.dart';
+import 'package:frontend/features/devices/data/models/device_type_enum.dart';
 import 'package:frontend/features/devices/presentation/widgets/device_list_tile.dart';
 
 class AdminDevices extends StatelessWidget {
@@ -18,9 +21,26 @@ class AdminDevices extends StatelessWidget {
       itemCount: 10,
       itemBuilder: (context, index) {
         return isTelemetryView
-            ? DeviceListTile.telemetry(name: 'Court $index', onTap: () {})
+            ? DeviceListTile.telemetry(
+                device: DeviceModel(
+                  id: 0,
+                  complexId: 0,
+                  type: DeviceType.presence,
+                  status: DeviceStatus.normal,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                ),
+                onTap: () {},
+              )
             : DeviceListTile.list(
-                name: 'Court $index',
+                device: DeviceModel(
+                  id: 0,
+                  complexId: 0,
+                  type: DeviceType.presence,
+                  status: DeviceStatus.normal,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                ),
                 onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
               );
       },

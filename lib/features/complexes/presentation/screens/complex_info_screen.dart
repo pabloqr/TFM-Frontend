@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/complex_provider.dart';
-import 'package:frontend/data/providers/courts_provider.dart';
+import 'package:frontend/data/providers/courts_list_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
@@ -28,7 +28,7 @@ class ComplexInfoScreen extends StatefulWidget {
 
 class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
   ComplexProvider? _complexProvider;
-  CourtsProvider? _courtsProvider;
+  CourtsListProvider? _courtsListProvider;
   VoidCallback? _providerListener;
 
   bool _loadingError = false;
@@ -44,16 +44,16 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       if (!mounted) return;
 
       _complexProvider = context.read<ComplexProvider?>();
-      _courtsProvider = context.read<CourtsProvider?>();
+      _courtsListProvider = context.read<CourtsListProvider?>();
 
-      if (_complexProvider != null && _courtsProvider != null) {
+      if (_complexProvider != null && _courtsListProvider != null) {
         if (_complexProvider!.state == ProviderState.initial) {
           _complexProvider!.getComplex(1);
         }
 
-        if (_courtsProvider!.state == ProviderState.initial) {
+        if (_courtsListProvider!.state == ProviderState.initial) {
           // TODO: Cange complex ID to real ID
-          _courtsProvider!.getCourts(1);
+          _courtsListProvider!.getCourts(1);
         }
 
         _providerListener = () {
@@ -67,16 +67,16 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
           }
 
           if (mounted &&
-              _courtsProvider != null &&
-              _courtsProvider!.state == ProviderState.error &&
-              _courtsProvider!.failure != null) {
+              _courtsListProvider != null &&
+              _courtsListProvider!.state == ProviderState.error &&
+              _courtsListProvider!.failure != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(_courtsProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+              SnackBar(content: Text(_courtsListProvider!.failure!.message), behavior: SnackBarBehavior.floating),
             );
           }
         };
         _complexProvider!.addListener(_providerListener!);
-        _courtsProvider!.addListener(_providerListener!);
+        _courtsListProvider!.addListener(_providerListener!);
       }
     });
   }
@@ -86,8 +86,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     if (_complexProvider != null && _providerListener != null) {
       _complexProvider!.removeListener(_providerListener!);
     }
-    if (_courtsProvider != null && _providerListener != null) {
-      _courtsProvider!.removeListener(_providerListener!);
+    if (_courtsListProvider != null && _providerListener != null) {
+      _courtsListProvider!.removeListener(_providerListener!);
     }
     _providerListener = null;
 
@@ -125,12 +125,12 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _complexProvider;
 
-        if (currentProvider == null) return _buildLoadingState(context, true);
+        if (currentProvider == null) return _buildLoadingState(context);
 
         switch (currentProvider.state) {
           case ProviderState.initial:
           case ProviderState.loading:
-            if (currentProvider.complex.id == -1) return _buildLoadingState(context, true);
+            if (currentProvider.complex.id == -1) return _buildLoadingState(context);
             return _buildLoadedState(context, currentProvider);
           case ProviderState.empty:
             return const Center(child: Text('No complexes found'));
@@ -146,25 +146,20 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     );
   }
 
-  Widget _buildLoadingState(BuildContext context, bool buildScaffold) {
+  Widget _buildLoadingState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     Widget loadingWidget = Container(
       color: colorScheme.surface,
       child: Center(child: CircularProgressIndicator()),
     );
 
-    return buildScaffold
-        ? Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-              title: const Text('Complex details'),
-            ),
-            body: SafeArea(child: loadingWidget),
-          )
-        : loadingWidget;
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
+        title: const Text('Complex details'),
+      ),
+      body: SafeArea(child: loadingWidget),
+    );
   }
 
   Widget _buildLoadedState(BuildContext context, ComplexProvider complexProvider) {
@@ -172,7 +167,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingState(context, true);
+          return _buildLoadingState(context);
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -241,9 +236,9 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
             child: MetaDataCard(
-              id: '00000000',
-              createdAt: 'Mon, 00/00/0000, 00:00:00',
-              updatedAt: 'Mon, 00/00/0000, 00:00:00',
+              id: complex.id.toString().padLeft(8, '0'),
+              createdAt: complex.createdAt.toFormattedString(),
+              updatedAt: complex.updatedAt.toFormattedString(),
             ),
           ),
         Padding(
@@ -309,9 +304,9 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
   }
 
   Widget _buildPinnedHeader(BuildContext context, bool isAdmin) {
-    return Consumer<CourtsProvider?>(
+    return Consumer<CourtsListProvider?>(
       builder: (context, consumerCourtsProvider, _) {
-        final currentCourtsProvider = consumerCourtsProvider ?? _courtsProvider;
+        final currentCourtsProvider = consumerCourtsProvider ?? _courtsListProvider;
 
         final nullProvider = currentCourtsProvider == null;
         final validStatus = currentCourtsProvider?.state == ProviderState.loaded;
@@ -398,26 +393,26 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
   }
 
   Widget _buildScrollableList(BuildContext context, bool isAdmin) {
-    return Consumer<CourtsProvider?>(
-      builder: (context, consumerCourtsProvider, _) {
-        final currentCourtsProvider = consumerCourtsProvider ?? _courtsProvider;
+    return Consumer<CourtsListProvider?>(
+      builder: (context, consumerProvider, _) {
+        final currentProvider = consumerProvider ?? _courtsListProvider;
 
-        if (currentCourtsProvider == null) return _buildLoadingListTile(context);
+        if (currentProvider == null) return _buildLoadingListTile(context);
 
-        List<CourtModel> courts = currentCourtsProvider.courts;
+        List<CourtModel> courts = currentProvider.courts;
 
-        switch (currentCourtsProvider.state) {
+        switch (currentProvider.state) {
           case ProviderState.initial:
           case ProviderState.loading:
             if (courts.isEmpty) return _buildLoadingListTile(context);
             return _buildListTile(context, courts, isAdmin);
           case ProviderState.empty:
-            return const Center(child: Text('No complexes found'));
+            return _buildErrorListTile(context);
           case ProviderState.error:
             if (courts.isNotEmpty) {
               return _buildListTile(context, courts, isAdmin);
             }
-            return const Center(child: Text('Error loading complexes'));
+            return _buildErrorListTile(context);
           case ProviderState.loaded:
             return _buildListTile(context, courts, isAdmin);
         }
@@ -430,6 +425,16 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       itemCount: 1,
       itemBuilder: (context, index) {
         return FakeItem(isBig: true);
+      },
+      separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+    );
+  }
+
+  Widget _buildErrorListTile(BuildContext context) {
+    return SliverList.separated(
+      itemCount: 1,
+      itemBuilder: (context, index) {
+        return const Center(heightFactor: 4.0, child: Text('Error loading complexes'));
       },
       separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
     );

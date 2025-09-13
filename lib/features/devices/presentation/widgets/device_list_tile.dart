@@ -1,24 +1,27 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/devices/data/models/device_model.dart';
+import 'package:frontend/features/devices/data/models/device_status_enum.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class DeviceListTile extends StatelessWidget {
   final bool isTelemetryView;
 
-  final String name;
+  final DeviceModel device;
   final VoidCallback onTap;
 
-  const DeviceListTile._(this.isTelemetryView, {required this.name, required this.onTap});
+  const DeviceListTile._(this.isTelemetryView, {required this.device, required this.onTap});
 
-  factory DeviceListTile.telemetry({required String name, required VoidCallback onTap}) =>
-      DeviceListTile._(true, name: name, onTap: onTap);
+  factory DeviceListTile.telemetry({required DeviceModel device, required VoidCallback onTap}) =>
+      DeviceListTile._(true, device: device, onTap: onTap);
 
-  factory DeviceListTile.list({required String name, required VoidCallback onTap}) =>
-      DeviceListTile._(false, name: name, onTap: onTap);
+  factory DeviceListTile.list({required DeviceModel device, required VoidCallback onTap}) =>
+      DeviceListTile._(false, device: device, onTap: onTap);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class DeviceListTile extends StatelessWidget {
         spacing: 8.0,
         children: [
           Text(
-            name,
+            'Device ${device.id}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             overflow: TextOverflow.ellipsis,
           ),
@@ -36,10 +39,9 @@ class DeviceListTile extends StatelessWidget {
             spacing: 4.0,
             runSpacing: 4.0,
             alignment: WrapAlignment.end,
-            // TODO: Chip based on device status
             children: [
-              SmallChip.neutralSurface(label: 'Type'),
-              SmallChip.alert(label: 'Warning'),
+              SmallChip.neutralSurface(label: device.type.name.toCapitalized()),
+              _buildStatusChip(),
             ],
           ),
         ],
@@ -67,5 +69,18 @@ class DeviceListTile extends StatelessWidget {
       trailing: isTelemetryView ? null : Icon(Symbols.chevron_right_rounded),
       onTap: onTap,
     );
+  }
+
+  Widget _buildStatusChip() {
+    switch (device.status) {
+      case DeviceStatus.normal:
+        return SmallChip.success(label: 'Normal');
+      case DeviceStatus.off:
+        return SmallChip.neutralSurface(label: 'Off');
+      case DeviceStatus.battery:
+        return SmallChip.alert(label: 'Low Battery');
+      case DeviceStatus.error:
+        return SmallChip.error(label: 'Error');
+    }
   }
 }

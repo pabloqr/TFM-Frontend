@@ -4,10 +4,10 @@ import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/domain/usecases/courts_use_cases.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
 
-class CourtsProvider extends ChangeNotifier {
+class CourtsListProvider extends ChangeNotifier {
   final CourtsUseCases _courtsUseCases;
 
-  CourtsProvider({required CourtsUseCases courtsUseCases}) : _courtsUseCases = courtsUseCases;
+  CourtsListProvider({required CourtsUseCases courtsUseCases}) : _courtsUseCases = courtsUseCases;
 
   ProviderState _state = ProviderState.initial;
   Failure? _failure;
