@@ -209,7 +209,9 @@ class ComplexCard extends StatelessWidget {
             spacing: 4.0,
             children: [
               OutlinedButton(
-                onPressed: () => Navigator.of(context).pushNamed(AppConstants.complexInfoRoute),
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushNamed(AppConstants.complexInfoRoute, arguments: {'complexId': complex.id}),
                 child: const Text('More info'),
               ),
               FilledButton(

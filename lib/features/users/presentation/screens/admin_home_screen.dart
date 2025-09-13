@@ -26,13 +26,17 @@ class _Destination {
 }
 
 class AdminHomeScreen extends StatefulWidget {
-  const AdminHomeScreen({super.key});
+  final int complexId;
+
+  const AdminHomeScreen({super.key, required this.complexId});
 
   @override
   State<AdminHomeScreen> createState() => _AdminHomeScreenState();
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProviderStateMixin {
+  late int _complexId;
+
   int _selectedIndex = 0;
   int _selectedTabIndex = 0;
 
@@ -93,7 +97,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
     AdminReservationsScreen(),
     Center(child: Text('Courts Screen Content')),
     Center(child: Text('Devices Screen Content')),
-    ComplexInfoScreen(),
+    ComplexInfoScreen(complexId: _complexId),
   ];
 
   late final List<List<Widget>> _subScreens = [
@@ -104,6 +108,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
+
+    _complexId = widget.complexId;
 
     _scrollController = ScrollController();
     _tabController = TabController(length: 2, vsync: this);

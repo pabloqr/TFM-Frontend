@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/data/models/widget_size.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
@@ -134,7 +133,7 @@ class CourtCard extends StatelessWidget {
             spacing: 4.0,
             children: [
               OutlinedButton(
-                onPressed: () => Navigator.of(context).pushNamed(AppConstants.complexInfoRoute),
+                onPressed: () {},
                 child: const Text('More info'),
               ),
               FilledButton(onPressed: () {}, child: const Text('Book court')),

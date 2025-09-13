@@ -1,13 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:frontend/features/auth/presentation/screens/sign_up_sign_in_screen.dart';
-import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:frontend/features/common/presentation/screens/settings_screen.dart';
 import 'package:frontend/features/complexes/presentation/screens/complex_info_screen.dart';
 import 'package:frontend/features/courts/presentation/screens/court_info_screen.dart';
-import 'package:frontend/features/reservations/presentation/screens/reservation_screen.dart';
 import 'package:frontend/features/reservations/presentation/screens/reservation_info_screen.dart';
-import 'package:frontend/features/users/presentation/screens/admin_home_screen.dart';
-import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
+import 'package:frontend/features/reservations/presentation/screens/reservation_screen.dart';
 
 class AppConstants {
   static String baseUrl = _defaultBaseUrl;
@@ -155,15 +152,27 @@ class AppConstants {
   static const String reservationInfoRoute = '$reservationsEndpoint/info';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
-    welcomeRoute: (context) => const WelcomeScreen(),
+    // welcomeRoute: (context) => const WelcomeScreen(),
     signUpRoute: (context) => const SignUpScreen(),
     signInRoute: (context) => const SignInScreen(),
-    clientHomeRoute: (context) => const ClientHomeScreen(),
-    adminHomeRoute: (context) => const AdminHomeScreen(),
     clientSettingsRoute: (context) => const SettingsScreen(),
     adminSettingsRoute: (context) => const SettingsScreen(),
-    complexInfoRoute: (context) => const ComplexInfoScreen(),
-    courtInfoRoute: (context) => const CourtInfoScreen(),
+    complexInfoRoute: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments is Map<String, dynamic>) {
+        return ComplexInfoScreen(complexId: arguments['complexId'] as int);
+      }
+
+      return const ComplexInfoScreen(complexId: 0);
+    },
+    courtInfoRoute: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments is Map<String, dynamic>) {
+        return CourtInfoScreen(complexId: arguments['complexId'] as int, courtId: arguments['courtId'] as int);
+      }
+
+      return const CourtInfoScreen(complexId: 0, courtId: 0);
+    },
     reservationClientNewRoute: (context) => ReservationScreen.create(isAdmin: false),
     reservationAdminNewRoute: (context) => ReservationScreen.create(isAdmin: true),
     reservationClientModifyRoute: (context) => ReservationScreen.modify(isAdmin: false),

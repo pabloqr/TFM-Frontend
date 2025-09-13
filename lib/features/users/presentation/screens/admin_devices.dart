@@ -39,6 +39,7 @@ class AdminDevices extends StatelessWidget {
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
                 ),
+                // TODO: Change to device info route
                 onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
               );
       },

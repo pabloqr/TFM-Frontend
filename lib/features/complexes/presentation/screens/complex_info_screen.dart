@@ -20,7 +20,9 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 
 class ComplexInfoScreen extends StatefulWidget {
-  const ComplexInfoScreen({super.key});
+  final int complexId;
+
+  const ComplexInfoScreen({super.key, required this.complexId});
 
   @override
   State<ComplexInfoScreen> createState() => _ComplexInfoScreenState();
@@ -48,12 +50,11 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
 
       if (_complexProvider != null && _courtsListProvider != null) {
         if (_complexProvider!.state == ProviderState.initial) {
-          _complexProvider!.getComplex(1);
+          _complexProvider!.getComplex(widget.complexId);
         }
 
         if (_courtsListProvider!.state == ProviderState.initial) {
-          // TODO: Cange complex ID to real ID
-          _courtsListProvider!.getCourts(1);
+          _courtsListProvider!.getCourts(widget.complexId);
         }
 
         _providerListener = () {
@@ -121,53 +122,11 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ComplexProvider?>(
-      builder: (context, consumerProvider, _) {
-        final currentProvider = consumerProvider ?? _complexProvider;
-
-        if (currentProvider == null) return _buildLoadingState(context);
-
-        switch (currentProvider.state) {
-          case ProviderState.initial:
-          case ProviderState.loading:
-            if (currentProvider.complex.id == -1) return _buildLoadingState(context);
-            return _buildLoadedState(context, currentProvider);
-          case ProviderState.empty:
-            return const Center(child: Text('No complexes found'));
-          case ProviderState.error:
-            if (currentProvider.complex.id != -1) {
-              return _buildLoadedState(context, currentProvider);
-            }
-            return const Center(child: Text('Error loading complexes'));
-          case ProviderState.loaded:
-            return _buildLoadedState(context, currentProvider);
-        }
-      },
-    );
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    Widget loadingWidget = Container(
-      color: colorScheme.surface,
-      child: Center(child: CircularProgressIndicator()),
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
-        title: const Text('Complex details'),
-      ),
-      body: SafeArea(child: loadingWidget),
-    );
-  }
-
-  Widget _buildLoadedState(BuildContext context, ComplexProvider complexProvider) {
     return FutureBuilder<bool>(
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingState(context);
+          return _buildLoadingState(context, false);
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -177,16 +136,65 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             }
           });
 
-          return _buildScaffold(context, complexProvider, false);
+          return _buildConsumer(context, false);
         }
 
         final isAdmin = snapshot.data!;
-        return _buildScaffold(context, complexProvider, isAdmin);
+        return _buildConsumer(context, isAdmin);
       },
     );
   }
 
-  Widget _buildScaffold(BuildContext context, ComplexProvider complexProvider, bool isAdmin) {
+  Widget _buildConsumer(BuildContext context, bool isAdmin) {
+    return Consumer<ComplexProvider?>(
+      builder: (context, consumerProvider, _) {
+        final currentProvider = consumerProvider ?? _complexProvider;
+
+        if (currentProvider == null) return _buildLoadingState(context, isAdmin);
+
+        Widget emptyWidget = const Center(child: Text('No complex found'));
+        Widget errorWidget = const Center(child: Text('Error loading complex'));
+
+        switch (currentProvider.state) {
+          case ProviderState.initial:
+          case ProviderState.loading:
+            if (currentProvider.complex.id == -1) return _buildLoadingState(context, isAdmin);
+            return _buildLoadedState(context, currentProvider, isAdmin);
+          case ProviderState.empty:
+            return isAdmin ? emptyWidget : _buildProvisionalScaffold(context, emptyWidget);
+          case ProviderState.error:
+            if (currentProvider.complex.id != -1) {
+              return _buildLoadedState(context, currentProvider, isAdmin);
+            }
+            return isAdmin ? emptyWidget : _buildProvisionalScaffold(context, errorWidget);
+          case ProviderState.loaded:
+            return _buildLoadedState(context, currentProvider, isAdmin);
+        }
+      },
+    );
+  }
+
+  Widget _buildProvisionalScaffold(BuildContext context, Widget body) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
+        title: const Text('Complex details'),
+      ),
+      body: SafeArea(top: false, child: body),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context, bool isAdmin) {
+    final colorScheme = Theme.of(context).colorScheme;
+    Widget loadingWidget = Container(
+      color: colorScheme.surface,
+      child: Center(child: CircularProgressIndicator()),
+    );
+
+    return isAdmin ? SafeArea(top: false, child: loadingWidget) : _buildProvisionalScaffold(context, loadingWidget);
+  }
+
+  Widget _buildLoadedState(BuildContext context, ComplexProvider complexProvider, bool isAdmin) {
     if (_loadingError) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -357,9 +365,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                           LabeledInfoWidget(
                             icon: Symbols.tag_rounded,
                             label: 'Number of courts',
-                            text: !validStatus || courts.isEmpty
-                                ? '--'
-                                : courts.length.toString().padLeft(2, '0'),
+                            text: !validStatus || courts.isEmpty ? '--' : courts.length.toString().padLeft(2, '0'),
                           ),
                           LabeledInfoWidget(icon: Symbols.payments_rounded, label: 'Price per hour', text: '00.00 €'),
                         ],
@@ -432,7 +438,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     return SliverList.separated(
       itemCount: 1,
       itemBuilder: (context, index) {
-        return const Center(heightFactor: 4.0, child: Text('Error loading complexes'));
+        return const Center(heightFactor: 4.0, child: Text('Error loading courts'));
       },
       separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
     );
@@ -444,7 +450,13 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       itemBuilder: (context, index) {
         return CourtListTile.list(
           court: courts.elementAt(index),
-          onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
+          onTap: () {
+            final court = courts.elementAt(index);
+
+            Navigator.of(
+              context,
+            ).pushNamed(AppConstants.courtInfoRoute, arguments: {'complexId': court.complexId, 'courtId': court.id});
+          },
           isAdmin: isAdmin,
         );
       },

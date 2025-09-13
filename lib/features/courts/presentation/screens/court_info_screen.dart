@@ -24,7 +24,10 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 
 class CourtInfoScreen extends StatefulWidget {
-  const CourtInfoScreen({super.key});
+  final int complexId;
+  final int courtId;
+
+  const CourtInfoScreen({super.key, required this.complexId, required this.courtId});
 
   @override
   State<CourtInfoScreen> createState() => _CourtInfoScreenState();
@@ -55,15 +58,15 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       if (_complexProvider != null && _courtProvider != null && _devicesListProvider != null) {
         // TODO: Cange complex ID to real ID
         if (_complexProvider!.state == ProviderState.initial) {
-          _complexProvider!.getComplex(1);
+          _complexProvider!.getComplex(widget.complexId);
         }
 
         if (_courtProvider!.state == ProviderState.initial) {
-          _courtProvider!.getCourt(1, 1);
+          _courtProvider!.getCourt(widget.complexId, widget.courtId);
         }
 
         if (_devicesListProvider!.state == ProviderState.initial) {
-          _devicesListProvider!.getCourtDevices(1, 1);
+          _devicesListProvider!.getCourtDevices(widget.complexId, widget.courtId);
         }
 
         _providerListener = () {
@@ -144,54 +147,11 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CourtProvider?>(
-      builder: (context, consumerProvider, _) {
-        final currentProvider = consumerProvider ?? _courtProvider;
-
-        if (currentProvider == null) return _buildLoadingState(context);
-
-        switch (currentProvider.state) {
-          case ProviderState.initial:
-          case ProviderState.loading:
-            if (currentProvider.court.id == -1) return _buildLoadingState(context);
-            return _buildLoadedState(context, currentProvider);
-          case ProviderState.empty:
-            return const Center(child: Text('No complexes found'));
-          case ProviderState.error:
-            if (currentProvider.court.id != -1) {
-              return _buildLoadedState(context, currentProvider);
-            }
-            return const Center(child: Text('Error loading complexes'));
-          case ProviderState.loaded:
-            return _buildLoadedState(context, currentProvider);
-        }
-      },
-    );
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
-        title: const Text('Complex details'),
-      ),
-      body: SafeArea(
-        child: Container(
-          color: colorScheme.surface,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadedState(BuildContext context, CourtProvider courtProvider) {
     return FutureBuilder<bool>(
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingState(context);
+          return _buildLoadingState(context, false);
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -201,13 +161,66 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
             }
           });
 
-          return _buildRegularView(context, courtProvider);
+          return _buildConsumer(context, false);
         }
 
         final isAdmin = snapshot.data!;
-        return isAdmin ? _buildScrollView(context, courtProvider) : _buildRegularView(context, courtProvider);
+        return _buildConsumer(context, isAdmin);
       },
     );
+  }
+
+  Widget _buildConsumer(BuildContext context, bool isAdmin) {
+    return Consumer<CourtProvider?>(
+      builder: (context, consumerProvider, _) {
+        final currentProvider = consumerProvider ?? _courtProvider;
+
+        if (currentProvider == null) return _buildLoadingState(context, isAdmin);
+
+        Widget emptyWidget = const Center(child: Text('No court found'));
+        Widget errorWidget = const Center(child: Text('Error loading court'));
+
+        switch (currentProvider.state) {
+          case ProviderState.initial:
+          case ProviderState.loading:
+            if (currentProvider.court.id == -1) return _buildLoadingState(context, isAdmin);
+            return _buildLoadedState(context, currentProvider, isAdmin);
+          case ProviderState.empty:
+            return _buildProvisionalScaffold(context, emptyWidget);
+          case ProviderState.error:
+            if (currentProvider.court.id != -1) {
+              return _buildLoadedState(context, currentProvider, isAdmin);
+            }
+            return _buildProvisionalScaffold(context, errorWidget);
+          case ProviderState.loaded:
+            return _buildLoadedState(context, currentProvider, isAdmin);
+        }
+      },
+    );
+  }
+
+  Widget _buildProvisionalScaffold(BuildContext context, Widget body) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
+        title: const Text('Court details'),
+      ),
+      body: SafeArea(top: false, child: body),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context, bool isAdmin) {
+    final colorScheme = Theme.of(context).colorScheme;
+    Widget loadingWidget = Container(
+      color: colorScheme.surface,
+      child: Center(child: CircularProgressIndicator()),
+    );
+
+    return isAdmin ? SafeArea(top: false, child: loadingWidget) : _buildProvisionalScaffold(context, loadingWidget);
+  }
+
+  Widget _buildLoadedState(BuildContext context, CourtProvider courtProvider, bool isAdmin) {
+    return isAdmin ? _buildScrollView(context, courtProvider) : _buildRegularView(context, courtProvider);
   }
 
   Widget _buildRegularView(BuildContext context, CourtProvider courtProvider) {

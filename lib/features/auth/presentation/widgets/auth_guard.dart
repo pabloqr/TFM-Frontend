@@ -8,10 +8,10 @@ import 'package:provider/provider.dart';
 
 class AuthGuard extends StatelessWidget {
   final Widget loginScreen;
-  final Widget clientApp;
-  final Widget adminApp;
+  final Widget Function() clientAppBuilder;
+  final Widget Function(int) adminAppBuilder;
 
-  const AuthGuard({super.key, required this.loginScreen, required this.clientApp, required this.adminApp});
+  const AuthGuard({super.key, required this.loginScreen, required this.clientAppBuilder, required this.adminAppBuilder});
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +51,10 @@ class AuthGuard extends StatelessWidget {
                     // Successfully fetched user, now check role and return appropriate screen
                     switch (user.role) {
                       case Role.client:
-                        return clientApp;
+                        return clientAppBuilder();
                       case Role.admin:
                       case Role.superadmin:
-                        return adminApp;
+                        return adminAppBuilder(1);
                     }
                   },
                 );
@@ -71,7 +71,7 @@ class AuthGuard extends StatelessWidget {
       body: SafeArea(
         child: Container(
           color: colorScheme.surface,
-          child: Center(child: CircularProgressIndicator()),
+          child: const Center(child: CircularProgressIndicator()),
         ),
       ),
     );
