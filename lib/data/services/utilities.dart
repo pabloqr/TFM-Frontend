@@ -15,6 +15,14 @@ extension StringExtension on String {
 }
 
 extension DateTimeExtension on DateTime {
+  String toFormattedDate() {
+    return DateFormat("dd/MM/yyyy").format(this);
+  }
+
+  String toFormattedTime() {
+    return DateFormat("HH:mm").format(this);
+  }
+
   String toFormattedString() {
     return DateFormat("E, dd/MM/yyyy, HH:mm:ss").format(this);
   }

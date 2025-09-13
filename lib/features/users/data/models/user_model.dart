@@ -25,7 +25,6 @@ class UserModel {
     required this.updatedAt,
   });
 
-  /// Constructor factoría para crear un UserModel a partir de un objeto JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'],

@@ -63,7 +63,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         }
 
         if (_devicesListProvider!.state == ProviderState.initial) {
-          _devicesListProvider!.getDevices(1, 1);
+          _devicesListProvider!.getCourtDevices(1, 1);
         }
 
         _providerListener = () {
@@ -274,59 +274,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                 ),
               ]),
             ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: StickyHeaderDelegate(
-                minHeight: 184.0,
-                maxHeight: 184.0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    spacing: 16.0,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Header.subheader(
-                            subheaderText: 'Devices',
-                            showButton: true,
-                            buttonText: 'Manage devices',
-                            onPressed: () {},
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            spacing: 8.0,
-                            children: [
-                              CustomFilterChip.dropDown('Type', _typeSelected, (selected) {
-                                setState(() => _typeSelected = selected);
-                              }),
-                              CustomFilterChip.dropDown('Status', _statusSelected, (selected) {
-                                setState(() => _statusSelected = selected);
-                              }),
-                            ],
-                          ),
-                          const SizedBox(height: 8.0),
-                          const InfoSectionWidget(
-                            leftChildren: [
-                              LabeledInfoWidget(icon: Symbols.tag_rounded, label: 'Number of devices', text: '00'),
-                              LabeledInfoWidget(icon: Symbols.mode_off_on_rounded, label: 'Devices on', text: '00'),
-                            ],
-                            rightChildren: [
-                              LabeledInfoWidget(
-                                icon: Symbols.check_circle_rounded,
-                                label: 'Normal operation',
-                                text: '00',
-                              ),
-                              LabeledInfoWidget(icon: Symbols.cancel_rounded, label: 'Warning/Error', text: '00'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _buildPinnedHeader(context),
             _buildScrollableList(context),
           ],
         ),
@@ -465,6 +413,93 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
               ],
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPinnedHeader(BuildContext context) {
+    return Consumer<DevicesListProvider?>(
+      builder: (context, consumerProvider, _) {
+        final currentProvider = consumerProvider ?? _devicesListProvider;
+        final validStatus = currentProvider?.state == ProviderState.loaded;
+
+        List<DeviceModel> devices = currentProvider?.devices ?? [];
+        final devicesOn = devices.fold<int>(0, (prev, device) => device.status != DeviceStatus.off ? prev + 1 : prev);
+        final devicesNormal = devices.fold<int>(
+          0,
+          (prev, device) => device.status == DeviceStatus.normal ? prev + 1 : prev,
+        );
+        final devicesWarning = devices.fold<int>(
+          0,
+          (prev, device) =>
+              device.status == DeviceStatus.battery || device.status == DeviceStatus.error ? prev + 1 : prev,
+        );
+
+        return SliverPersistentHeader(
+          pinned: true,
+          delegate: StickyHeaderDelegate(
+            minHeight: 184.0,
+            maxHeight: 184.0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                spacing: 16.0,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Header.subheader(
+                        subheaderText: 'Devices',
+                        showButton: true,
+                        buttonText: 'Manage devices',
+                        onPressed: () {},
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        spacing: 8.0,
+                        children: [
+                          CustomFilterChip.dropDown('Type', _typeSelected, (selected) {
+                            setState(() => _typeSelected = selected);
+                          }),
+                          CustomFilterChip.dropDown('Status', _statusSelected, (selected) {
+                            setState(() => _statusSelected = selected);
+                          }),
+                        ],
+                      ),
+                      const SizedBox(height: 8.0),
+                      InfoSectionWidget(
+                        leftChildren: [
+                          LabeledInfoWidget(
+                            icon: Symbols.tag_rounded,
+                            label: 'Number of devices',
+                            text: !validStatus || devices.isEmpty ? '--' : devices.length.toString().padLeft(2, '0'),
+                          ),
+                          LabeledInfoWidget(
+                            icon: Symbols.mode_off_on_rounded,
+                            label: 'Devices on',
+                            text: !validStatus || devices.isEmpty ? '--' : devicesOn.toString().padLeft(2, '0'),
+                          ),
+                        ],
+                        rightChildren: [
+                          LabeledInfoWidget(
+                            icon: Symbols.check_circle_rounded,
+                            label: 'Normal operation',
+                            text: !validStatus || devices.isEmpty ? '--' : devicesNormal.toString().padLeft(2, '0'),
+                          ),
+                          LabeledInfoWidget(
+                            icon: Symbols.cancel_rounded,
+                            label: 'Warning/Error',
+                            text: !validStatus || devices.isEmpty ? '--' : devicesWarning.toString().padLeft(2, '0'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

@@ -10,7 +10,7 @@ abstract class CourtsRepository {
 
   Future<Either<Failure, CourtModel>> getCourt(int complexId, int courtId);
 
-  Future<Either<Failure, List<DeviceModel>>> getDevices(int complexId, int courtId);
+  Future<Either<Failure, List<DeviceModel>>> getCourtDevices(int complexId, int courtId);
 }
 
 class CourtsRepositoryImpl implements CourtsRepository {
@@ -47,9 +47,9 @@ class CourtsRepositoryImpl implements CourtsRepository {
   }
 
   @override
-  Future<Either<Failure, List<DeviceModel>>> getDevices(int complexId, int courtId) async {
+  Future<Either<Failure, List<DeviceModel>>> getCourtDevices(int complexId, int courtId) async {
     try {
-      final response = await _remoteService.getDevices(complexId, courtId);
+      final response = await _remoteService.getCourtDevices(complexId, courtId);
       return Right(response);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));

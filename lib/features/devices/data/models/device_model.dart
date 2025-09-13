@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum DeviceType { presence, rain }
 
 enum DeviceStatus { normal, off, battery, error }
@@ -37,4 +39,17 @@ class DeviceModel {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'complexId': complexId,
+      'type': type.name,
+      'status': status.name,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  String toJsonString() => json.encode(toJson());
 }

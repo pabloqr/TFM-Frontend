@@ -17,7 +17,7 @@ class CourtsUseCases {
     return await _repository.getCourt(complexId, courtId);
   }
 
-  Future<Either<Failure, List<DeviceModel>>> getDevices(int complexId, int courtId) async {
-    return await _repository.getDevices(complexId, courtId);
+  Future<Either<Failure, List<DeviceModel>>> getCourtDevices(int complexId, int courtId) async {
+    return await _repository.getCourtDevices(complexId, courtId);
   }
 }

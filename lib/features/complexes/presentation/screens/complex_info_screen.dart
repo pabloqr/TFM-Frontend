@@ -307,8 +307,6 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     return Consumer<CourtsListProvider?>(
       builder: (context, consumerCourtsProvider, _) {
         final currentCourtsProvider = consumerCourtsProvider ?? _courtsListProvider;
-
-        final nullProvider = currentCourtsProvider == null;
         final validStatus = currentCourtsProvider?.state == ProviderState.loaded;
 
         List<CourtModel> courts = currentCourtsProvider?.courts ?? [];
@@ -359,7 +357,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                           LabeledInfoWidget(
                             icon: Symbols.tag_rounded,
                             label: 'Number of courts',
-                            text: nullProvider || !validStatus || courts.isEmpty
+                            text: !validStatus || courts.isEmpty
                                 ? '--'
                                 : courts.length.toString().padLeft(2, '0'),
                           ),
@@ -369,7 +367,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                           LabeledInfoWidget(
                             icon: Symbols.groups_rounded,
                             label: 'Capacity',
-                            text: nullProvider || !validStatus || courts.isEmpty
+                            text: !validStatus || courts.isEmpty
                                 ? '--'
                                 : '${minCapacity.toString().padLeft(2, '0')} - ${maxCapacity.toString().padLeft(2, '0')}',
                           ),

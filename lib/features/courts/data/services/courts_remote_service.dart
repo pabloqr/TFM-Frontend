@@ -13,7 +13,7 @@ abstract class CourtsRemoteService {
 
   Future<CourtModel> getCourt(int complexId, int courtId);
 
-  Future<List<DeviceModel>> getDevices(int complexId, int courtId);
+  Future<List<DeviceModel>> getCourtDevices(int complexId, int courtId);
 }
 
 class CourtsRemoteServiceImpl implements CourtsRemoteService {
@@ -111,7 +111,7 @@ class CourtsRemoteServiceImpl implements CourtsRemoteService {
   }
 
   @override
-  Future<List<DeviceModel>> getDevices(int complexId, int courtId) async {
+  Future<List<DeviceModel>> getCourtDevices(int complexId, int courtId) async {
     Uri uri = Uri.parse(
       '${AppConstants.baseUrl}${AppConstants.courtDevicesEndpoint(complexId.toString(), courtId.toString())}',
     );
