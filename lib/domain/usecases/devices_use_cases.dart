@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/data/repositories/devices_repository.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
 
 class DevicesUseCases {
@@ -43,5 +44,9 @@ class DevicesUseCases {
     TelemetryModel telemetry,
   ) async {
     return await _repository.setDeviceTelemetry(complexId, deviceId, telemetry);
+  }
+
+  Future<Either<Failure, List<CourtModel>>> getDeviceCourts(int complexId, int deviceId) async {
+    return await _repository.getDeviceCourts(complexId, deviceId);
   }
 }

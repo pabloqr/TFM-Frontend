@@ -98,7 +98,7 @@ class AppConstants {
   static String devicesStatusEndpoint(String complexId, String deviceId) =>
       '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}/status';
 
-  static String devicesCourtsEndpoint(String complexId, String deviceId) =>
+  static String deviceCourtsEndpoint(String complexId, String deviceId) =>
       '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}/courts';
 
   //------------------------------------------------------------------------------------------------------------------//

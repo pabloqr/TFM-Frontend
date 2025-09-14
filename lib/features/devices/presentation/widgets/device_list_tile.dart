@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
+import 'package:frontend/data/providers/device_courts_provider.dart';
 import 'package:frontend/data/providers/telemetry_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
@@ -29,6 +30,7 @@ class DeviceListTile extends StatefulWidget {
 }
 
 class _DeviceListTileState extends State<DeviceListTile> {
+  DeviceCourtsProvider? _deviceCourtsProvider;
   TelemetryProvider? _telemetryProvider;
   VoidCallback? _providerListener;
 
@@ -39,9 +41,14 @@ class _DeviceListTileState extends State<DeviceListTile> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
+      _deviceCourtsProvider = context.read<DeviceCourtsProvider?>();
       _telemetryProvider = context.read<TelemetryProvider?>();
 
-      if (_telemetryProvider != null) {
+      if (_deviceCourtsProvider != null && _telemetryProvider != null) {
+        if (_deviceCourtsProvider!.getProviderState(widget.device.id) == ProviderState.initial) {
+          _deviceCourtsProvider!.getDeviceCourts(widget.device.complexId, widget.device.id);
+        }
+
         if (_telemetryProvider!.getProviderState(widget.device.id) == ProviderState.initial) {
           _telemetryProvider!.getDeviceTelemetry(widget.device.complexId, widget.device.id, query: {'last': true});
         }
@@ -105,18 +112,7 @@ class _DeviceListTileState extends State<DeviceListTile> {
     );
   }
 
-  Widget _buildStatusChip() {
-    switch (widget.device.status) {
-      case DeviceStatus.normal:
-        return SmallChip.success(label: 'Normal');
-      case DeviceStatus.off:
-        return SmallChip.neutralSurface(label: 'Off');
-      case DeviceStatus.battery:
-        return SmallChip.alert(label: 'Low Battery');
-      case DeviceStatus.error:
-        return SmallChip.error(label: 'Error');
-    }
-  }
+  Widget _buildStatusChip() => widget.device.status.smallStatusChip;
 
   Widget _buildSubtitleContent(BuildContext context) {
     return widget.isTelemetryView ? _buildSubtitleTelemetryContent(context) : _buildSubtitleListContent(context);
@@ -132,7 +128,22 @@ class _DeviceListTileState extends State<DeviceListTile> {
         return InfoSectionWidget(
           leftChildren: [
             _buildLastTelemetryInfoWidget(context, validStatus, telemetry),
-            LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Court', text: 'CourtName'),
+            Consumer<DeviceCourtsProvider?>(
+              builder: (context, nestedConsumerProvider, _) {
+                final currentDeviceCourtsProvider = nestedConsumerProvider ?? _deviceCourtsProvider;
+                final validStatus =
+                    currentDeviceCourtsProvider?.getProviderState(widget.device.id) == ProviderState.loaded;
+                final courts = currentDeviceCourtsProvider?.getProviderCourts(widget.device.id);
+
+                return LabeledInfoWidget(
+                  icon: Symbols.location_on_rounded,
+                  label: 'Court',
+                  text: !validStatus || courts == null || courts.isEmpty
+                      ? 'Not assigned to any courts'
+                      : courts.map((court) => '${court.sport.name.toCapitalized()} ${court.name}').join(', '),
+                );
+              },
+            ),
           ],
           rightChildren: [
             LabeledInfoWidget(

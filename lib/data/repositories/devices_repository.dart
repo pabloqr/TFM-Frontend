@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
 import 'package:frontend/features/devices/data/services/devices_remote_service.dart';
 
@@ -27,6 +28,8 @@ abstract class DevicesRepository {
     int deviceId,
     TelemetryModel telemetry,
   );
+
+  Future<Either<Failure, List<CourtModel>>> getDeviceCourts(int complexId, int deviceId);
 }
 
 class DevicesRepositoryImpl implements DevicesRepository {
@@ -100,5 +103,19 @@ class DevicesRepositoryImpl implements DevicesRepository {
   ) async {
     // TODO: implement setDeviceTelemetry
     throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<Failure, List<CourtModel>>> getDeviceCourts(int complexId, int deviceId) async {
+    try {
+      final response = await _remoteService.getDeviceCourts(complexId, deviceId);
+      return Right(response);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(message: 'Unexpected error in repository getting device courts: ${e.toString()}'));
+    }
   }
 }

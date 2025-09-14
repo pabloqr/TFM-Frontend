@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/data/providers/complex_provider.dart';
 import 'package:frontend/data/providers/court_provider.dart';
 import 'package:frontend/data/providers/courts_list_provider.dart';
+import 'package:frontend/data/providers/device_courts_provider.dart';
 import 'package:frontend/data/providers/devices_list_provider.dart';
 import 'package:frontend/data/providers/reservation_provider.dart';
 import 'package:frontend/data/providers/reservations_list_provider.dart';
@@ -245,6 +246,18 @@ List<SingleChildWidget> get appProviders {
         }
 
         return DevicesListProvider(devicesUseCases: useCases1, courtsUseCases: useCases2);
+      },
+    ),
+
+    ChangeNotifierProxyProvider<DevicesUseCases?, DeviceCourtsProvider?>(
+      create: (context) => null,
+      update: (context, useCases, previousProvider) {
+        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
+        if (useCases == null || previousProvider != null) {
+          return previousProvider;
+        }
+
+        return DeviceCourtsProvider(devicesUseCases: useCases);
       },
     ),
 

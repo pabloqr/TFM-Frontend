@@ -6,6 +6,7 @@ import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/data/services/authenticated_http_client.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
 
 abstract class DevicesRemoteService {
@@ -22,6 +23,8 @@ abstract class DevicesRemoteService {
   Future<List<TelemetryModel>> getDeviceTelemetry(int complexId, int deviceId, {Map<String, dynamic>? query});
 
   Future<List<TelemetryModel>> setDeviceTelemetry(int complexId, int deviceId, TelemetryModel telemetry);
+
+  Future<List<CourtModel>> getDeviceCourts(int complexId, int deviceId);
 }
 
 class DevicesRemoteServiceImpl implements DevicesRemoteService {
@@ -223,5 +226,42 @@ class DevicesRemoteServiceImpl implements DevicesRemoteService {
   Future<List<TelemetryModel>> setDeviceTelemetry(int complexId, int deviceId, TelemetryModel telemetry) async {
     // TODO: implement setDeviceTelemetry
     throw UnimplementedError();
+  }
+
+  @override
+  Future<List<CourtModel>> getDeviceCourts(int complexId, int deviceId) async {
+    Uri uri = Uri.parse(
+      '${AppConstants.baseUrl}${AppConstants.deviceCourtsEndpoint(complexId.toString(), deviceId.toString())}',
+    );
+
+    try {
+      final response = await _client.get(uri);
+
+      final Map<String, dynamic> data;
+      try {
+        data = json.decode(utf8.decode(response.bodyBytes));
+      } catch (e) {
+        throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+      }
+
+      if (response.statusCode == 200) {
+        if (data['courts'] is List) {
+          final List<dynamic> courtsData = data['courts'] as List<dynamic>;
+          return courtsData.map<CourtModel>((e) {
+            return CourtModel.fromJson(e as Map<String, dynamic>);
+          }).toList();
+        } else {
+          throw UnexpectedException(message: 'Expected a list of courts, but got: ${data['devices'].runtimeType}');
+        }
+      } else {
+        throw ServerException(
+          message: data['message'] ?? 'Error getting device courts: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error getting device courts: ${e.toString()}');
+    }
   }
 }

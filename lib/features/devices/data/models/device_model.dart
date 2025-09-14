@@ -1,8 +1,26 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
+
 enum DeviceType { presence, rain }
 
 enum DeviceStatus { normal, off, battery, error }
+
+extension DeviceStatusExtension on DeviceStatus {
+  Widget get smallStatusChip {
+    switch (this) {
+      case DeviceStatus.normal:
+        return SmallChip.success(label: 'Normal');
+      case DeviceStatus.off:
+        return SmallChip.neutralSurface(label: 'Off');
+      case DeviceStatus.battery:
+        return SmallChip.alert(label: 'Low Battery');
+      case DeviceStatus.error:
+        return SmallChip.error(label: 'Error');
+    }
+  }
+}
 
 class DeviceModel {
   final int id;
