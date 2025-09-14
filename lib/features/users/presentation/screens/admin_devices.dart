@@ -35,9 +35,7 @@ class _AdminDevicesState extends State<AdminDevices> {
       _devicesListProvider = context.read<DevicesListProvider?>();
 
       if (_devicesListProvider != null) {
-        if (_devicesListProvider!.state == ProviderState.initial) {
-          _devicesListProvider!.getDevices(widget.complexId);
-        }
+        _devicesListProvider!.getDevices(widget.complexId);
 
         _providerListener = () {
           if (mounted &&

@@ -1,34 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/small_chip.dart';
-
-enum ReservationAvailabilityStatus { empty, occupied, cancelled }
-
-extension ReservationAvailabilityStatusExtension on ReservationAvailabilityStatus {
-  Widget get smallStatusChip {
-    switch (this) {
-      case ReservationAvailabilityStatus.empty:
-        return SmallChip.neutralSurface(label: 'Scheduled');
-      case ReservationAvailabilityStatus.occupied:
-        return SmallChip.success(label: 'Occupied');
-      case ReservationAvailabilityStatus.cancelled:
-        return SmallChip.error(label: 'Cancelled');
-    }
-  }
-
-  Widget get mediumStatusChip {
-    switch (this) {
-      case ReservationAvailabilityStatus.empty:
-        return MediumChip.neutralSurface(label: 'Scheduled');
-      case ReservationAvailabilityStatus.occupied:
-        return MediumChip.success(label: 'Occupied');
-      case ReservationAvailabilityStatus.cancelled:
-        return MediumChip.error(label: 'Cancelled');
-    }
-  }
-}
 
 enum ReservationStatus { scheduled, weather, completed, cancelled }
 
@@ -69,7 +44,7 @@ class ReservationModel {
   final int courtId;
   final DateTime dateIni;
   final DateTime dateEnd;
-  final ReservationAvailabilityStatus status;
+  final AvailabilityStatus status;
   final ReservationStatus reservationStatus;
   final TimeFilter timeFilter;
   final DateTime createdAt;
@@ -97,7 +72,7 @@ class ReservationModel {
       courtId: json['courtId'] as int,
       dateIni: DateTime.parse(json['dateIni'] as String),
       dateEnd: DateTime.parse(json['dateEnd'] as String),
-      status: ReservationAvailabilityStatus.values.firstWhere((status) {
+      status: AvailabilityStatus.values.firstWhere((status) {
         final String name = status.name.toLowerCase();
         final String jsonName = (json['status'] as String).toLowerCase();
         return name == jsonName;

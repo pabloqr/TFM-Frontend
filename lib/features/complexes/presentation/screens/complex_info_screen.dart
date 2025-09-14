@@ -49,13 +49,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       _courtsListProvider = context.read<CourtsListProvider?>();
 
       if (_complexProvider != null && _courtsListProvider != null) {
-        if (_complexProvider!.state == ProviderState.initial) {
-          _complexProvider!.getComplex(widget.complexId);
-        }
-
-        if (_courtsListProvider!.state == ProviderState.initial) {
-          _courtsListProvider!.getCourts(widget.complexId);
-        }
+        _complexProvider!.getComplex(widget.complexId);
+        _courtsListProvider!.getCourts(widget.complexId);
 
         _providerListener = () {
           if (mounted &&

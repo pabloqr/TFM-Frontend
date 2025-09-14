@@ -8,7 +8,9 @@ import 'package:frontend/features/reservations/presentation/widgets/reservation_
 import 'package:provider/provider.dart';
 
 class AdminReservationsScreen extends StatefulWidget {
-  const AdminReservationsScreen({super.key});
+  final int complexId;
+
+  const AdminReservationsScreen({super.key, required this.complexId});
 
   @override
   State<AdminReservationsScreen> createState() => _AdminReservationsScreenState();
@@ -28,9 +30,7 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
       _reservationsListProvider = context.read<ReservationsListProvider?>();
 
       if (_reservationsListProvider != null) {
-        if (_reservationsListProvider!.state == ProviderState.initial) {
-          _reservationsListProvider!.getComplexReservations(1);
-        }
+        _reservationsListProvider!.getComplexReservations(widget.complexId);
 
         _providerListener = () {
           if (mounted &&

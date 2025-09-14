@@ -7,6 +7,7 @@ import 'package:frontend/data/providers/court_provider.dart';
 import 'package:frontend/data/providers/reservation_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_dialog.dart';
 import 'package:frontend/features/common/presentation/widgets/expandable_fab.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
@@ -51,17 +52,9 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
       _reservationProvider = context.read<ReservationProvider?>();
 
       if (_complexProvider != null && _courtProvider != null && _reservationProvider != null) {
-        if (_complexProvider!.state == ProviderState.initial) {
-          _complexProvider!.getComplex(widget.complexId);
-        }
-
-        if (_courtProvider!.state == ProviderState.initial) {
-          _courtProvider!.getCourt(widget.complexId, widget.courtId);
-        }
-
-        if (_reservationProvider!.state == ProviderState.initial) {
-          _reservationProvider!.getReservation(widget.reservationId);
-        }
+        _complexProvider!.getComplex(widget.complexId);
+        _courtProvider!.getCourt(widget.complexId, widget.courtId);
+        _reservationProvider!.getReservation(widget.reservationId);
 
         _providerListener = () {
           if (mounted &&

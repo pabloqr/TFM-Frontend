@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/core/error/failure.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 import 'package:frontend/features/reservations/data/services/reservations_remote_service.dart';
 
@@ -21,7 +22,7 @@ abstract class ReservationsRepository {
 
   Future<Either<Failure, ReservationModel>> setReservationStatus(
     int reservationId,
-    ReservationAvailabilityStatus status,
+    AvailabilityStatus status,
   );
 }
 
@@ -138,7 +139,7 @@ class ReservationsRepositoryImpl implements ReservationsRepository {
   @override
   Future<Either<Failure, ReservationModel>> setReservationStatus(
     int reservationId,
-    ReservationAvailabilityStatus status,
+    AvailabilityStatus status,
   ) async {
     try {
       final response = await _remoteService.setReservationStatus(reservationId, status);

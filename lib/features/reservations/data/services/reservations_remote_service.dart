@@ -4,6 +4,7 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/data/services/authenticated_http_client.dart';
 import 'package:frontend/data/services/utilities.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 
 abstract class ReservationsRemoteService {
@@ -21,7 +22,7 @@ abstract class ReservationsRemoteService {
 
   Future<void> deleteReservation(int reservationId);
 
-  Future<ReservationModel> setReservationStatus(int reservationId, ReservationAvailabilityStatus status);
+  Future<ReservationModel> setReservationStatus(int reservationId, AvailabilityStatus status);
 }
 
 class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
@@ -31,7 +32,7 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
     'courtId': int,
     'dateIni': DateTime,
     'dateEnd': DateTime,
-    'status': ReservationAvailabilityStatus,
+    'status': AvailabilityStatus,
     'reservationStatus': ReservationStatus,
     'timeFilter': TimeFilter,
     'createdAt': DateTime,
@@ -149,7 +150,7 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
   }
 
   @override
-  Future<ReservationModel> setReservationStatus(int reservationId, ReservationAvailabilityStatus status) async {
+  Future<ReservationModel> setReservationStatus(int reservationId, AvailabilityStatus status) async {
     // TODO: implement setReservationStatus
     throw UnimplementedError();
   }

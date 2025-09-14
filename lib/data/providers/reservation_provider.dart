@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/domain/usecases/reservations_use_cases.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 
 class ReservationProvider extends ChangeNotifier {
@@ -19,7 +20,7 @@ class ReservationProvider extends ChangeNotifier {
     courtId: -1,
     dateIni: DateTime.now(),
     dateEnd: DateTime.now(),
-    status: ReservationAvailabilityStatus.empty,
+    status: AvailabilityStatus.empty,
     reservationStatus: ReservationStatus.scheduled,
     timeFilter: TimeFilter.upcoming,
     createdAt: DateTime.now(),

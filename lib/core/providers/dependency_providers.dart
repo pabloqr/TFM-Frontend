@@ -261,18 +261,6 @@ List<SingleChildWidget> get appProviders {
       },
     ),
 
-    ChangeNotifierProxyProvider<DevicesUseCases?, TelemetryProvider?>(
-      create: (context) => null,
-      update: (context, useCases, previousProvider) {
-        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
-        if (useCases == null || previousProvider != null) {
-          return previousProvider;
-        }
-
-        return TelemetryProvider(devicesUseCases: useCases);
-      },
-    ),
-
     ChangeNotifierProxyProvider<ReservationsUseCases?, ReservationsListProvider?>(
       create: (context) => null,
       update: (context, useCases, previousProvider) {
@@ -294,6 +282,18 @@ List<SingleChildWidget> get appProviders {
         }
 
         return ReservationProvider(reservationsUseCases: useCases);
+      },
+    ),
+
+    ChangeNotifierProxyProvider<DevicesUseCases?, TelemetryProvider?>(
+      create: (context) => null,
+      update: (context, useCases, previousProvider) {
+        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
+        if (useCases == null || previousProvider != null) {
+          return previousProvider;
+        }
+
+        return TelemetryProvider(devicesUseCases: useCases);
       },
     ),
 

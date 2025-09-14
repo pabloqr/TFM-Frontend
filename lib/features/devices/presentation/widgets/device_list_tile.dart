@@ -45,24 +45,19 @@ class _DeviceListTileState extends State<DeviceListTile> {
       _telemetryProvider = context.read<TelemetryProvider?>();
 
       if (_deviceCourtsProvider != null && _telemetryProvider != null) {
-        if (_deviceCourtsProvider!.getProviderState(widget.device.id) == ProviderState.initial) {
-          _deviceCourtsProvider!.getDeviceCourts(widget.device.complexId, widget.device.id);
-        }
-
-        if (_telemetryProvider!.getProviderState(widget.device.id) == ProviderState.initial) {
-          _telemetryProvider!.getDeviceTelemetry(widget.device.complexId, widget.device.id, query: {'last': true});
-        }
+        _deviceCourtsProvider!.getDeviceCourts(widget.device.complexId, widget.device.id);
+        _telemetryProvider!.getDeviceTelemetry(widget.device.complexId, widget.device.id, query: {'last': true});
       }
 
       if (_telemetryProvider != null) {
         _providerListener = () {
           if (mounted &&
               _telemetryProvider != null &&
-              _telemetryProvider!.getProviderState(widget.device.id) == ProviderState.error &&
-              _telemetryProvider!.getProviderFailure(widget.device.id) != null) {
+              _telemetryProvider!.getDataState(widget.device.id) == ProviderState.error &&
+              _telemetryProvider!.getDataFailure(widget.device.id) != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(_telemetryProvider!.getProviderFailure(widget.device.id)!.message),
+                content: Text(_telemetryProvider!.getDataFailure(widget.device.id)!.message),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -122,8 +117,8 @@ class _DeviceListTileState extends State<DeviceListTile> {
     return Consumer<TelemetryProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _telemetryProvider;
-        final validStatus = currentProvider?.getProviderState(widget.device.id) == ProviderState.loaded;
-        final telemetry = currentProvider?.getProviderTelemetry(widget.device.id);
+        final validStatus = currentProvider?.getDataState(widget.device.id) == ProviderState.loaded;
+        final telemetry = currentProvider?.getDataTelemetry(widget.device.id);
 
         return InfoSectionWidget(
           leftChildren: [
@@ -170,8 +165,8 @@ class _DeviceListTileState extends State<DeviceListTile> {
     return Consumer<TelemetryProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _telemetryProvider;
-        final validStatus = currentProvider?.getProviderState(widget.device.id) == ProviderState.loaded;
-        final telemetry = currentProvider?.getProviderTelemetry(widget.device.id);
+        final validStatus = currentProvider?.getDataState(widget.device.id) == ProviderState.loaded;
+        final telemetry = currentProvider?.getDataTelemetry(widget.device.id);
 
         return InfoSectionWidget(
           leftChildren: [_buildLastTelemetryInfoWidget(context, validStatus, telemetry)],

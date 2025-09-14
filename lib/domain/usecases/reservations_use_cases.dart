@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/data/repositories/reservations_repository.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 
 class ReservationsUseCases {
@@ -41,7 +42,7 @@ class ReservationsUseCases {
 
   Future<Either<Failure, ReservationModel>> setReservationStatus(
     int reservationId,
-    ReservationAvailabilityStatus status,
+    AvailabilityStatus status,
   ) async {
     return await _repository.setReservationStatus(reservationId, status);
   }

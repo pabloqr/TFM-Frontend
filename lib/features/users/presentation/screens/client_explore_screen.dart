@@ -28,9 +28,7 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
       _complexesProvider = context.read<ComplexesListProvider?>();
 
       if (_complexesProvider != null) {
-        if (_complexesProvider!.state == ProviderState.initial) {
-          _complexesProvider!.getComplexes();
-        }
+        _complexesProvider!.getComplexes();
 
         _providerListener = () {
           if (mounted &&

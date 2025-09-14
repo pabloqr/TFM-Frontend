@@ -25,54 +25,88 @@ class TelemetryProvider extends ChangeNotifier {
 
   TelemetryProvider({required DevicesUseCases devicesUseCases}) : _devicesUseCases = devicesUseCases;
 
-  final Map<int, DeviceTelemetryData> _deviceData = {};
+  ProviderState _state = ProviderState.loaded;
+  Failure? _failure;
+  List<int> _ids = [];
+  final Map<int, DeviceTelemetryData> _data = {};
 
-  DeviceTelemetryData? getDeviceData(int deviceId) {
-    return _deviceData[deviceId];
+  ProviderState get state => _state;
+
+  Failure? get failure => _failure;
+
+  List<int> get ids => _ids;
+
+  DeviceTelemetryData? getDeviceData(int id) {
+    return _data[id];
   }
 
-  ProviderState getProviderState(int deviceId) {
-    return _deviceData[deviceId]?.state ?? ProviderState.initial;
+  ProviderState getDataState(int id) {
+    return _data[id]?.state ?? ProviderState.initial;
   }
 
-  Failure? getProviderFailure(int deviceId) {
-    return _deviceData[deviceId]?.failure;
+  Failure? getDataFailure(int id) {
+    return _data[id]?.failure;
   }
 
-  List<TelemetryModel> getProviderTelemetry(int deviceId) {
-    return _deviceData[deviceId]?.telemetry ?? [];
+  List<TelemetryModel> getDataTelemetry(int id) {
+    return _data[id]?.telemetry ?? [];
   }
 
-  void _setProviderState(int deviceId, DeviceTelemetryData newData) {
-    _deviceData[deviceId] = newData;
+  set state(ProviderState value) {
+    _state = value;
     notifyListeners();
   }
 
-  void _ensureDeviceExists(int deviceId) {
-    if (!_deviceData.containsKey(deviceId)) {
-      _deviceData[deviceId] = DeviceTelemetryData(state: ProviderState.initial, telemetry: []);
+  void _setDataState(int id, DeviceTelemetryData newData) {
+    _data[id] = newData;
+    notifyListeners();
+  }
+
+  void _ensureTelemetryExists(int id) {
+    if (!_data.containsKey(id)) {
+      _data[id] = DeviceTelemetryData(state: ProviderState.initial, telemetry: []);
     }
   }
 
-  Future<void> getDeviceTelemetry(int complexId, int deviceId, {Map<String, dynamic>? query}) async {
-    _ensureDeviceExists(deviceId);
+  Future<void> getDevicesTelemetry(int complexId, {Map<String, dynamic>? query}) async {
+    _ids = [];
+    state = ProviderState.loading;
 
-    final currentState = _deviceData[deviceId]!;
+    final devicesResult = await _devicesUseCases.getDevices(complexId);
+    devicesResult.fold(
+      (failure) {
+        state = ProviderState.error;
+        _failure = failure;
+      },
+      (ids) async {
+        for (var id in ids.map((e) => e.id)) {
+          getDeviceTelemetry(complexId, id);
+        }
+
+        state = ProviderState.loaded;
+        _failure = null;
+      },
+    );
+  }
+
+  Future<void> getDeviceTelemetry(int complexId, int deviceId, {Map<String, dynamic>? query}) async {
+    _ensureTelemetryExists(deviceId);
+
+    final currentState = _data[deviceId]!;
 
     // Actualizar a estado de carga, manteniendo los datos existentes
-    _setProviderState(deviceId, currentState.copyWith(state: ProviderState.loading));
+    _setDataState(deviceId, currentState.copyWith(state: ProviderState.loading));
 
     final result = await _devicesUseCases.getDeviceTelemetry(complexId, deviceId, query: query);
 
     result.fold(
       (failure) {
-        _setProviderState(
-          deviceId,
-          currentState.copyWith(state: ProviderState.error, failure: failure),
-        );
+        _setDataState(deviceId, currentState.copyWith(state: ProviderState.error, failure: failure));
       },
       (telemetryData) {
-        _setProviderState(
+        _ids.add(deviceId);
+
+        _setDataState(
           deviceId,
           DeviceTelemetryData(
             state: telemetryData.isNotEmpty ? ProviderState.loaded : ProviderState.empty,

@@ -55,17 +55,9 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       _devicesListProvider = context.read<DevicesListProvider?>();
 
       if (_complexProvider != null && _courtProvider != null && _devicesListProvider != null) {
-        if (_complexProvider!.state == ProviderState.initial) {
-          _complexProvider!.getComplex(widget.complexId);
-        }
-
-        if (_courtProvider!.state == ProviderState.initial) {
-          _courtProvider!.getCourt(widget.complexId, widget.courtId);
-        }
-
-        if (_devicesListProvider!.state == ProviderState.initial) {
-          _devicesListProvider!.getCourtDevices(widget.complexId, widget.courtId);
-        }
+        _complexProvider!.getComplex(widget.complexId);
+        _courtProvider!.getCourt(widget.complexId, widget.courtId);
+        _devicesListProvider!.getCourtDevices(widget.complexId, widget.courtId);
 
         _providerListener = () {
           if (mounted &&
@@ -355,8 +347,6 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return Consumer<ComplexProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _complexProvider;
-
-        final nullProvider = currentProvider == null;
         final validStatus = currentProvider?.state == ProviderState.loaded;
 
         ComplexModel? complex = currentProvider?.complex;
@@ -366,12 +356,12 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
           spacing: 8.0,
           children: [
             Header.subheader(
-              subheaderText: nullProvider || !validStatus || complex == null ? 'Complex' : complex.complexName,
+              subheaderText: !validStatus || complex == null ? 'Complex' : complex.complexName,
               showButton: false,
             ),
             InfoSectionWidget(
               leftChildren: [
-                if (nullProvider || !validStatus || complex == null)
+                if (!validStatus || complex == null)
                   LabeledInfoWidget(
                     icon: Symbols.location_on_rounded,
                     label: 'Address',
@@ -400,9 +390,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                 LabeledInfoWidget(
                   icon: Symbols.schedule_rounded,
                   label: 'Schedule',
-                  text: nullProvider || !validStatus || complex == null
-                      ? '00:00 - 00:00'
-                      : '${complex.timeIni} - ${complex.timeEnd}',
+                  text: !validStatus || complex == null ? '00:00 - 00:00' : '${complex.timeIni} - ${complex.timeEnd}',
                 ),
               ],
             ),
