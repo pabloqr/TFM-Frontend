@@ -38,7 +38,7 @@ class ReservationCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                MediumChip.alert('Scheduled'),
+                MediumChip.alert(label: 'Scheduled'),
                 // SmallChip.alert('Scheduled'),
                 // ReservationStatusChip(icon: Symbols.check_circle_rounded, label: 'Completed'),
               ],
@@ -62,7 +62,9 @@ class ReservationCard extends StatelessWidget {
                   child: const Text('More info'),
                 ),
                 FilledButton(
-                  onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientModifyRoute),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': false}),
                   child: const Text('Modify'),
                 ),
               ],

@@ -1,6 +1,23 @@
+import 'package:flutter/material.dart';
+import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 
 enum CourtStatus { open, maintenance, blocked, weather }
+
+extension CourtStatusExtension on CourtStatus {
+  Widget get mediumStatusChip {
+    switch (this) {
+      case CourtStatus.open:
+        return MediumChip.success(label: 'Open');
+      case CourtStatus.weather:
+        return MediumChip.alert(label: 'Weather');
+      case CourtStatus.maintenance:
+        return MediumChip.error(label: 'Maintenance');
+      case CourtStatus.blocked:
+        return MediumChip.error(label: 'Closed');
+    }
+  }
+}
 
 class CourtModel {
   final int id;

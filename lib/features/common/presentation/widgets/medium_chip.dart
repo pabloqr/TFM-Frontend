@@ -7,15 +7,17 @@ class MediumChip extends StatelessWidget {
 
   const MediumChip._({required this.status, required this.label});
 
-  factory MediumChip.neutralSurface(String label) => MediumChip._(status: WidgetStatus.neutralSurface, label: label);
+  factory MediumChip.neutralSurface({required String label}) =>
+      MediumChip._(status: WidgetStatus.neutralSurface, label: label);
 
-  factory MediumChip.neutralCard(String label) => MediumChip._(status: WidgetStatus.neutralCard, label: label);
+  factory MediumChip.neutralCard({required String label}) =>
+      MediumChip._(status: WidgetStatus.neutralCard, label: label);
 
-  factory MediumChip.alert(String label) => MediumChip._(status: WidgetStatus.alert, label: label);
+  factory MediumChip.alert({required String label}) => MediumChip._(status: WidgetStatus.alert, label: label);
 
-  factory MediumChip.success(String label) => MediumChip._(status: WidgetStatus.success, label: label);
+  factory MediumChip.success({required String label}) => MediumChip._(status: WidgetStatus.success, label: label);
 
-  factory MediumChip.error(String label) => MediumChip._(status: WidgetStatus.error, label: label);
+  factory MediumChip.error({required String label}) => MediumChip._(status: WidgetStatus.error, label: label);
 
   @override
   Widget build(BuildContext context) {

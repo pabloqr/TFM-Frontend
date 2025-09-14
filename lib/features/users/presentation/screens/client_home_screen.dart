@@ -202,7 +202,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   Widget? _buildFloatingActionButton() {
     return _shouldShowFloatingActionButton()
         ? FloatingActionButton.extended(
-            onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientNewRoute),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
             label: const Text('Book'),
             icon: const Icon(
               Symbols.calendar_add_on_rounded,

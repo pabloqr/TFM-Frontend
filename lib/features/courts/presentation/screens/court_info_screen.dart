@@ -12,7 +12,6 @@ import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/common/presentation/widgets/image_carousel.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
-import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
 import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
 import 'package:frontend/features/complexes/data/models/complex_model.dart';
@@ -56,7 +55,6 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       _devicesListProvider = context.read<DevicesListProvider?>();
 
       if (_complexProvider != null && _courtProvider != null && _devicesListProvider != null) {
-        // TODO: Cange complex ID to real ID
         if (_complexProvider!.state == ProviderState.initial) {
           _complexProvider!.getComplex(widget.complexId);
         }
@@ -151,7 +149,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingState(context, false);
+          return _buildLoadingState(context);
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -175,7 +173,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _courtProvider;
 
-        if (currentProvider == null) return _buildLoadingState(context, isAdmin);
+        if (currentProvider == null) return _buildLoadingState(context);
 
         Widget emptyWidget = const Center(child: Text('No court found'));
         Widget errorWidget = const Center(child: Text('Error loading court'));
@@ -183,7 +181,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         switch (currentProvider.state) {
           case ProviderState.initial:
           case ProviderState.loading:
-            if (currentProvider.court.id == -1) return _buildLoadingState(context, isAdmin);
+            if (currentProvider.court.id == -1) return _buildLoadingState(context);
             return _buildLoadedState(context, currentProvider, isAdmin);
           case ProviderState.empty:
             return _buildProvisionalScaffold(context, emptyWidget);
@@ -209,14 +207,14 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     );
   }
 
-  Widget _buildLoadingState(BuildContext context, bool isAdmin) {
+  Widget _buildLoadingState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     Widget loadingWidget = Container(
       color: colorScheme.surface,
       child: Center(child: CircularProgressIndicator()),
     );
 
-    return isAdmin ? SafeArea(top: false, child: loadingWidget) : _buildProvisionalScaffold(context, loadingWidget);
+    return _buildProvisionalScaffold(context, loadingWidget);
   }
 
   Widget _buildLoadedState(BuildContext context, CourtProvider courtProvider, bool isAdmin) {
@@ -236,7 +234,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     }
 
     return Scaffold(
-      appBar: _buildAppBar(courtProvider),
+      appBar: _buildAppBar(courtProvider.court),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -244,7 +242,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ImageCarousel(isAdmin: false),
-              _buildCourtInfoSubsection(courtProvider, false),
+              _buildCourtInfoSubsection(courtProvider.court, false),
               const SizedBox(height: 16.0),
               _buildComplexInfoSubsection(),
             ],
@@ -252,7 +250,8 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientNewRoute),
+        onPressed: () =>
+            Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
         label: const Text('Book'),
         icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
@@ -263,7 +262,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     final court = courtProvider.court;
 
     return Scaffold(
-      appBar: _buildAppBar(courtProvider),
+      appBar: _buildAppBar(court),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -282,7 +281,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     spacing: 16.0,
-                    children: [_buildCourtInfoSubsection(courtProvider, true), _buildComplexInfoSubsection()],
+                    children: [_buildCourtInfoSubsection(court, true), _buildComplexInfoSubsection()],
                   ),
                 ),
               ]),
@@ -302,41 +301,23 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(CourtProvider courtProvider) {
+  PreferredSizeWidget _buildAppBar(CourtModel court) {
     return AppBar(
       leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
       title: const Text('Court details'),
-      actions: _buildAppBarActions(courtProvider),
+      actions: _buildAppBarActions(court),
     );
   }
 
-  List<Widget> _buildAppBarActions(CourtProvider courtProvider) {
-    return [_buildStatusChip(courtProvider)];
+  List<Widget> _buildAppBarActions(CourtModel court) {
+    return [_buildStatusChip(court)];
   }
 
-  Widget _buildStatusChip(CourtProvider courtProvider) {
-    Widget chip;
-    switch (courtProvider.court.status) {
-      case CourtStatus.open:
-        chip = MediumChip.success('Open');
-        break;
-      case CourtStatus.weather:
-        chip = MediumChip.alert('Weather');
-        break;
-      case CourtStatus.maintenance:
-        chip = MediumChip.error('Maintenance');
-        break;
-      case CourtStatus.blocked:
-        chip = MediumChip.error('Closed');
-        break;
-    }
-
-    return Padding(padding: const EdgeInsets.only(right: 16.0), child: chip);
+  Widget _buildStatusChip(CourtModel court) {
+    return Padding(padding: const EdgeInsets.only(right: 16.0), child: court.status.mediumStatusChip);
   }
 
-  Widget _buildCourtInfoSubsection(CourtProvider courtProvider, bool isAdmin) {
-    final court = courtProvider.court;
-
+  Widget _buildCourtInfoSubsection(CourtModel court, bool isAdmin) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

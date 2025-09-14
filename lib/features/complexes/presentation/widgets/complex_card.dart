@@ -215,7 +215,8 @@ class ComplexCard extends StatelessWidget {
                 child: const Text('More info'),
               ),
               FilledButton(
-                onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationClientNewRoute),
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
                 child: const Text('Book court'),
               ),
             ],

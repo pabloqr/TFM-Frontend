@@ -145,10 +145,8 @@ class AppConstants {
   static const String adminSettingsRoute = '/admin/settings';
   static const String complexInfoRoute = '$complexesEndpoint/info';
   static const String courtInfoRoute = '$courtsEndpoint/info';
-  static const String reservationClientNewRoute = '/client$reservationsEndpoint/new';
-  static const String reservationAdminNewRoute = '/admin$reservationsEndpoint/new';
-  static const String reservationClientModifyRoute = '/client$reservationsEndpoint/modify';
-  static const String reservationAdminModifyRoute = '/admin$reservationsEndpoint/modify';
+  static const String reservationNewRoute = '$reservationsEndpoint/new';
+  static const String reservationModifyRoute = '$reservationsEndpoint/modify';
   static const String reservationInfoRoute = '$reservationsEndpoint/info';
 
   static final Map<String, Widget Function(BuildContext)> routes = {
@@ -173,10 +171,33 @@ class AppConstants {
 
       return const CourtInfoScreen(complexId: 0, courtId: 0);
     },
-    reservationClientNewRoute: (context) => ReservationScreen.create(isAdmin: false),
-    reservationAdminNewRoute: (context) => ReservationScreen.create(isAdmin: true),
-    reservationClientModifyRoute: (context) => ReservationScreen.modify(isAdmin: false),
-    reservationAdminModifyRoute: (context) => ReservationScreen.modify(isAdmin: true),
-    reservationInfoRoute: (context) => const ReservationInfoScreen(),
+    reservationNewRoute: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments is Map<String, dynamic>) {
+        return ReservationScreen.create(isAdmin: arguments['isAdmin'] as bool);
+      }
+
+      return ReservationScreen.create(isAdmin: false);
+    },
+    reservationModifyRoute: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments is Map<String, dynamic>) {
+        return ReservationScreen.modify(isAdmin: arguments['isAdmin'] as bool);
+      }
+
+      return ReservationScreen.modify(isAdmin: false);
+    },
+    reservationInfoRoute: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments is Map<String, dynamic>) {
+        return ReservationInfoScreen(
+          complexId: arguments['complexId'] as int,
+          courtId: arguments['courtId'] as int,
+          reservationId: arguments['reservationId'] as int,
+        );
+      }
+
+      return const ReservationInfoScreen(complexId: 0, courtId: 0, reservationId: 0);
+    },
   };
 }

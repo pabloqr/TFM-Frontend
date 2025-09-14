@@ -3,6 +3,8 @@ import 'package:frontend/data/providers/complex_provider.dart';
 import 'package:frontend/data/providers/court_provider.dart';
 import 'package:frontend/data/providers/courts_list_provider.dart';
 import 'package:frontend/data/providers/devices_list_provider.dart';
+import 'package:frontend/data/providers/reservation_provider.dart';
+import 'package:frontend/data/providers/reservations_list_provider.dart';
 import 'package:frontend/data/providers/settings_provider.dart'; // AÑADIDO
 import 'package:frontend/data/providers/auth_provider.dart';
 import 'package:frontend/data/providers/complexes_list_provider.dart';
@@ -11,17 +13,20 @@ import 'package:frontend/data/repositories/auth_repository.dart';
 import 'package:frontend/data/repositories/complexes_repository.dart';
 import 'package:frontend/data/repositories/courts_repository.dart';
 import 'package:frontend/data/repositories/devices_repository.dart';
+import 'package:frontend/data/repositories/reservations_repository.dart';
 import 'package:frontend/data/services/authenticated_http_client.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/domain/usecases/complexes_use_cases.dart';
 import 'package:frontend/domain/usecases/courts_use_cases.dart';
 import 'package:frontend/domain/usecases/devices_use_cases.dart';
+import 'package:frontend/domain/usecases/reservations_use_cases.dart';
 import 'package:frontend/features/auth/data/services/auth_local_service.dart';
 import 'package:frontend/features/auth/data/services/auth_remote_service.dart';
 import 'package:frontend/features/common/presentation/widgets/time_range_selector.dart';
 import 'package:frontend/features/complexes/data/services/complexes_remote_service.dart';
 import 'package:frontend/features/courts/data/services/courts_remote_service.dart';
 import 'package:frontend/features/devices/data/services/devices_remote_service.dart';
+import 'package:frontend/features/reservations/data/services/reservations_remote_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -91,6 +96,12 @@ List<SingleChildWidget> get appProviders {
       },
     ),
 
+    ProxyProvider<AuthenticatedHttpClient?, ReservationsRemoteService?>(
+      update: (context, authenticatedClient, previousRemoteService) {
+        return authenticatedClient != null ? ReservationsRemoteServiceImpl(client: authenticatedClient) : null;
+      },
+    ),
+
     // ---------------------------------------------------------------------------------------------------------------//
     // REPOSITORIES LEVEL 2 (Depend on services from level 2)
     // ---------------------------------------------------------------------------------------------------------------//
@@ -109,6 +120,12 @@ List<SingleChildWidget> get appProviders {
     ProxyProvider<DevicesRemoteService?, DevicesRepository?>(
       update: (context, remoteService, previousRepository) {
         return remoteService != null ? DevicesRepositoryImpl(remoteService: remoteService) : null;
+      },
+    ),
+
+    ProxyProvider<ReservationsRemoteService?, ReservationsRepository?>(
+      update: (context, remoteService, previousRepository) {
+        return remoteService != null ? ReservationsRepositoryImpl(remoteService: remoteService) : null;
       },
     ),
 
@@ -136,6 +153,12 @@ List<SingleChildWidget> get appProviders {
     ProxyProvider<DevicesRepository?, DevicesUseCases?>(
       update: (context, repository, previousUseCases) {
         return repository != null ? DevicesUseCases(repository: repository) : null;
+      },
+    ),
+
+    ProxyProvider<ReservationsRepository?, ReservationsUseCases?>(
+      update: (context, repository, previousUseCases) {
+        return repository != null ? ReservationsUseCases(repository: repository) : null;
       },
     ),
 
@@ -234,6 +257,30 @@ List<SingleChildWidget> get appProviders {
         }
 
         return TelemetryProvider(devicesUseCases: useCases);
+      },
+    ),
+
+    ChangeNotifierProxyProvider<ReservationsUseCases?, ReservationsListProvider?>(
+      create: (context) => null,
+      update: (context, useCases, previousProvider) {
+        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
+        if (useCases == null || previousProvider != null) {
+          return previousProvider;
+        }
+
+        return ReservationsListProvider(reservationsUseCases: useCases);
+      },
+    ),
+
+    ChangeNotifierProxyProvider<ReservationsUseCases?, ReservationProvider?>(
+      create: (context) => null,
+      update: (context, useCases, previousProvider) {
+        // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
+        if (useCases == null || previousProvider != null) {
+          return previousProvider;
+        }
+
+        return ReservationProvider(reservationsUseCases: useCases);
       },
     ),
 
