@@ -183,7 +183,23 @@ class ComplexCard extends StatelessWidget {
         _buildHeader(context),
         if (size != WidgetSize.small)
           InfoSectionWidget(
-            leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
+            leftChildren: [
+              FutureBuilder(
+                future: WidgetUtilities.getAddressFromLatLng(complex.locLatitude!, complex.locLongitude!),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting || snapshot.hasError || !snapshot.hasData) {
+                    return LabeledInfoWidget(
+                      icon: Symbols.location_on_rounded,
+                      label: 'Address',
+                      text: 'C/XXXXXXXX XXXXXXXX, 00',
+                    );
+                  }
+
+                  final address = snapshot.data!;
+                  return LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: address);
+                },
+              ),
+            ],
             rightChildren: [
               LabeledInfoWidget(
                 icon: Symbols.schedule_rounded,
@@ -229,7 +245,6 @@ class ComplexCard extends StatelessWidget {
     return Row(
       spacing: 4.0,
       children: sports.map((sport) {
-        // return Icon(sport.icon, size: 24, fill: 0, weight: 400, grade: 0, opticalSize: 24);
         return SmallChip.alert(label: sport.name.toCapitalized());
       }).toList(),
     );
