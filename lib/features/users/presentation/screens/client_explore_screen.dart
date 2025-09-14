@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/complexes_list_provider.dart';
+import 'package:frontend/domain/usecases/courts_use_cases.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:provider/provider.dart';
@@ -55,9 +56,16 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
     super.dispose();
   }
 
+  Future<Set<Sport>> _getComplexSports(int complexId) async {
+    CourtsUseCases? courtsUseCases = context.read<CourtsUseCases?>();
+    if (courtsUseCases == null) return {};
+
+    final result = await courtsUseCases.getCourts(complexId);
+    return result.fold((failure) => {}, (value) => value.map((court) => court.sport).toSet());
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Consumer widget will handle getting the latest provider state for the build method
     return Consumer<ComplexesListProvider?>(
       builder: (context, consumerComplexProvider, _) {
         final currentProvider = consumerComplexProvider ?? _complexesProvider;
@@ -102,14 +110,37 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
           sports.remove(Sport.padel);
           sports.shuffle(random);
 
-          final complex = provider.complexes[index];
-          return ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 358.0),
-            child: ComplexCard.large(
-              complex: complex,
-              rating: (random.nextInt(5) / 2.0) + 3.0,
-              sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
-            ),
+          return FutureBuilder(
+            future: _getComplexSports(provider.complexes.elementAt(index).id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 358.0),
+                  child: Container(color: Theme.of(context).colorScheme.surfaceContainer),
+                );
+              }
+
+              if (snapshot.hasError || !snapshot.hasData) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 358.0),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    child: Center(child: Text('Error loading ${provider.complexes.elementAt(index).complexName} data')),
+                  ),
+                );
+              }
+
+              final sports = snapshot.data!;
+
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 358.0),
+                child: ComplexCard.large(
+                  complex: provider.complexes.elementAt(index),
+                  rating: Random().nextInt(11) / 2.0,
+                  sports: sports,
+                ),
+              );
+            },
           );
         },
       ),

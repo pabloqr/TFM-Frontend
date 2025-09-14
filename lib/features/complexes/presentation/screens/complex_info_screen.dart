@@ -256,10 +256,10 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             spacing: 8.0,
             children: [
               if (isAdmin)
-                Header.subheader(subheaderText: 'ComplexName', showButton: false)
+                Header.subheader(subheaderText: complexProvider.complex.complexName, showButton: false)
               else
                 Header.subheader(
-                  subheaderText: 'ComplexName',
+                  subheaderText: complexProvider.complex.complexName,
                   showButton: true,
                   buttonText: 'Get directions',
                   onPressed: () {},

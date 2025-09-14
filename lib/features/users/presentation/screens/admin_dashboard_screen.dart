@@ -4,9 +4,16 @@ import 'package:frontend/features/devices/presentation/widgets/metrics_card.dart
 import 'package:frontend/features/notifications/presentation/widgets/alerts_card.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
-  const AdminDashboardScreen({super.key});
+class AdminDashboardScreen extends StatefulWidget {
+  final int complexId;
 
+  const AdminDashboardScreen({super.key, required this.complexId});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(

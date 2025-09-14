@@ -3,10 +3,13 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
+import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class ReservationCard extends StatelessWidget {
-  const ReservationCard({super.key});
+  final ReservationModel? reservation;
+
+  const ReservationCard({super.key, required this.reservation});
 
   @override
   Widget build(BuildContext context) {

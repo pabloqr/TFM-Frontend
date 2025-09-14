@@ -103,12 +103,9 @@ class _CourtListTileState extends State<CourtListTile> {
             runSpacing: 4.0,
             alignment: WrapAlignment.end,
             children: [
-              if (widget.isAdmin) ...[
-                SmallChip.neutralSurface(label: widget.court.sport.name.toCapitalized()),
-                if (widget.isTelemetryView)
-                  SmallChip.neutralSurface(label: widget.telemetry!.type!.name.toCapitalized()),
-              ] else
-                SmallChip.alert(label: widget.court.sport.name.toCapitalized()),
+              SmallChip.neutralSurface(label: widget.court.sport.name.toCapitalized()),
+              if (widget.isAdmin && widget.isTelemetryView)
+                SmallChip.neutralSurface(label: widget.telemetry!.type!.name.toCapitalized()),
               if (widget.isAdmin)
                 _buildStatusChip()
               // TODO: Get real availability

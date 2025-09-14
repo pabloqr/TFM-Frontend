@@ -93,7 +93,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   ];
 
   late final List<Widget> _screens = <Widget>[
-    AdminDashboardScreen(),
+    AdminDashboardScreen(complexId: _complexId),
     AdminReservationsScreen(complexId: _complexId),
     Center(child: Text('Courts Screen Content')),
     Center(child: Text('Devices Screen Content')),

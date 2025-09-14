@@ -11,7 +11,9 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 
 class ClientHomeScreen extends StatefulWidget {
-  const ClientHomeScreen({super.key});
+  final int userId;
+
+  const ClientHomeScreen({super.key, required this.userId});
 
   @override
   State<ClientHomeScreen> createState() => _ClientHomeScreenState();
@@ -31,6 +33,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   late final List<Widget> _screens = <Widget>[
     ClientDashboardScreen(
+      userId: widget.userId,
       onReservationPressed: () {
         _onDestinationSelected(1);
       },
@@ -39,7 +42,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       },
       onNewsPressed: () {},
     ),
-    const ClientReservationsScreen(),
+    ClientReservationsScreen(userId: widget.userId),
     const ClientExploreScreen(),
     const Center(child: Text('Account Screen Content')),
   ];

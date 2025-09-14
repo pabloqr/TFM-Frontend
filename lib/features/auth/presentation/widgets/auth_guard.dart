@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 class AuthGuard extends StatelessWidget {
   final Widget loginScreen;
-  final Widget Function() clientAppBuilder;
+  final Widget Function(int) clientAppBuilder;
   final Widget Function(int) adminAppBuilder;
 
   const AuthGuard({super.key, required this.loginScreen, required this.clientAppBuilder, required this.adminAppBuilder});
@@ -51,7 +51,7 @@ class AuthGuard extends StatelessWidget {
                     // Successfully fetched user, now check role and return appropriate screen
                     switch (user.role) {
                       case Role.client:
-                        return clientAppBuilder();
+                        return clientAppBuilder(user.id);
                       case Role.admin:
                       case Role.superadmin:
                         return adminAppBuilder(1);

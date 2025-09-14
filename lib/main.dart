@@ -66,7 +66,7 @@ class _AppInitializerState extends State<AppInitializer> {
   Widget build(BuildContext context) {
     return AuthGuard(
       loginScreen: WelcomeScreen(),
-      clientAppBuilder: () => ClientHomeScreen(),
+      clientAppBuilder: (userId) => ClientHomeScreen(userId: userId),
       adminAppBuilder: (complexId) => AdminHomeScreen(complexId: complexId),
     );
   }

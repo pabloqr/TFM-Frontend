@@ -67,20 +67,62 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
         return ReservationModel.fromJson(data);
       } else {
         throw ServerException(
-          message: data['message'] ?? 'Error getting court: ${response.statusCode}',
+          message: data['message'] ?? 'Error getting reservation: ${response.statusCode}',
           statusCode: response.statusCode,
         );
       }
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw NetworkException(message: 'Network error getting court: ${e.toString()}');
+      throw NetworkException(message: 'Network error getting reservation: ${e.toString()}');
     }
   }
 
   @override
   Future<List<ReservationModel>> getUserReservations(int userId, {Map<String, dynamic>? query}) async {
-    // TODO: implement getUserReservations
-    throw UnimplementedError();
+    Uri uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.reservationsUsersEndpoint(userId.toString())}');
+
+    if (query != null && query.isNotEmpty) {
+      Map<String, String> queryParameters = {};
+      query.forEach((key, value) {
+        if (!_userQueryValidator.containsKey(key)) return;
+
+        Type type = _userQueryValidator[key]!;
+        String? valueString = NetworkUtilities.validateQueryValue(type: type, value: value);
+
+        if (valueString != null) queryParameters[key] = valueString;
+      });
+
+      uri.replace(queryParameters: queryParameters);
+    }
+
+    try {
+      final response = await _client.get(uri);
+      if (response.statusCode == 200) {
+        final List<dynamic> data;
+        try {
+          data = json.decode(utf8.decode(response.bodyBytes));
+        } catch (e) {
+          throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+        }
+
+        return data.map((e) => ReservationModel.fromJson(e as Map<String, dynamic>)).toList();
+      } else {
+        final Map<String, dynamic> data;
+        try {
+          data = json.decode(utf8.decode(response.bodyBytes));
+        } catch (e) {
+          throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+        }
+
+        throw ServerException(
+          message: data['message'] ?? 'Error getting user reservations: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error getting user reservations: ${e.toString()}');
+    }
   }
 
   @override
@@ -121,13 +163,13 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
         }
 
         throw ServerException(
-          message: data['message'] ?? 'Error getting reservations: ${response.statusCode}',
+          message: data['message'] ?? 'Error getting complex reservations: ${response.statusCode}',
           statusCode: response.statusCode,
         );
       }
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw NetworkException(message: 'Network error getting reservations: ${e.toString()}');
+      throw NetworkException(message: 'Network error getting complex reservations: ${e.toString()}');
     }
   }
 

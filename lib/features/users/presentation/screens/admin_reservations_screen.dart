@@ -92,7 +92,7 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
   Widget _buildLoadingListTile(BuildContext context) {
     return ListView.separated(
       padding: EdgeInsets.zero,
-      itemCount: 1,
+      itemCount: 10,
       itemBuilder: (context, index) {
         return FakeItem(isBig: true);
       },
