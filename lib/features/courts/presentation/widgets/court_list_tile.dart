@@ -38,12 +38,8 @@ class CourtListTile extends StatefulWidget {
     required bool isAdmin,
   }) => CourtListTile._(true, telemetry: telemetry, court: court, onTap: onTap, isAdmin: isAdmin);
 
-  factory CourtListTile.list({
-    TelemetryModel? telemetry,
-    required CourtModel court,
-    required VoidCallback onTap,
-    required bool isAdmin,
-  }) => CourtListTile._(false, telemetry: telemetry, court: court, onTap: onTap, isAdmin: isAdmin);
+  factory CourtListTile.list({required CourtModel court, required VoidCallback onTap, required bool isAdmin}) =>
+      CourtListTile._(false, court: court, onTap: onTap, isAdmin: isAdmin);
 
   @override
   State<CourtListTile> createState() => _CourtListTileState();
@@ -62,7 +58,7 @@ class _CourtListTileState extends State<CourtListTile> {
 
       _complexProvider = context.read<ComplexProvider?>();
 
-      if (_complexProvider != null) {
+      if (widget.isTelemetryView && _complexProvider != null) {
         _complexProvider!.getComplex(widget.court.complexId);
 
         _providerListener = () {
@@ -107,12 +103,11 @@ class _CourtListTileState extends State<CourtListTile> {
             runSpacing: 4.0,
             alignment: WrapAlignment.end,
             children: [
-              if (widget.isAdmin)
+              if (widget.isAdmin) ...[
+                SmallChip.neutralSurface(label: widget.court.sport.name.toCapitalized()),
                 if (widget.isTelemetryView)
-                  SmallChip.neutralSurface(label: widget.telemetry!.type!.name.toCapitalized())
-                else
-                  SmallChip.neutralSurface(label: widget.court.sport.name.toCapitalized())
-              else
+                  SmallChip.neutralSurface(label: widget.telemetry!.type!.name.toCapitalized()),
+              ] else
                 SmallChip.alert(label: widget.court.sport.name.toCapitalized()),
               if (widget.isAdmin)
                 _buildStatusChip()
@@ -184,16 +179,5 @@ class _CourtListTileState extends State<CourtListTile> {
     );
   }
 
-  Widget _buildStatusChip() {
-    switch (widget.court.status) {
-      case CourtStatus.open:
-        return SmallChip.success(label: 'Open');
-      case CourtStatus.weather:
-        return SmallChip.alert(label: 'Weather');
-      case CourtStatus.blocked:
-        return SmallChip.error(label: 'Closed');
-      case CourtStatus.maintenance:
-        return SmallChip.error(label: 'Maintenance');
-    }
-  }
+  Widget _buildStatusChip() => widget.court.status.smallStatusChip;
 }

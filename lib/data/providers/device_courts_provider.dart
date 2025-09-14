@@ -31,19 +31,19 @@ class DeviceCourtsProvider extends ChangeNotifier {
     return _deviceData[deviceId];
   }
 
-  ProviderState getProviderState(int deviceId) {
+  ProviderState getDataState(int deviceId) {
     return _deviceData[deviceId]?.state ?? ProviderState.initial;
   }
 
-  Failure? getProviderFailure(int deviceId) {
+  Failure? getDataFailure(int deviceId) {
     return _deviceData[deviceId]?.failure;
   }
 
-  List<CourtModel> getProviderCourts(int deviceId) {
+  List<CourtModel> getDataCourts(int deviceId) {
     return _deviceData[deviceId]?.courts ?? [];
   }
 
-  void _setProviderState(int deviceId, DeviceCourtsData newData) {
+  void _setDataState(int deviceId, DeviceCourtsData newData) {
     _deviceData[deviceId] = newData;
     notifyListeners();
   }
@@ -60,16 +60,16 @@ class DeviceCourtsProvider extends ChangeNotifier {
     final currentState = _deviceData[deviceId]!;
 
     // Actualizar a estado de carga, manteniendo los datos existentes
-    _setProviderState(deviceId, currentState.copyWith(state: ProviderState.loading));
+    _setDataState(deviceId, currentState.copyWith(state: ProviderState.loading));
 
     final result = await _devicesUseCases.getDeviceCourts(complexId, deviceId);
 
     result.fold(
       (failure) {
-        _setProviderState(deviceId, currentState.copyWith(state: ProviderState.error, failure: failure));
+        _setDataState(deviceId, currentState.copyWith(state: ProviderState.error, failure: failure));
       },
       (telemetryData) {
-        _setProviderState(
+        _setDataState(
           deviceId,
           DeviceCourtsData(
             state: telemetryData.isNotEmpty ? ProviderState.loaded : ProviderState.empty,

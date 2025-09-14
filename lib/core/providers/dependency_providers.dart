@@ -285,15 +285,15 @@ List<SingleChildWidget> get appProviders {
       },
     ),
 
-    ChangeNotifierProxyProvider<DevicesUseCases?, TelemetryProvider?>(
+    ChangeNotifierProxyProvider2<DevicesUseCases?, CourtsUseCases?, TelemetryProvider?>(
       create: (context) => null,
-      update: (context, useCases, previousProvider) {
+      update: (context, useCases1, useCases2, previousProvider) {
         // Si no existe el caso de uso pero sí existe un CourtsProvider, no crear uno nuevo
-        if (useCases == null || previousProvider != null) {
+        if (useCases1 == null || useCases2 == null || previousProvider != null) {
           return previousProvider;
         }
 
-        return TelemetryProvider(devicesUseCases: useCases);
+        return TelemetryProvider(devicesUseCases: useCases1, courtsUseCases: useCases2);
       },
     ),
 

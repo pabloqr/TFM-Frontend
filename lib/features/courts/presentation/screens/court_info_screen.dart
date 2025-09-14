@@ -4,6 +4,7 @@ import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/complex_provider.dart';
 import 'package:frontend/data/providers/court_provider.dart';
 import 'package:frontend/data/providers/devices_list_provider.dart';
+import 'package:frontend/data/providers/telemetry_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
@@ -36,6 +37,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
   ComplexProvider? _complexProvider;
   CourtProvider? _courtProvider;
   DevicesListProvider? _devicesListProvider;
+  TelemetryProvider? _telemetryProvider;
   VoidCallback? _providerListener;
 
   bool _loadingError = false;
@@ -53,44 +55,44 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
       _complexProvider = context.read<ComplexProvider?>();
       _courtProvider = context.read<CourtProvider?>();
       _devicesListProvider = context.read<DevicesListProvider?>();
+      _telemetryProvider = context.read<TelemetryProvider?>();
 
-      if (_complexProvider != null && _courtProvider != null && _devicesListProvider != null) {
-        _complexProvider!.getComplex(widget.complexId);
-        _courtProvider!.getCourt(widget.complexId, widget.courtId);
-        _devicesListProvider!.getCourtDevices(widget.complexId, widget.courtId);
+      _complexProvider?.getComplex(widget.complexId);
+      _courtProvider?.getCourt(widget.complexId, widget.courtId);
+      _devicesListProvider?.getCourtDevices(widget.complexId, widget.courtId);
+      _telemetryProvider?.getCourtDevicesTelemetry(widget.complexId, widget.courtId, query: {'last': true});
 
-        _providerListener = () {
-          if (mounted &&
-              _complexProvider != null &&
-              _complexProvider!.state == ProviderState.error &&
-              _complexProvider!.failure != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(_complexProvider!.failure!.message), behavior: SnackBarBehavior.floating),
-            );
-          }
+      _providerListener = () {
+        if (mounted &&
+            _complexProvider != null &&
+            _complexProvider!.state == ProviderState.error &&
+            _complexProvider!.failure != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_complexProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+          );
+        }
 
-          if (mounted &&
-              _courtProvider != null &&
-              _courtProvider!.state == ProviderState.error &&
-              _courtProvider!.failure != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(_courtProvider!.failure!.message), behavior: SnackBarBehavior.floating),
-            );
-          }
+        if (mounted &&
+            _courtProvider != null &&
+            _courtProvider!.state == ProviderState.error &&
+            _courtProvider!.failure != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_courtProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+          );
+        }
 
-          if (mounted &&
-              _devicesListProvider != null &&
-              _devicesListProvider!.state == ProviderState.error &&
-              _devicesListProvider!.failure != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(_devicesListProvider!.failure!.message), behavior: SnackBarBehavior.floating),
-            );
-          }
-        };
-        _complexProvider!.addListener(_providerListener!);
-        _courtProvider!.addListener(_providerListener!);
-        _devicesListProvider!.addListener(_providerListener!);
-      }
+        if (mounted &&
+            _devicesListProvider != null &&
+            _devicesListProvider!.state == ProviderState.error &&
+            _devicesListProvider!.failure != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_devicesListProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+          );
+        }
+      };
+      _complexProvider!.addListener(_providerListener!);
+      _courtProvider!.addListener(_providerListener!);
+      _devicesListProvider!.addListener(_providerListener!);
     });
   }
 
@@ -284,9 +286,8 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Add logic to edit court info
-        },
+        // TODO: Add logic to edit court info
+        onPressed: () {},
         label: Text('Edit court'),
         icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
@@ -488,29 +489,39 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
   }
 
   Widget _buildScrollableList(BuildContext context) {
-    return Consumer<DevicesListProvider?>(
-      builder: (context, consumerProvider, _) {
-        final currentProvider = consumerProvider ?? _devicesListProvider;
+    return Consumer2<DevicesListProvider?, TelemetryProvider?>(
+      builder: (context, consumerProvider1, consumerProvider2, _) {
+        final currentDevicesListProvider = consumerProvider1 ?? _devicesListProvider;
+        final currentTelemetryProvider = consumerProvider2 ?? _telemetryProvider;
 
-        if (currentProvider == null) return _buildLoadingListTile(context);
-
-        List<DeviceModel> devices = currentProvider.devices;
-
-        switch (currentProvider.state) {
-          case ProviderState.initial:
-          case ProviderState.loading:
-            if (devices.isEmpty) return _buildLoadingListTile(context);
-            return _buildListTile(context, devices);
-          case ProviderState.empty:
-            return _buildErrorListTile(context);
-          case ProviderState.error:
-            if (devices.isNotEmpty) {
-              return _buildListTile(context, devices);
-            }
-            return _buildErrorListTile(context);
-          case ProviderState.loaded:
-            return _buildListTile(context, devices);
+        if (currentDevicesListProvider == null || currentTelemetryProvider == null) {
+          return _buildLoadingListTile(context);
         }
+
+        List<DeviceModel> devices = currentDevicesListProvider.devices;
+        List<int> ids = currentTelemetryProvider.ids;
+
+        if (currentTelemetryProvider.state == ProviderState.initial ||
+            currentTelemetryProvider.state == ProviderState.initial) {
+          return _buildLoadingListTile(context);
+        } else if (currentTelemetryProvider.state == ProviderState.loading ||
+            currentTelemetryProvider.state == ProviderState.loading) {
+          if (ids.isNotEmpty && devices.isNotEmpty) {
+            return _buildListTile(context, currentTelemetryProvider, devices);
+          }
+          return _buildLoadingListTile(context);
+        } else if (currentTelemetryProvider.state == ProviderState.empty ||
+            currentTelemetryProvider.state == ProviderState.empty) {
+          return _buildErrorListTile(context);
+        } else if (currentTelemetryProvider.state == ProviderState.error ||
+            currentTelemetryProvider.state == ProviderState.error) {
+          if (ids.isNotEmpty && devices.isNotEmpty) {
+            return _buildListTile(context, currentTelemetryProvider, devices);
+          }
+          return _buildErrorListTile(context);
+        }
+
+        return _buildListTile(context, currentTelemetryProvider, devices);
       },
     );
   }
@@ -535,11 +546,14 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     );
   }
 
-  Widget _buildListTile(BuildContext context, List<DeviceModel> devices) {
+  Widget _buildListTile(BuildContext context, TelemetryProvider telemetryProvider, List<DeviceModel> devices) {
     return SliverList.separated(
       itemCount: devices.length,
       itemBuilder: (context, index) {
+        final telemetry = telemetryProvider.getDataTelemetry(devices.elementAt(index).id);
+
         return DeviceListTile.list(
+          telemetry: telemetry.isNotEmpty ? telemetry.first : null,
           device: devices.elementAt(index),
           // TODO: Add device view navigation
           onTap: () {},

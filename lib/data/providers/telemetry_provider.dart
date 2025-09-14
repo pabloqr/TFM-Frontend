@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
+import 'package:frontend/domain/usecases/courts_use_cases.dart';
 import 'package:frontend/domain/usecases/devices_use_cases.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
 
@@ -22,8 +23,11 @@ class DeviceTelemetryData {
 
 class TelemetryProvider extends ChangeNotifier {
   final DevicesUseCases _devicesUseCases;
+  final CourtsUseCases _courtsUseCases;
 
-  TelemetryProvider({required DevicesUseCases devicesUseCases}) : _devicesUseCases = devicesUseCases;
+  TelemetryProvider({required DevicesUseCases devicesUseCases, required CourtsUseCases courtsUseCases})
+    : _devicesUseCases = devicesUseCases,
+      _courtsUseCases = courtsUseCases;
 
   ProviderState _state = ProviderState.loaded;
   Failure? _failure;
@@ -68,7 +72,7 @@ class TelemetryProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getDevicesTelemetry(int complexId, {Map<String, dynamic>? query}) async {
+  Future<void> getComplexDevicesTelemetry(int complexId, {Map<String, dynamic>? query}) async {
     _ids = [];
     state = ProviderState.loading;
 
@@ -80,7 +84,28 @@ class TelemetryProvider extends ChangeNotifier {
       },
       (ids) async {
         for (var id in ids.map((e) => e.id)) {
-          getDeviceTelemetry(complexId, id);
+          getDeviceTelemetry(complexId, id, query: query);
+        }
+
+        state = ProviderState.loaded;
+        _failure = null;
+      },
+    );
+  }
+
+  Future<void> getCourtDevicesTelemetry(int complexId, int courtId, {Map<String, dynamic>? query}) async {
+    _ids = [];
+    state = ProviderState.loading;
+
+    final devicesResult = await _courtsUseCases.getCourtDevices(complexId, courtId);
+    devicesResult.fold(
+      (failure) {
+        state = ProviderState.error;
+        _failure = failure;
+      },
+      (ids) async {
+        for (var id in ids.map((e) => e.id)) {
+          getDeviceTelemetry(complexId, id, query: query);
         }
 
         state = ProviderState.loaded;

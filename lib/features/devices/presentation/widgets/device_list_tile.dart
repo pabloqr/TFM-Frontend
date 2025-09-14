@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/device_courts_provider.dart';
-import 'package:frontend/data/providers/telemetry_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
@@ -14,16 +13,23 @@ import 'package:provider/provider.dart';
 class DeviceListTile extends StatefulWidget {
   final bool isTelemetryView;
 
+  final TelemetryModel? telemetry;
   final DeviceModel device;
   final VoidCallback onTap;
 
-  const DeviceListTile._(this.isTelemetryView, {required this.device, required this.onTap});
+  const DeviceListTile._(this.isTelemetryView, {required this.telemetry, required this.device, required this.onTap});
 
-  factory DeviceListTile.telemetry({required DeviceModel device, required VoidCallback onTap}) =>
-      DeviceListTile._(true, device: device, onTap: onTap);
+  factory DeviceListTile.telemetry({
+    required TelemetryModel? telemetry,
+    required DeviceModel device,
+    required VoidCallback onTap,
+  }) => DeviceListTile._(true, telemetry: telemetry, device: device, onTap: onTap);
 
-  factory DeviceListTile.list({required DeviceModel device, required VoidCallback onTap}) =>
-      DeviceListTile._(false, device: device, onTap: onTap);
+  factory DeviceListTile.list({
+    required TelemetryModel? telemetry,
+    required DeviceModel device,
+    required VoidCallback onTap,
+  }) => DeviceListTile._(false, telemetry: telemetry, device: device, onTap: onTap);
 
   @override
   State<DeviceListTile> createState() => _DeviceListTileState();
@@ -31,7 +37,6 @@ class DeviceListTile extends StatefulWidget {
 
 class _DeviceListTileState extends State<DeviceListTile> {
   DeviceCourtsProvider? _deviceCourtsProvider;
-  TelemetryProvider? _telemetryProvider;
   VoidCallback? _providerListener;
 
   @override
@@ -42,36 +47,32 @@ class _DeviceListTileState extends State<DeviceListTile> {
       if (!mounted) return;
 
       _deviceCourtsProvider = context.read<DeviceCourtsProvider?>();
-      _telemetryProvider = context.read<TelemetryProvider?>();
 
-      if (_deviceCourtsProvider != null && _telemetryProvider != null) {
+      if (widget.isTelemetryView && _deviceCourtsProvider != null) {
         _deviceCourtsProvider!.getDeviceCourts(widget.device.complexId, widget.device.id);
-        _telemetryProvider!.getDeviceTelemetry(widget.device.complexId, widget.device.id, query: {'last': true});
       }
 
-      if (_telemetryProvider != null) {
-        _providerListener = () {
-          if (mounted &&
-              _telemetryProvider != null &&
-              _telemetryProvider!.getDataState(widget.device.id) == ProviderState.error &&
-              _telemetryProvider!.getDataFailure(widget.device.id) != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(_telemetryProvider!.getDataFailure(widget.device.id)!.message),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        };
-        _telemetryProvider!.addListener(_providerListener!);
-      }
+      _providerListener = () {
+        if (mounted &&
+            _deviceCourtsProvider != null &&
+            _deviceCourtsProvider!.getDataState(widget.device.id) == ProviderState.error &&
+            _deviceCourtsProvider!.getDataFailure(widget.device.id) != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_deviceCourtsProvider!.getDataFailure(widget.device.id)!.message),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      };
+      _deviceCourtsProvider?.addListener(_providerListener!);
     });
   }
 
   @override
   void dispose() {
-    if (_telemetryProvider != null && _providerListener != null) {
-      _telemetryProvider!.removeListener(_providerListener!);
+    if (_deviceCourtsProvider != null && _providerListener != null) {
+      _deviceCourtsProvider!.removeListener(_providerListener!);
     }
     _providerListener = null;
 
@@ -114,75 +115,57 @@ class _DeviceListTileState extends State<DeviceListTile> {
   }
 
   Widget _buildSubtitleTelemetryContent(BuildContext context) {
-    return Consumer<TelemetryProvider?>(
-      builder: (context, consumerProvider, _) {
-        final currentProvider = consumerProvider ?? _telemetryProvider;
-        final validStatus = currentProvider?.getDataState(widget.device.id) == ProviderState.loaded;
-        final telemetry = currentProvider?.getDataTelemetry(widget.device.id);
+    return InfoSectionWidget(
+      leftChildren: [
+        _buildTelemetryInfoWidget(context),
+        Consumer<DeviceCourtsProvider?>(
+          builder: (context, nestedConsumerProvider, _) {
+            final currentDeviceCourtsProvider = nestedConsumerProvider ?? _deviceCourtsProvider;
+            final validStatus = currentDeviceCourtsProvider?.getDataState(widget.device.id) == ProviderState.loaded;
+            final courts = currentDeviceCourtsProvider?.getDataCourts(widget.device.id);
 
-        return InfoSectionWidget(
-          leftChildren: [
-            _buildLastTelemetryInfoWidget(context, validStatus, telemetry),
-            Consumer<DeviceCourtsProvider?>(
-              builder: (context, nestedConsumerProvider, _) {
-                final currentDeviceCourtsProvider = nestedConsumerProvider ?? _deviceCourtsProvider;
-                final validStatus =
-                    currentDeviceCourtsProvider?.getProviderState(widget.device.id) == ProviderState.loaded;
-                final courts = currentDeviceCourtsProvider?.getProviderCourts(widget.device.id);
-
-                return LabeledInfoWidget(
-                  icon: Symbols.location_on_rounded,
-                  label: 'Court',
-                  text: !validStatus || courts == null || courts.isEmpty
-                      ? 'Not assigned to any courts'
-                      : courts.map((court) => '${court.sport.name.toCapitalized()} ${court.name}').join(', '),
-                );
-              },
-            ),
-          ],
-          rightChildren: [
-            LabeledInfoWidget(
-              icon: Symbols.calendar_month_rounded,
-              label: 'Date',
-              text: !validStatus || telemetry == null || telemetry.isEmpty || telemetry.elementAt(0).createdAt == null
-                  ? '--/--/----'
-                  : telemetry.elementAt(0).createdAt!.toFormattedDate(),
-            ),
-            LabeledInfoWidget(
-              icon: Symbols.schedule_rounded,
-              label: 'Time',
-              text: !validStatus || telemetry == null || telemetry.isEmpty || telemetry.elementAt(0).createdAt == null
-                  ? '--:--'
-                  : telemetry.elementAt(0).createdAt!.toFormattedTime(),
-            ),
-          ],
-        );
-      },
+            return LabeledInfoWidget(
+              icon: Symbols.location_on_rounded,
+              label: 'Court',
+              text: !validStatus || courts == null || courts.isEmpty
+                  ? 'Not assigned to any courts'
+                  : courts.map((court) => '${court.sport.name.toCapitalized()} ${court.name}').join(', '),
+            );
+          },
+        ),
+      ],
+      rightChildren: [
+        LabeledInfoWidget(
+          icon: Symbols.calendar_month_rounded,
+          label: 'Date',
+          text: widget.telemetry == null || widget.telemetry!.createdAt == null
+              ? '--/--/----'
+              : widget.telemetry!.createdAt!.toFormattedDate(),
+        ),
+        LabeledInfoWidget(
+          icon: Symbols.schedule_rounded,
+          label: 'Time',
+          text: widget.telemetry == null || widget.telemetry!.createdAt == null
+              ? '--:--'
+              : widget.telemetry!.createdAt!.toFormattedTime(),
+        ),
+      ],
     );
   }
 
   Widget _buildSubtitleListContent(BuildContext context) {
-    return Consumer<TelemetryProvider?>(
-      builder: (context, consumerProvider, _) {
-        final currentProvider = consumerProvider ?? _telemetryProvider;
-        final validStatus = currentProvider?.getDataState(widget.device.id) == ProviderState.loaded;
-        final telemetry = currentProvider?.getDataTelemetry(widget.device.id);
-
-        return InfoSectionWidget(
-          leftChildren: [_buildLastTelemetryInfoWidget(context, validStatus, telemetry)],
-          rightChildren: [],
-        );
-      },
-    );
+    return InfoSectionWidget(leftChildren: [_buildTelemetryInfoWidget(context)], rightChildren: []);
   }
 
-  Widget _buildLastTelemetryInfoWidget(BuildContext context, bool validStatus, List<TelemetryModel>? telemetry) {
+  Widget _buildTelemetryInfoWidget(BuildContext context) {
     return LabeledInfoWidget(
       icon: Symbols.timeline_rounded,
-      label: 'Last telemetry',
-      text: !validStatus || telemetry == null || telemetry.isEmpty || telemetry.elementAt(0).createdAt == null
+      label: widget.isTelemetryView ? 'Value' : 'Last telemetry',
+      text: widget.telemetry == null || widget.telemetry!.createdAt == null
           ? '--'
-          : telemetry.elementAt(0).value.toString(),
+          : widget.telemetry!.type != DeviceType.presence
+          ? widget.telemetry!.value.toString()
+          : widget.telemetry!.toAvailabilityStatus().name.toCapitalized(),
     );
   }
 }

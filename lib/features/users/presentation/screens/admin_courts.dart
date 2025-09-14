@@ -3,6 +3,7 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/courts_list_provider.dart';
 import 'package:frontend/data/providers/telemetry_provider.dart';
+import 'package:frontend/domain/usecases/devices_use_cases.dart';
 import 'package:frontend/features/common/data/models/telemetry_model.dart';
 import 'package:frontend/features/common/presentation/widgets/fake_item.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
@@ -39,8 +40,12 @@ class _AdminCourtsState extends State<AdminCourts> {
       _telemetryProvider = context.read<TelemetryProvider?>();
       _courtsListProvider = context.read<CourtsListProvider?>();
 
-      if (widget.isTelemetryView && _telemetryProvider != null) {
-        _telemetryProvider!.getDevicesTelemetry(widget.complexId);
+      if (_telemetryProvider != null) {
+        if (widget.isTelemetryView) {
+          _telemetryProvider!.getComplexDevicesTelemetry(widget.complexId);
+        } else {
+          _telemetryProvider!.getComplexDevicesTelemetry(widget.complexId, query: {'last': true});
+        }
       }
 
       if (_courtsListProvider != null) {
@@ -82,6 +87,23 @@ class _AdminCourtsState extends State<AdminCourts> {
     _providerListener = null;
 
     super.dispose();
+  }
+
+  Future<List<MapEntry<int, TelemetryModel>>> _getCourtsTelemetry(List<MapEntry<int, TelemetryModel>> telemetry) async {
+    DevicesUseCases? devicesUseCases = context.read<DevicesUseCases?>();
+    if (devicesUseCases == null) return [];
+
+    final List<MapEntry<int, TelemetryModel>> courtsTelemetry = [];
+    for (var element in telemetry) {
+      final result = await devicesUseCases.getDeviceCourts(widget.complexId, element.key);
+      result.fold((failure) {}, (courts) {
+        for (var court in courts) {
+          courtsTelemetry.add(MapEntry(court.id, element.value));
+        }
+      });
+    }
+
+    return courtsTelemetry;
   }
 
   @override
@@ -161,7 +183,7 @@ class _AdminCourtsState extends State<AdminCourts> {
   Widget _buildLoadingListTile(BuildContext context) {
     return ListView.separated(
       padding: EdgeInsets.zero,
-      itemCount: 1,
+      itemCount: 10,
       itemBuilder: (context, index) {
         return FakeItem(isBig: true);
       },
@@ -186,31 +208,46 @@ class _AdminCourtsState extends State<AdminCourts> {
     List<int> ids,
     List<CourtModel> courts,
   ) {
-    final List<TelemetryModel> telemetry = [];
+    final List<MapEntry<int, TelemetryModel>> telemetry = [];
     for (var id in ids) {
       final state = telemetryProvider.getDataState(id);
       final telemetryData = telemetryProvider.getDataTelemetry(id);
 
       if (state == ProviderState.loaded) {
         for (var element in telemetryData) {
-          telemetry.add(element);
+          telemetry.add(MapEntry(id, element));
         }
       }
     }
-    telemetry.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
+    telemetry.sort((a, b) => b.value.createdAt!.compareTo(a.value.createdAt!));
 
-    return ListView.separated(
-      padding: EdgeInsets.zero,
-      itemCount: telemetry.length,
-      itemBuilder: (context, index) {
-        return CourtListTile.telemetry(
-          telemetry: telemetry.elementAt(index),
-          court: courts.elementAt(index),
-          onTap: () {},
-          isAdmin: true,
+    return FutureBuilder(
+      future: _getCourtsTelemetry(telemetry),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingListTile(context);
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return _buildErrorListTile(context);
+        }
+
+        final courtsTelemetry = snapshot.data!;
+
+        return ListView.separated(
+          padding: EdgeInsets.zero,
+          itemCount: courtsTelemetry.length,
+          itemBuilder: (context, index) {
+            return CourtListTile.telemetry(
+              telemetry: courtsTelemetry.elementAt(index).value,
+              court: courts.firstWhere((element) => element.id == courtsTelemetry.elementAt(index).key),
+              onTap: () {},
+              isAdmin: true,
+            );
+          },
+          separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
         );
       },
-      separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
     );
   }
 
