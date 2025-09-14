@@ -87,7 +87,7 @@ class AppConstants {
   //------------------------------------------------------------------------------------------------------------------//
   // DEVICES ENDPOINTS
   //------------------------------------------------------------------------------------------------------------------//
-  static String devicesCREndpoint(String complexId) => '${complexesByIdEndpoint(complexId)}/$devicesEndpoint';
+  static String devicesCREndpoint(String complexId) => '${complexesByIdEndpoint(complexId)}$devicesEndpoint';
 
   static String devicesUDEndpoint(String complexId, String deviceId) =>
       '${complexesByIdEndpoint(complexId)}${devicesByIdEndpoint(deviceId)}';

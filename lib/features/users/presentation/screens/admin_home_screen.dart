@@ -101,8 +101,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   ];
 
   late final List<List<Widget>> _subScreens = [
-    [AdminCourts.telemetry(), AdminCourts.list()],
-    [AdminDevices.telemetry(), AdminDevices.list()],
+    [AdminCourts.telemetry(complexId: _complexId), AdminCourts.list(complexId: _complexId)],
+    [AdminDevices.telemetry(complexId: _complexId), AdminDevices.list(complexId: _complexId)],
   ];
 
   @override

@@ -541,7 +541,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return SliverList.separated(
       itemCount: 1,
       itemBuilder: (context, index) {
-        return const Center(heightFactor: 4.0, child: Text('Error loading complexes'));
+        return const Center(heightFactor: 4.0, child: Text('Error loading devices'));
       },
       separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
     );
@@ -554,7 +554,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         return DeviceListTile.list(
           device: devices.elementAt(index),
           // TODO: Add device view navigation
-          onTap: () => Navigator.of(context).pushNamed(AppConstants.courtInfoRoute),
+          onTap: () {},
         );
       },
       separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
