@@ -224,7 +224,7 @@ class ComplexCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             spacing: 4.0,
             children: [
-              OutlinedButton(
+              TextButton(
                 onPressed: () => Navigator.of(
                   context,
                 ).pushNamed(AppConstants.complexInfoRoute, arguments: {'complexId': complex.id}),

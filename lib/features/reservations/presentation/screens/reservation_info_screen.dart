@@ -202,7 +202,11 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
         ],
       ),
       body: SafeArea(child: _buildContent(context, reservationProvider.reservation, isAdmin)),
-      floatingActionButton: _buildFloatingActionButton(context, isAdmin),
+      floatingActionButton: _buildFloatingActionButton(
+        context,
+        reservationProvider.reservation.reservationStatus,
+        isAdmin,
+      ),
     );
   }
 
@@ -376,7 +380,11 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     );
   }
 
-  Widget _buildFloatingActionButton(BuildContext context, bool isAdmin) {
+  Widget? _buildFloatingActionButton(BuildContext context, ReservationStatus reservationStatus, bool isAdmin) {
+    if (reservationStatus == ReservationStatus.completed || reservationStatus == ReservationStatus.cancelled) {
+      return null;
+    }
+
     return isAdmin
         ? FloatingActionButton.extended(
             onPressed: () =>

@@ -1,15 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/data/models/provider_state_enum.dart';
+import 'package:frontend/data/providers/complex_provider.dart';
+import 'package:frontend/data/providers/court_provider.dart';
+import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
-import 'package:frontend/features/common/presentation/widgets/medium_chip.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:provider/provider.dart';
 
-class ReservationCard extends StatelessWidget {
+class ReservationCard extends StatefulWidget {
   final ReservationModel? reservation;
 
   const ReservationCard({super.key, required this.reservation});
+
+  @override
+  State<ReservationCard> createState() => _ReservationCardState();
+}
+
+class _ReservationCardState extends State<ReservationCard> {
+  ComplexProvider? _complexProvider;
+  CourtProvider? _courtProvider;
+  VoidCallback? _providerListener;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      _complexProvider = context.read<ComplexProvider?>();
+      _courtProvider = context.read<CourtProvider?>();
+
+      if (_complexProvider != null) {
+        if (widget.reservation != null) _complexProvider!.getComplex(widget.reservation!.complexId);
+        if (widget.reservation != null) {
+          _courtProvider!.getCourt(widget.reservation!.complexId, widget.reservation!.courtId);
+        }
+
+        _providerListener = () {
+          if (mounted &&
+              _complexProvider != null &&
+              _complexProvider!.state == ProviderState.error &&
+              _complexProvider!.failure != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_complexProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+            );
+          }
+
+          if (mounted &&
+              _courtProvider != null &&
+              _courtProvider!.state == ProviderState.error &&
+              _courtProvider!.failure != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_courtProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+            );
+          }
+        };
+        _complexProvider!.addListener(_providerListener!);
+        _courtProvider!.addListener(_providerListener!);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_complexProvider != null && _providerListener != null) {
+      _complexProvider!.removeListener(_providerListener!);
+    }
+    if (_courtProvider != null && _providerListener != null) {
+      _courtProvider!.removeListener(_providerListener!);
+    }
+    _providerListener = null;
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,35 +108,68 @@ class ReservationCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                MediumChip.alert(label: 'Scheduled'),
-                // SmallChip.alert('Scheduled'),
-                // ReservationStatusChip(icon: Symbols.check_circle_rounded, label: 'Completed'),
+                if (widget.reservation != null) widget.reservation!.reservationStatus.mediumStatusChip,
               ],
             ),
-            const InfoSectionWidget(
-              leftChildren: [
-                LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Court', text: 'Court name'),
-                LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport name'),
-              ],
-              rightChildren: [
-                LabeledInfoWidget(icon: Symbols.calendar_month_rounded, label: 'Date', text: '00/00/0000'),
-                LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Time', text: '00:00 - 00:00'),
-              ],
+            Consumer<CourtProvider?>(
+              builder: (context, consumerProvider, _) {
+                final currentProvider = consumerProvider ?? _courtProvider;
+                final court = currentProvider?.court;
+
+                return InfoSectionWidget(
+                  leftChildren: [
+                    LabeledInfoWidget(
+                      icon: Symbols.location_on_rounded,
+                      label: 'Court',
+                      text: court != null ? court.name : 'Court',
+                    ),
+                    LabeledInfoWidget(
+                      icon: Symbols.sports_rounded,
+                      label: 'Sport',
+                      text: court != null ? court.sport.name.toCapitalized() : 'Sport',
+                    ),
+                  ],
+                  rightChildren: [
+                    LabeledInfoWidget(
+                      icon: Symbols.calendar_month_rounded,
+                      label: 'Date',
+                      text: widget.reservation != null ? widget.reservation!.dateIni.toFormattedDate() : '--/--/----',
+                    ),
+                    LabeledInfoWidget(
+                      icon: Symbols.schedule_rounded,
+                      label: 'Time',
+                      text: widget.reservation != null
+                          ? '${widget.reservation!.dateIni.toFormattedTime()} - ${widget.reservation!.dateEnd.toFormattedTime()}'
+                          : '--:-- - --:--',
+                    ),
+                  ],
+                );
+              },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               spacing: 4.0,
               children: [
-                OutlinedButton(
-                  onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationInfoRoute),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pushNamed(
+                    AppConstants.reservationInfoRoute,
+                    arguments: {
+                      'complexId': widget.reservation?.complexId ?? 0,
+                      'courtId': widget.reservation?.courtId ?? 0,
+                      'reservationId': widget.reservation?.id ?? 0,
+                    },
+                  ),
                   child: const Text('More info'),
                 ),
-                FilledButton(
-                  onPressed: () => Navigator.of(
-                    context,
-                  ).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': false}),
-                  child: const Text('Modify'),
-                ),
+                if (widget.reservation != null &&
+                    (widget.reservation!.reservationStatus == ReservationStatus.scheduled ||
+                        widget.reservation!.reservationStatus == ReservationStatus.weather))
+                  FilledButton(
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': false}),
+                    child: const Text('Modify'),
+                  ),
               ],
             ),
           ],
