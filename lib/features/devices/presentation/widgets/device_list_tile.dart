@@ -89,7 +89,7 @@ class _DeviceListTileState extends State<DeviceListTile> {
           Text(
             'Device ${widget.device.id}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
+            overflow: TextOverflow.fade,
           ),
           Wrap(
             spacing: 4.0,

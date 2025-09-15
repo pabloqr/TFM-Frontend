@@ -6,6 +6,7 @@ import 'package:frontend/data/providers/court_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/marquee_widget.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
@@ -91,29 +92,73 @@ class _ReservationCardState extends State<ReservationCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16.0,
           children: [
-            Row(
-              spacing: 8.0,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4.0,
-                    children: [
-                      Text('Complex name', style: textTheme.titleLarge),
-                      Text(
-                        'Complex address',
-                        style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                        overflow: TextOverflow.ellipsis,
+            Consumer<ComplexProvider?>(
+              builder: (context, consumerProvider, _) {
+                final currentProvider = consumerProvider ?? _complexProvider;
+                final validStatus = currentProvider?.state == ProviderState.loaded;
+                final complex = currentProvider?.complex;
+
+                return Row(
+                  spacing: 8.0,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 4.0,
+                        children: [
+                          Text(
+                            validStatus && complex != null ? complex.complexName : 'Complex',
+                            style: textTheme.titleLarge,
+                          ),
+                          if (validStatus &&
+                              complex != null &&
+                              complex.locLatitude != null &&
+                              complex.locLongitude != null)
+                            FutureBuilder(
+                              future: WidgetUtilities.getAddressFromLatLng(complex.locLatitude!, complex.locLongitude!),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting ||
+                                    snapshot.hasError ||
+                                    !snapshot.hasData) {
+                                  return MarqueeWidget(
+                                    child: Text(
+                                      'C/XXXXXXXX, XXXXXXXX, XXXXXXXX, 00',
+                                      style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                                      overflow: TextOverflow.fade,
+                                    ),
+                                  );
+                                }
+
+                                final address = snapshot.data!;
+                                return MarqueeWidget(
+                                  child: Text(
+                                    address,
+                                    style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                                    overflow: TextOverflow.fade,
+                                  ),
+                                );
+                              },
+                            )
+                          else
+                            MarqueeWidget(
+                              child: Text(
+                                'C/XXXXXXXX, XXXXXXXX, XXXXXXXX, 00',
+                                style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                                overflow: TextOverflow.fade,
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                if (widget.reservation != null) widget.reservation!.reservationStatus.mediumStatusChip,
-              ],
+                    ),
+                    if (widget.reservation != null) widget.reservation!.reservationStatus.mediumStatusChip,
+                  ],
+                );
+              },
             ),
             Consumer<CourtProvider?>(
               builder: (context, consumerProvider, _) {
                 final currentProvider = consumerProvider ?? _courtProvider;
+                final validStatus = currentProvider?.state == ProviderState.loaded;
                 final court = currentProvider?.court;
 
                 return InfoSectionWidget(
@@ -121,12 +166,12 @@ class _ReservationCardState extends State<ReservationCard> {
                     LabeledInfoWidget(
                       icon: Symbols.location_on_rounded,
                       label: 'Court',
-                      text: court != null ? court.name : 'Court',
+                      text: validStatus && court != null ? court.name : 'Court',
                     ),
                     LabeledInfoWidget(
                       icon: Symbols.sports_rounded,
                       label: 'Sport',
-                      text: court != null ? court.sport.name.toCapitalized() : 'Sport',
+                      text: validStatus && court != null ? court.sport.name.toCapitalized() : 'Sport',
                     ),
                   ],
                   rightChildren: [

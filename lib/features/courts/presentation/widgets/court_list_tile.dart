@@ -96,7 +96,7 @@ class _CourtListTileState extends State<CourtListTile> {
           Text(
             widget.court.name,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
+            overflow: TextOverflow.fade,
           ),
           Wrap(
             spacing: 4.0,
