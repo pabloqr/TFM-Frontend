@@ -8,6 +8,7 @@ import 'package:frontend/data/providers/reservation_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
 import 'package:frontend/features/common/data/models/availability_status.dart';
+import 'package:frontend/features/common/data/models/user_data.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_dialog.dart';
 import 'package:frontend/features/common/presentation/widgets/expandable_fab.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
@@ -81,7 +82,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     super.dispose();
   }
 
-  Future<bool> _checkIfUserIsAdmin() async {
+  Future<UserData> _checkIfUserIsAdmin() async {
     final authUseCases = context.read<AuthUseCases?>();
 
     if (authUseCases == null) {
@@ -91,7 +92,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
         }
       });
 
-      return false;
+      return UserData(userId: null, isAdmin: false);
     }
 
     final result = await authUseCases.getAuthenticatedUser();
@@ -102,13 +103,13 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
         }
       });
 
-      return false;
-    }, (user) => user.role == Role.admin || user.role == Role.superadmin);
+      return UserData(userId: null, isAdmin: false);
+    }, (user) => UserData(userId: user.id, isAdmin: user.role == Role.admin || user.role == Role.superadmin));
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<UserData>(
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -122,16 +123,16 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
             }
           });
 
-          return _buildConsumer(context, false);
+          return _buildConsumer(context, UserData(userId: null, isAdmin: false));
         }
 
-        final isAdmin = snapshot.data!;
-        return _buildConsumer(context, isAdmin);
+        final data = snapshot.data!;
+        return _buildConsumer(context, data);
       },
     );
   }
 
-  Widget _buildConsumer(BuildContext context, bool isAdmin) {
+  Widget _buildConsumer(BuildContext context, UserData data) {
     return Consumer<ReservationProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _reservationProvider;
@@ -145,16 +146,16 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
           case ProviderState.initial:
           case ProviderState.loading:
             if (currentProvider.reservation.id == -1) return _buildLoadingState(context);
-            return _buildLoadedState(context, currentProvider, isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
           case ProviderState.empty:
             return _buildProvisionalScaffold(context, emptyWidget);
           case ProviderState.error:
             if (currentProvider.reservation.id != -1) {
-              return _buildLoadedState(context, currentProvider, isAdmin);
+              return _buildLoadedState(context, currentProvider, data);
             }
             return _buildProvisionalScaffold(context, errorWidget);
           case ProviderState.loaded:
-            return _buildLoadedState(context, currentProvider, isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
         }
       },
     );
@@ -180,7 +181,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     return _buildProvisionalScaffold(context, loadingWidget);
   }
 
-  Widget _buildLoadedState(BuildContext context, ReservationProvider reservationProvider, bool isAdmin) {
+  Widget _buildLoadedState(BuildContext context, ReservationProvider reservationProvider, UserData data) {
     if (_loadingError) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,15 +198,15 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
         leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
         title: const Text('Reservation details'),
         actions: [
-          if (isAdmin) _buildStatusChip(reservationProvider.reservation),
+          if (data.isAdmin) _buildStatusChip(reservationProvider.reservation),
           _buildReservationStatusChip(reservationProvider.reservation),
         ],
       ),
-      body: SafeArea(child: _buildContent(context, reservationProvider.reservation, isAdmin)),
+      body: SafeArea(child: _buildContent(context, reservationProvider.reservation, data.isAdmin)),
       floatingActionButton: _buildFloatingActionButton(
         context,
         reservationProvider.reservation.reservationStatus,
-        isAdmin,
+        data,
       ),
     );
   }
@@ -251,7 +252,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     return Consumer<ComplexProvider?>(
       builder: (context, consumerProvider, _) {
         final currentComplexProvider = consumerProvider ?? _complexProvider;
-        final validStatus = currentComplexProvider?.state == ProviderState.loaded;
+        final validState = currentComplexProvider?.state == ProviderState.loaded;
 
         ComplexModel? complex = currentComplexProvider?.complex;
 
@@ -261,19 +262,19 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
           children: [
             if (isAdmin)
               Header.subheader(
-                subheaderText: !validStatus || complex == null || complex.id == -1 ? 'Complex' : complex.complexName,
+                subheaderText: !validState || complex == null || complex.id == -1 ? 'Complex' : complex.complexName,
                 showButton: false,
               )
             else
               Header.subheader(
-                subheaderText: !validStatus || complex == null || complex.id == -1 ? 'Complex' : complex.complexName,
+                subheaderText: !validState || complex == null || complex.id == -1 ? 'Complex' : complex.complexName,
                 showButton: true,
                 buttonText: 'Get directions',
                 onPressed: () {},
               ),
             InfoSectionWidget(
               leftChildren: [
-                if (validStatus &&
+                if (validState &&
                     complex != null &&
                     complex.id != -1 &&
                     complex.locLatitude != null &&
@@ -306,7 +307,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
                 LabeledInfoWidget(
                   icon: Symbols.schedule_rounded,
                   label: 'Schedule',
-                  text: !validStatus || complex == null || complex.id == -1
+                  text: !validState || complex == null || complex.id == -1
                       ? '--:-- - --:--'
                       : '${complex.timeIni} - ${complex.timeEnd}',
                 ),
@@ -322,7 +323,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     return Consumer<CourtProvider?>(
       builder: (context, consumerProvider, _) {
         final currentCourtProvider = consumerProvider ?? _courtProvider;
-        final validStatus = currentCourtProvider?.state == ProviderState.loaded;
+        final validState = currentCourtProvider?.state == ProviderState.loaded;
 
         CourtModel? court = currentCourtProvider?.court;
 
@@ -331,7 +332,7 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
           spacing: 8.0,
           children: [
             Header.subheader(
-              subheaderText: !validStatus || court == null || court.id == -1 ? 'Court' : court.name,
+              subheaderText: !validState || court == null || court.id == -1 ? 'Court' : court.name,
               showButton: false,
             ),
             InfoSectionWidget(
@@ -339,12 +340,12 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
                 LabeledInfoWidget(
                   icon: Symbols.sports_rounded,
                   label: 'Sport',
-                  text: !validStatus || court == null || court.id == -1 ? 'Sport' : court.sport.name.toCapitalized(),
+                  text: !validState || court == null || court.id == -1 ? 'Sport' : court.sport.name.toCapitalized(),
                 ),
                 LabeledInfoWidget(
                   icon: Symbols.groups_rounded,
                   label: 'Capacity',
-                  text: !validStatus || court == null || court.id == -1 ? '--' : court.maxPeople.toString(),
+                  text: !validState || court == null || court.id == -1 ? '--' : court.maxPeople.toString(),
                 ),
               ],
               rightChildren: [
@@ -380,15 +381,16 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
     );
   }
 
-  Widget? _buildFloatingActionButton(BuildContext context, ReservationStatus reservationStatus, bool isAdmin) {
+  Widget? _buildFloatingActionButton(BuildContext context, ReservationStatus reservationStatus, UserData data) {
     if (reservationStatus == ReservationStatus.completed || reservationStatus == ReservationStatus.cancelled) {
       return null;
     }
 
-    return isAdmin
+    return data.isAdmin
         ? FloatingActionButton.extended(
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': true}),
+            onPressed: () => Navigator.of(
+              context,
+            ).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': true, 'userId': null}),
             label: const Text('Modify reservation'),
             icon: const Icon(Symbols.edit_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
           )
@@ -429,8 +431,9 @@ class _ReservationInfoScreenState extends State<ReservationInfoScreen> {
               ActionButton(
                 icon: Symbols.edit_calendar_rounded,
                 label: 'Modify reservation',
-                onPressed: () =>
-                    Navigator.of(context).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': false}),
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': false, 'userId': data.userId}),
               ),
             ],
           );

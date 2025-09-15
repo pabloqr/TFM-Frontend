@@ -12,9 +12,10 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 
 class ReservationCard extends StatefulWidget {
+  final int? userId;
   final ReservationModel? reservation;
 
-  const ReservationCard({super.key, required this.reservation});
+  const ReservationCard({super.key, required this.userId, required this.reservation});
 
   @override
   State<ReservationCard> createState() => _ReservationCardState();
@@ -61,7 +62,7 @@ class _ReservationCardState extends State<ReservationCard> {
           }
         };
         _complexProvider!.addListener(_providerListener!);
-        _courtProvider!.addListener(_providerListener!);
+        _courtProvider?.addListener(_providerListener!);
       }
     });
   }
@@ -95,7 +96,7 @@ class _ReservationCardState extends State<ReservationCard> {
             Consumer<ComplexProvider?>(
               builder: (context, consumerProvider, _) {
                 final currentProvider = consumerProvider ?? _complexProvider;
-                final validStatus = currentProvider?.state == ProviderState.loaded;
+                final validState = currentProvider?.state == ProviderState.loaded;
                 final complex = currentProvider?.complex;
 
                 return Row(
@@ -107,10 +108,10 @@ class _ReservationCardState extends State<ReservationCard> {
                         spacing: 4.0,
                         children: [
                           Text(
-                            validStatus && complex != null ? complex.complexName : 'Complex',
+                            validState && complex != null ? complex.complexName : 'Complex',
                             style: textTheme.titleLarge,
                           ),
-                          if (validStatus &&
+                          if (validState &&
                               complex != null &&
                               complex.locLatitude != null &&
                               complex.locLongitude != null)
@@ -158,7 +159,7 @@ class _ReservationCardState extends State<ReservationCard> {
             Consumer<CourtProvider?>(
               builder: (context, consumerProvider, _) {
                 final currentProvider = consumerProvider ?? _courtProvider;
-                final validStatus = currentProvider?.state == ProviderState.loaded;
+                final validState = currentProvider?.state == ProviderState.loaded;
                 final court = currentProvider?.court;
 
                 return InfoSectionWidget(
@@ -166,12 +167,12 @@ class _ReservationCardState extends State<ReservationCard> {
                     LabeledInfoWidget(
                       icon: Symbols.location_on_rounded,
                       label: 'Court',
-                      text: validStatus && court != null ? court.name : 'Court',
+                      text: validState && court != null ? court.name : 'Court',
                     ),
                     LabeledInfoWidget(
                       icon: Symbols.sports_rounded,
                       label: 'Sport',
-                      text: validStatus && court != null ? court.sport.name.toCapitalized() : 'Sport',
+                      text: validState && court != null ? court.sport.name.toCapitalized() : 'Sport',
                     ),
                   ],
                   rightChildren: [
@@ -210,9 +211,10 @@ class _ReservationCardState extends State<ReservationCard> {
                     (widget.reservation!.reservationStatus == ReservationStatus.scheduled ||
                         widget.reservation!.reservationStatus == ReservationStatus.weather))
                   FilledButton(
-                    onPressed: () => Navigator.of(
-                      context,
-                    ).pushNamed(AppConstants.reservationModifyRoute, arguments: {'isAdmin': false}),
+                    onPressed: () => Navigator.of(context).pushNamed(
+                      AppConstants.reservationModifyRoute,
+                      arguments: {'isAdmin': false, 'userId': widget.userId},
+                    ),
                     child: const Text('Modify'),
                   ),
               ],

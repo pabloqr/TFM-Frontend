@@ -7,6 +7,7 @@ import 'package:frontend/data/providers/devices_list_provider.dart';
 import 'package:frontend/data/providers/telemetry_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
+import 'package:frontend/features/common/data/models/user_data.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/fake_item.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
@@ -90,9 +91,9 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
           );
         }
       };
-      _complexProvider!.addListener(_providerListener!);
-      _courtProvider!.addListener(_providerListener!);
-      _devicesListProvider!.addListener(_providerListener!);
+      _complexProvider?.addListener(_providerListener!);
+      _courtProvider?.addListener(_providerListener!);
+      _devicesListProvider?.addListener(_providerListener!);
     });
   }
 
@@ -112,7 +113,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     super.dispose();
   }
 
-  Future<bool> _checkIfUserIsAdmin() async {
+  Future<UserData> _checkIfUserIsAdmin() async {
     final authUseCases = context.read<AuthUseCases?>();
 
     if (authUseCases == null) {
@@ -122,7 +123,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         }
       });
 
-      return false;
+      return UserData(userId: null, isAdmin: false);
     }
 
     final result = await authUseCases.getAuthenticatedUser();
@@ -133,13 +134,13 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         }
       });
 
-      return false;
-    }, (user) => user.role == Role.admin || user.role == Role.superadmin);
+      return UserData(userId: null, isAdmin: false);
+    }, (user) => UserData(userId: user.id, isAdmin: user.role == Role.admin || user.role == Role.superadmin));
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<UserData>(
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -153,16 +154,16 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
             }
           });
 
-          return _buildConsumer(context, false);
+          return _buildConsumer(context, UserData(userId: null, isAdmin: false));
         }
 
-        final isAdmin = snapshot.data!;
-        return _buildConsumer(context, isAdmin);
+        final data = snapshot.data!;
+        return _buildConsumer(context, data);
       },
     );
   }
 
-  Widget _buildConsumer(BuildContext context, bool isAdmin) {
+  Widget _buildConsumer(BuildContext context, UserData data) {
     return Consumer<CourtProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _courtProvider;
@@ -176,16 +177,16 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
           case ProviderState.initial:
           case ProviderState.loading:
             if (currentProvider.court.id == -1) return _buildLoadingState(context);
-            return _buildLoadedState(context, currentProvider, isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
           case ProviderState.empty:
             return _buildProvisionalScaffold(context, emptyWidget);
           case ProviderState.error:
             if (currentProvider.court.id != -1) {
-              return _buildLoadedState(context, currentProvider, isAdmin);
+              return _buildLoadedState(context, currentProvider, data);
             }
             return _buildProvisionalScaffold(context, errorWidget);
           case ProviderState.loaded:
-            return _buildLoadedState(context, currentProvider, isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
         }
       },
     );
@@ -211,11 +212,13 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return _buildProvisionalScaffold(context, loadingWidget);
   }
 
-  Widget _buildLoadedState(BuildContext context, CourtProvider courtProvider, bool isAdmin) {
-    return isAdmin ? _buildScrollView(context, courtProvider) : _buildRegularView(context, courtProvider);
+  Widget _buildLoadedState(BuildContext context, CourtProvider courtProvider, UserData data) {
+    return data.isAdmin
+        ? _buildScrollView(context, courtProvider)
+        : _buildRegularView(context, courtProvider, data.userId);
   }
 
-  Widget _buildRegularView(BuildContext context, CourtProvider courtProvider) {
+  Widget _buildRegularView(BuildContext context, CourtProvider courtProvider, int? userId) {
     if (_loadingError) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -244,8 +247,9 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () =>
-            Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
+        onPressed: () => Navigator.of(
+          context,
+        ).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false, 'userId': userId}),
         label: const Text('Book'),
         icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       ),
@@ -348,7 +352,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return Consumer<ComplexProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _complexProvider;
-        final validStatus = currentProvider?.state == ProviderState.loaded;
+        final validState = currentProvider?.state == ProviderState.loaded;
 
         ComplexModel? complex = currentProvider?.complex;
 
@@ -357,12 +361,12 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
           spacing: 8.0,
           children: [
             Header.subheader(
-              subheaderText: !validStatus || complex == null ? 'Complex' : complex.complexName,
+              subheaderText: !validState || complex == null ? 'Complex' : complex.complexName,
               showButton: false,
             ),
             InfoSectionWidget(
               leftChildren: [
-                if (!validStatus || complex == null)
+                if (!validState || complex == null)
                   LabeledInfoWidget(
                     icon: Symbols.location_on_rounded,
                     label: 'Address',
@@ -391,7 +395,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                 LabeledInfoWidget(
                   icon: Symbols.schedule_rounded,
                   label: 'Schedule',
-                  text: !validStatus || complex == null ? '00:00 - 00:00' : '${complex.timeIni} - ${complex.timeEnd}',
+                  text: !validState || complex == null ? '00:00 - 00:00' : '${complex.timeIni} - ${complex.timeEnd}',
                 ),
               ],
             ),
@@ -405,7 +409,7 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
     return Consumer<DevicesListProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _devicesListProvider;
-        final validStatus = currentProvider?.state == ProviderState.loaded;
+        final validState = currentProvider?.state == ProviderState.loaded;
 
         List<DeviceModel> devices = currentProvider?.devices ?? [];
         final devicesOn = devices.fold<int>(0, (prev, device) => device.status != DeviceStatus.off ? prev + 1 : prev);
@@ -456,24 +460,24 @@ class _CourtInfoScreenState extends State<CourtInfoScreen> {
                           LabeledInfoWidget(
                             icon: Symbols.tag_rounded,
                             label: 'Number of devices',
-                            text: !validStatus || devices.isEmpty ? '--' : devices.length.toString().padLeft(2, '0'),
+                            text: !validState || devices.isEmpty ? '--' : devices.length.toString().padLeft(2, '0'),
                           ),
                           LabeledInfoWidget(
                             icon: Symbols.mode_off_on_rounded,
                             label: 'Devices on',
-                            text: !validStatus || devices.isEmpty ? '--' : devicesOn.toString().padLeft(2, '0'),
+                            text: !validState || devices.isEmpty ? '--' : devicesOn.toString().padLeft(2, '0'),
                           ),
                         ],
                         rightChildren: [
                           LabeledInfoWidget(
                             icon: Symbols.check_circle_rounded,
                             label: 'Normal operation',
-                            text: !validStatus || devices.isEmpty ? '--' : devicesNormal.toString().padLeft(2, '0'),
+                            text: !validState || devices.isEmpty ? '--' : devicesNormal.toString().padLeft(2, '0'),
                           ),
                           LabeledInfoWidget(
                             icon: Symbols.cancel_rounded,
                             label: 'Warning/Error',
-                            text: !validStatus || devices.isEmpty ? '--' : devicesWarning.toString().padLeft(2, '0'),
+                            text: !validState || devices.isEmpty ? '--' : devicesWarning.toString().padLeft(2, '0'),
                           ),
                         ],
                       ),

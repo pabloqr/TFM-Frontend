@@ -43,7 +43,7 @@ class ComplexesRemoteServiceImpl implements ComplexesRemoteService {
         if (valueString != null) queryParameters[key] = valueString;
       });
 
-      uri.replace(queryParameters: queryParameters);
+      uri = uri.replace(queryParameters: queryParameters);
     }
 
     try {

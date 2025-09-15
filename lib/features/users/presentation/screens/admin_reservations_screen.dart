@@ -43,7 +43,7 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
           }
         };
       }
-      _reservationsListProvider!.addListener(_providerListener!);
+      _reservationsListProvider?.addListener(_providerListener!);
     });
   }
 

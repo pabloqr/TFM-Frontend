@@ -2,16 +2,25 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/theme.dart';
+import 'package:frontend/data/models/provider_state_enum.dart';
+import 'package:frontend/data/providers/availability_provider.dart';
+import 'package:frontend/data/providers/complexes_list_provider.dart';
+import 'package:frontend/data/providers/courts_list_provider.dart';
+import 'package:frontend/data/services/utilities.dart';
+import 'package:frontend/domain/usecases/reservations_use_cases.dart';
+import 'package:frontend/features/common/data/models/availability_status.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_dialog.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
 import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
-import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/common/presentation/widgets/time_range_selector.dart';
 import 'package:frontend/features/complexes/data/models/complex_model.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/courts/presentation/widgets/court_card.dart';
 import 'package:frontend/features/courts/presentation/widgets/sport_card.dart';
+import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -22,13 +31,16 @@ import 'package:provider/provider.dart';
 class ReservationScreen extends StatefulWidget {
   final bool isNew;
   final bool isAdmin;
+  final int? userId;
 
   /// Creates a [ReservationScreen].
-  const ReservationScreen._(this.isNew, {required this.isAdmin});
+  const ReservationScreen._(this.isNew, {required this.isAdmin, this.userId});
 
-  factory ReservationScreen.create({required bool isAdmin}) => ReservationScreen._(true, isAdmin: isAdmin);
+  factory ReservationScreen.create({required bool isAdmin, int? userId}) =>
+      ReservationScreen._(true, isAdmin: isAdmin, userId: userId);
 
-  factory ReservationScreen.modify({required bool isAdmin}) => ReservationScreen._(false, isAdmin: isAdmin);
+  factory ReservationScreen.modify({required bool isAdmin, int? userId}) =>
+      ReservationScreen._(false, isAdmin: isAdmin, userId: userId);
 
   @override
   State<ReservationScreen> createState() => _ReservationScreenState();
@@ -38,8 +50,40 @@ class ReservationScreen extends StatefulWidget {
 ///
 /// Manages the current step of the reservation process and the user's selections.
 class _ReservationScreenState extends State<ReservationScreen> {
+  ComplexesListProvider? _complexesListProvider;
+  CourtsListProvider? _courtsListProvider;
+  AvailabilityProvider? _availabilityProvider;
+  VoidCallback? _providerListener;
+
+  TimeRangeController? _timeRangeController;
+
   /// The current active step in the stepper.
   int _currentStep = 0;
+
+  String _selectedComplexName = '--';
+  String _selectedComplexAddress = 'C/XXXXXXXX XXXXXXXX, 00';
+  String _selectedComplexSchedule = '--:-- - --:--';
+  String _selectedSportName = '--';
+  String _selectedCourtName = '--';
+  String _selectedCourtCapacity = '--';
+
+  /// The model for the current reservation.
+  final ReservationModel _reservationModel = ReservationModel(
+    id: -1,
+    userId: -1,
+    complexId: -1,
+    courtId: -1,
+    dateIni: DateTime.now(),
+    dateEnd: DateTime.now(),
+    status: AvailabilityStatus.empty,
+    reservationStatus: ReservationStatus.scheduled,
+    timeFilter: TimeFilter.upcoming,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
+
+  /// A map of sport indices to lists of sports.
+  final Map<int, List<Sport>> _sports = {};
 
   /// Defines the steps in the reservation process.
   List<Step> get _steps => [
@@ -106,14 +150,64 @@ class _ReservationScreenState extends State<ReservationScreen> {
   /// Notifier for the index of the selected court.
   final ValueNotifier<int> _selectedCourtIndex = ValueNotifier(-1);
 
+  bool _selectedDate = false;
+
   /// The selected start date for the reservation.
-  DateTime? _selectedDateIni;
+  DateTime _selectedDateIni = DateTime.now();
 
   /// The selected end date for the reservation.
-  DateTime? _selectedDateEnd;
+  late DateTime _selectedDateEnd;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _reservationModel.userId = widget.userId ?? -1;
+    _selectedDateEnd = _selectedDateIni.add(const Duration(hours: 1));
+    _reservationModel.dateIni = _selectedDateIni;
+    _reservationModel.dateEnd = _selectedDateEnd;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      _complexesListProvider = context.read<ComplexesListProvider?>();
+      _courtsListProvider = context.read<CourtsListProvider?>();
+      _availabilityProvider = context.read<AvailabilityProvider?>();
+
+      _timeRangeController = context.read<TimeRangeController?>();
+
+      if (_complexesListProvider != null) {
+        _complexesListProvider!.getComplexes();
+      }
+
+      _providerListener = () {
+        if (mounted &&
+            _complexesListProvider != null &&
+            _complexesListProvider!.state == ProviderState.error &&
+            _complexesListProvider!.failure != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_complexesListProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+          );
+        }
+      };
+      _complexesListProvider?.addListener(_providerListener!);
+      _timeRangeController?.addListener(_onTimeRangeChanged);
+    });
+  }
 
   @override
   void dispose() {
+    if (_complexesListProvider != null && _providerListener != null) {
+      _complexesListProvider!.removeListener(_providerListener!);
+    }
+    if (_courtsListProvider != null && _providerListener != null) {
+      _courtsListProvider!.removeListener(_providerListener!);
+    }
+    if (_availabilityProvider != null && _providerListener != null) {
+      _availabilityProvider!.removeListener(_providerListener!);
+    }
+    _providerListener = null;
+
     _userIdController.dispose();
     // _selectedUserId.dispose();
     _selectedComplexIndex.dispose();
@@ -194,7 +288,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
         case 3: // Court selection
           return _selectedCourtIndex.value != -1;
         case 4: // Date and time selection
-          return _selectedDateIni != null && _selectedDateEnd != null;
         case 5: // Summary
           return true;
         default:
@@ -209,7 +302,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
         case 2: // Court selection
           return _selectedCourtIndex.value != -1;
         case 3: // Date and time selection
-          return _selectedDateIni != null && _selectedDateEnd != null;
         case 4: // Summary
           return true;
         default:
@@ -228,6 +320,17 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
     // Default to disabled if none of the above (should not be reached if logic is correct).
     return StepState.disabled;
+  }
+
+  void _onTimeRangeChanged() {
+    if (mounted && _timeRangeController != null) {
+      DateTime date = _timeRangeController!.currentRangeValues.start.toDateTime();
+      _selectedDateIni = _selectedDateIni.copyWith(hour: date.hour, minute: date.minute);
+      _reservationModel.dateIni = _selectedDateIni;
+      date = _timeRangeController!.currentRangeValues.end.toDateTime();
+      _selectedDateEnd = _selectedDateEnd.copyWith(hour: date.hour, minute: date.minute);
+      _reservationModel.dateEnd = _selectedDateEnd;
+    }
   }
 
   /// Handles tap events on a step header, allowing navigation.
@@ -270,14 +373,22 @@ class _ReservationScreenState extends State<ReservationScreen> {
   /// Callback for when a complex is selected.
   ///
   /// Resets subsequent selections and moves to the next step if appropriate.
-  void _onComplexSelected(int index) {
+  void _onComplexSelected(int index, int complexId, String complexName, String complexAddress, String complexSchedule) {
     setState(() {
+      _selectedComplexName = complexName;
+      _selectedComplexAddress = complexAddress;
+      _selectedComplexSchedule = complexSchedule;
+
+      // Se actualiza el modelo de reserva con el id del complejo seleccionado
+      _reservationModel.complexId = complexId;
+
       _selectedComplexIndex.value = index;
       // Reset selections for subsequent steps.
       _selectedSportIndex.value = -1;
       _selectedCourtIndex.value = -1;
-      _selectedDateIni = null;
-      _selectedDateEnd = null;
+      _selectedDate = false;
+      _selectedDateIni = DateTime.now();
+      _selectedDateEnd = _selectedDateIni.add(const Duration(hours: 1));
 
       // If currently on the complex selection step, move to the sport selection step.
       if (_currentStep == _stepOffset) _currentStep = 1 + _stepOffset;
@@ -288,12 +399,21 @@ class _ReservationScreenState extends State<ReservationScreen> {
   ///
   /// Resets subsequent selections and moves to the next step if appropriate.
   void _onSportSelected(int index) {
+    // Se obtienen las pistas del complejo seleccionado, para el deporte seleccionado
+    _courtsListProvider?.getCourts(
+      _reservationModel.complexId,
+      query: {'sport': _sports[_reservationModel.complexId]?.elementAt(index).name.toUpperCase()},
+    );
+
     setState(() {
+      _selectedSportName = _sports[_reservationModel.complexId]?.elementAt(index).name.toCapitalized() ?? '--';
+
       _selectedSportIndex.value = index;
       // Reset selections for subsequent steps.
       _selectedCourtIndex.value = -1;
-      _selectedDateIni = null;
-      _selectedDateEnd = null;
+      _selectedDate = false;
+      _selectedDateIni = DateTime.now();
+      _selectedDateEnd = _selectedDateIni.add(const Duration(hours: 1));
 
       // If currently on the sport selection step, move to the court selection step.
       if (_currentStep == 1 + _stepOffset) _currentStep = 2 + _stepOffset;
@@ -303,12 +423,19 @@ class _ReservationScreenState extends State<ReservationScreen> {
   /// Callback for when a court is selected.
   ///
   /// Resets subsequent selections and moves to the next step if appropriate.
-  void _onCourtSelected(int index) {
+  void _onCourtSelected(int index, int courtId, String courtName, String courtCapacity) {
+    _availabilityProvider?.getCourtAvailability(_reservationModel.complexId, courtId);
+
     setState(() {
+      _selectedCourtName = courtName;
+      _selectedCourtCapacity = courtCapacity;
+
+      _reservationModel.courtId = courtId;
+
       _selectedCourtIndex.value = index;
-      // Reset selections for subsequent steps.
-      _selectedDateIni = null;
-      _selectedDateEnd = null;
+      _selectedDate = false;
+      _selectedDateIni = DateTime.now();
+      _selectedDateEnd = _selectedDateIni.add(const Duration(hours: 1));
 
       // If currently on the court selection step, move to the date/time selection step.
       if (_currentStep == 2 + _stepOffset) _currentStep = 3 + _stepOffset;
@@ -330,8 +457,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
   /// Callback for when a date is selected from the date picker.
   void _onDateSelected(DateTime date) {
     setState(() {
-      _selectedDateIni = date;
-      _selectedDateEnd = date; // Assuming reservation is for a single day for now.
+      _selectedDate = true;
+      _selectedDateIni = _selectedDateIni.copyWith(year: date.year, month: date.month, day: date.day);
+      _reservationModel.dateIni = _selectedDateIni;
+      _selectedDateEnd = _selectedDateEnd.copyWith(year: date.year, month: date.month, day: date.day);
+      _reservationModel.dateEnd = _selectedDateEnd;
 
       // If currently on the court selection step (before date/time), move to date/time selection.
       // This condition might need adjustment based on flow, as date selection is part of step 3.
@@ -339,12 +469,41 @@ class _ReservationScreenState extends State<ReservationScreen> {
     });
   }
 
+  void _showErrorDialog() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showCustomAlertDialog(
+      context,
+      icon: Symbols.error_outline_rounded,
+      headline: 'Try again?',
+      supportingText:
+          'There was a problem with the reservation creation process. If you exit now all unsaved changes will be lost.',
+      headerColor: colorScheme.errorContainer,
+      iconColor: colorScheme.onErrorContainer,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+          child: const Text('Leave'),
+        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Try again')),
+      ],
+    );
+  }
+
   /// Shows a confirmation dialog for the reservation.
   ///
   /// Navigates back twice on confirmation: once to close the dialog,
   /// and once to pop the new reservation screen.
-  void _confirmReservation() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  void _confirmReservation() async {
+    ReservationsUseCases? useCases = context.read<ReservationsUseCases?>();
+    if (useCases == null) _showErrorDialog();
+
+    final result = await useCases!.createReservation(_reservationModel);
+    result.fold(
+      // (failure) => _showErrorDialog(),
+      (failure) => Navigator.of(context).popUntil((route) => route.isFirst),
+      (reservation) => Navigator.of(context).popUntil((route) => route.isFirst),
+    );
   }
 
   /// Handles the cancellation of the reservation.
@@ -445,31 +604,62 @@ class _ReservationScreenState extends State<ReservationScreen> {
   Widget _buildComplexSelector() {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 264.0),
-      child: CarouselView(
-        onTap: _onComplexSelected,
-        itemExtent: 240.0,
-        children: List.generate(10, (int index) {
-          final random = Random();
-          List<Sport> sports = Sport.values.toList();
-          sports.shuffle(random);
+      child: Consumer<ComplexesListProvider?>(
+        builder: (context, consumerProvider, _) {
+          final currentProvider = consumerProvider ?? _complexesListProvider;
+          List<ComplexModel> complexes = currentProvider?.complexes ?? [];
 
-          return ComplexCard.small(
-            complex: ComplexModel(
-              id: 0,
-              complexName: 'Complex $index',
-              timeIni: '00:00',
-              timeEnd: '00:00',
-              locLongitude: null,
-              locLatitude: null,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-            rating: random.nextInt(11) / 2.0,
-            sports: sports.sublist(0, random.nextInt(sports.length) + 1).toSet(),
-            index: index,
-            selectedIndex: _selectedComplexIndex,
+          return CarouselView(
+            onTap: (index) async {
+              final complex = complexes.elementAt(index);
+              final address = complex.locLatitude != null && complex.locLongitude != null
+                  ? await WidgetUtilities.getAddressFromLatLng(complex.locLatitude!, complex.locLongitude!)
+                  : 'C/XXXXXXXX XXXXXXXX, 00';
+
+              _onComplexSelected(
+                index,
+                complex.id,
+                complex.complexName,
+                address,
+                '${complex.timeIni} - ${complex.timeEnd}',
+              );
+            },
+            itemExtent: 240.0,
+            children: List.generate(complexes.isNotEmpty ? complexes.length : 10, (int index) {
+              if (complexes.isEmpty) {
+                return Container(color: Theme.of(context).colorScheme.surfaceContainer);
+              }
+
+              return FutureBuilder(
+                future: NetworkUtilities.getComplexSports(context, complexes.elementAt(index).id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(color: Theme.of(context).colorScheme.surfaceContainer);
+                  }
+
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return Container(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      child: Center(child: Text('Error loading ${complexes.elementAt(index).complexName} data')),
+                    );
+                  }
+
+                  final sports = snapshot.data!;
+                  _sports[complexes.elementAt(index).id] = sports.toList();
+
+                  return ComplexCard.small(
+                    userId: null,
+                    complex: complexes.elementAt(index),
+                    rating: Random().nextInt(11) / 2.0,
+                    sports: sports,
+                    index: index,
+                    selectedIndex: _selectedComplexIndex,
+                  );
+                },
+              );
+            }),
           );
-        }),
+        },
       ),
     );
   }
@@ -480,6 +670,26 @@ class _ReservationScreenState extends State<ReservationScreen> {
       return const Center(child: Text('You must select a complex first'));
     }
 
+    final sports = _sports[_reservationModel.complexId];
+
+    if (sports == null) {
+      return const Center(
+        heightFactor: 2.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 16.0,
+          children: [
+            SizedBox(width: 24.0, height: 24.0, child: CircularProgressIndicator()),
+            Text('Loading sports...'),
+          ],
+        ),
+      );
+    }
+
+    if (sports.isEmpty) {
+      return const Center(child: Text('No sports available for this complex'));
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -487,12 +697,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
         crossAxisCount: 2,
         mainAxisSpacing: 8.0,
         crossAxisSpacing: 8.0,
-        childAspectRatio: 4 / 2,
+        childAspectRatio: sports.length / 2,
       ),
-      itemCount: Sport.values.length,
+      itemCount: sports.length,
       itemBuilder: (context, index) {
-        Sport sport = Sport.values[index];
-
+        final sport = sports[index];
         return SportCard(
           sport: sport,
           onTap: () => _onSportSelected(index),
@@ -507,33 +716,42 @@ class _ReservationScreenState extends State<ReservationScreen> {
   Widget _buildCourtSelector() {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 264.0),
-      child: CarouselView(
-        onTap: _onCourtSelected,
-        itemExtent: 240.0,
-        children: List.generate(10, (int index) {
-          final random = Random();
-          List<TimeOfDay> times = List.generate(random.nextInt(3) + 1, (i) {
-            return TimeOfDay(hour: random.nextInt(15) + 9, minute: 0);
-          });
-          List<Sport> sports = Sport.values.toList();
-          sports.remove(Sport.padel);
-          sports.shuffle(random);
+      child: Consumer<CourtsListProvider?>(
+        builder: (context, consumerProvider, _) {
+          final currentProvider = consumerProvider ?? _courtsListProvider;
+          final validState = currentProvider?.state == ProviderState.loaded;
+          List<CourtModel> courts = currentProvider?.courts ?? [];
 
-          return CourtCard.small(
-            title: 'Court $index',
-            times: times.toSet(),
-            index: index,
-            selectedIndex: _selectedCourtIndex,
+          return CarouselView(
+            onTap: (index) {
+              final court = courts.elementAt(index);
+              _onCourtSelected(index, court.id, court.name, court.maxPeople.toString().padLeft(2, '0'));
+            },
+            itemExtent: 240.0,
+            children: List.generate(validState && courts.isNotEmpty ? courts.length : 10, (int index) {
+              final random = Random();
+              List<TimeOfDay> times = List.generate(random.nextInt(3) + 1, (i) {
+                return TimeOfDay(hour: random.nextInt(15) + 9, minute: 0);
+              });
+              List<Sport> sports = Sport.values.toList();
+              sports.remove(Sport.padel);
+              sports.shuffle(random);
+
+              return CourtCard.small(
+                title: validState && courts.isNotEmpty ? courts.elementAt(index).name : 'Court $index',
+                times: times.toSet(),
+                index: index,
+                selectedIndex: _selectedCourtIndex,
+              );
+            }),
           );
-        }),
+        },
       ),
     );
   }
 
   /// Builds the widget for selecting the date and time range.
   Widget _buildDateAndTimeSelector(BuildContext context) {
-    final controller = Provider.of<TimeRangeController>(context, listen: false);
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       spacing: 8.0,
@@ -547,9 +765,13 @@ class _ReservationScreenState extends State<ReservationScreen> {
               spacing: 8.0,
               children: [
                 Expanded(
-                  child: LabeledInfoWidget(icon: Symbols.calendar_month_rounded, label: 'Date', text: '01/01/2023'),
+                  child: LabeledInfoWidget(
+                    icon: Symbols.calendar_month_rounded,
+                    label: 'Date',
+                    text: _selectedDateIni.toFormattedDate(),
+                  ),
                 ),
-                if (_selectedDateIni == null || _selectedDateEnd == null)
+                if (!_selectedDate)
                   FilledButton.icon(
                     onPressed: () async => await _selectDate(),
                     label: const Text('Select'),
@@ -585,9 +807,48 @@ class _ReservationScreenState extends State<ReservationScreen> {
               subheaderText: 'Select time range',
               showButton: true,
               buttonText: 'Reset',
-              onPressed: controller.reset,
+              onPressed: _timeRangeController?.reset,
             ),
-            TimeRangeSelector(),
+            Consumer<AvailabilityProvider?>(
+              builder: (context, consumerProvider, _) {
+                final currentProvider = consumerProvider ?? _availabilityProvider;
+                final validState = currentProvider?.state == ProviderState.loaded;
+                final courtAvailability = currentProvider?.availability;
+
+                RangeValues schedule = RangeValues(8.0, 24.0); // Default schedule
+
+                final parts = _selectedComplexSchedule.split(' - ');
+                if (parts.length == 2) {
+                  final timeIni = parts[0];
+                  final timeIniParts = timeIni.split(':');
+
+                  double timeIniDouble = 8.0;
+                  if (timeIniParts.length == 2) {
+                    final timeIniHour = int.tryParse(timeIniParts[0]) ?? 8.0;
+                    final timeIniMinute = int.tryParse(timeIniParts[1]) ?? 0.0;
+                    timeIniDouble = timeIniHour + (timeIniMinute / 60.0);
+                  }
+
+                  final timeEnd = parts[1];
+                  final timeEndParts = timeEnd.split(':');
+
+                  double timeEndDouble = 24.0;
+                  if (timeEndParts.length == 2) {
+                    final timeEndHour = int.tryParse(timeEndParts[0]) ?? 24.0;
+                    final timeEndMinute = int.tryParse(timeEndParts[1]) ?? 0.0;
+                    timeEndDouble = timeEndHour + (timeEndMinute / 60.0);
+                  }
+
+                  schedule = RangeValues(timeIniDouble, timeEndDouble);
+                }
+
+                return TimeRangeSelector(
+                  schedule: schedule,
+                  date: DateTime.now(),
+                  availability: validState && courtAvailability != null ? courtAvailability.availability : [],
+                );
+              },
+            ),
           ],
         ),
       ],
@@ -609,10 +870,14 @@ class _ReservationScreenState extends State<ReservationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
-        Header.subSubheader(subheaderText: 'ComplexName', showButton: false),
+        Header.subSubheader(subheaderText: _selectedComplexName, showButton: false),
         InfoSectionWidget(
-          leftChildren: [LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: 'C/XXXX, 00')],
-          rightChildren: [LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: '00:00 - 00:00')],
+          leftChildren: [
+            LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: _selectedComplexAddress),
+          ],
+          rightChildren: [
+            LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Schedule', text: _selectedComplexSchedule),
+          ],
         ),
       ],
     );
@@ -624,15 +889,23 @@ class _ReservationScreenState extends State<ReservationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
-        Header.subSubheader(subheaderText: 'CourtName', showButton: false),
+        Header.subSubheader(subheaderText: _selectedCourtName, showButton: false),
         InfoSectionWidget(
           leftChildren: [
-            LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: 'Sport'),
-            LabeledInfoWidget(icon: Symbols.groups_rounded, label: 'Capacity', text: '00'),
+            LabeledInfoWidget(icon: Symbols.sports_rounded, label: 'Sport', text: _selectedSportName),
+            LabeledInfoWidget(icon: Symbols.groups_rounded, label: 'Capacity', text: _selectedCourtCapacity),
           ],
           rightChildren: [
-            LabeledInfoWidget(icon: Symbols.calendar_month_rounded, label: 'Date', text: 'Mon, 00/00/0000'),
-            LabeledInfoWidget(icon: Symbols.schedule_rounded, label: 'Reservation time', text: '00:00 - 00:00'),
+            LabeledInfoWidget(
+              icon: Symbols.calendar_month_rounded,
+              label: 'Date',
+              text: _reservationModel.dateIni.toFormattedDate(),
+            ),
+            LabeledInfoWidget(
+              icon: Symbols.schedule_rounded,
+              label: 'Reservation time',
+              text: '${_reservationModel.dateIni.toFormattedTime()} - ${_reservationModel.dateEnd.toFormattedTime()}',
+            ),
           ],
         ),
       ],

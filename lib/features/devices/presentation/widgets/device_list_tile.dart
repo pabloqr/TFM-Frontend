@@ -121,13 +121,13 @@ class _DeviceListTileState extends State<DeviceListTile> {
         Consumer<DeviceCourtsProvider?>(
           builder: (context, nestedConsumerProvider, _) {
             final currentDeviceCourtsProvider = nestedConsumerProvider ?? _deviceCourtsProvider;
-            final validStatus = currentDeviceCourtsProvider?.getDataState(widget.device.id) == ProviderState.loaded;
+            final validState = currentDeviceCourtsProvider?.getDataState(widget.device.id) == ProviderState.loaded;
             final courts = currentDeviceCourtsProvider?.getDataCourts(widget.device.id);
 
             return LabeledInfoWidget(
               icon: Symbols.location_on_rounded,
               label: 'Court',
-              text: !validStatus || courts == null || courts.isEmpty
+              text: !validState || courts == null || courts.isEmpty
                   ? 'Not assigned to any courts'
                   : courts.map((court) => '${court.sport.name.toCapitalized()} ${court.name}').join(', '),
             );

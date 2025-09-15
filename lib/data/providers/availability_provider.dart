@@ -2,36 +2,36 @@ import 'package:flutter/foundation.dart';
 import 'package:frontend/core/error/failure.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/domain/usecases/courts_use_cases.dart';
-import 'package:frontend/features/courts/data/models/court_model.dart';
+import 'package:frontend/features/courts/data/models/court_availability_model.dart';
 
-class CourtsListProvider extends ChangeNotifier {
+class AvailabilityProvider extends ChangeNotifier {
   final CourtsUseCases _courtsUseCases;
 
-  CourtsListProvider({required CourtsUseCases courtsUseCases}) : _courtsUseCases = courtsUseCases;
+  AvailabilityProvider({required CourtsUseCases courtsUseCases}) : _courtsUseCases = courtsUseCases;
 
   ProviderState _state = ProviderState.initial;
   Failure? _failure;
-  List<CourtModel> _courts = [];
+  CourtAvailabilityModel _availability = CourtAvailabilityModel(id: -1, complexId: -1, availability: []);
 
   ProviderState get state => _state;
 
   Failure? get failure => _failure;
 
-  List<CourtModel> get courts => _courts;
+  CourtAvailabilityModel get availability => _availability;
 
   set state(ProviderState value) {
     _state = value;
     notifyListeners();
   }
 
-  Future<void> getCourts(int complexId, {Map<String, dynamic>? query}) async {
-    final bool isInitialLoad = _courts.isEmpty || _state == ProviderState.error;
+  Future<void> getCourtAvailability(int complexId, int courtId) async {
+    final bool isInitialLoad = _availability.id == -1 || _state == ProviderState.error;
 
     if (isInitialLoad) {
       state = ProviderState.loading;
     }
 
-    final result = await _courtsUseCases.getCourts(complexId, query: query);
+    final result = await _courtsUseCases.getCourtAvailability(complexId, courtId);
     result.fold(
       (failure) {
         _failure = failure;
@@ -42,10 +42,10 @@ class CourtsListProvider extends ChangeNotifier {
         }
       },
       (value) {
-        _courts = value;
+        _availability = value;
         // Clear any previous failure on successful fetch
         _failure = null;
-        state = courts.isNotEmpty ? ProviderState.loaded : ProviderState.empty;
+        state = _availability.id != -1 ? ProviderState.loaded : ProviderState.empty;
       },
     );
   }

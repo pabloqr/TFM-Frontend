@@ -92,7 +92,7 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
         if (valueString != null) queryParameters[key] = valueString;
       });
 
-      uri.replace(queryParameters: queryParameters);
+      uri = uri.replace(queryParameters: queryParameters);
     }
 
     try {
@@ -140,7 +140,7 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
         if (valueString != null) queryParameters[key] = valueString;
       });
 
-      uri.replace(queryParameters: queryParameters);
+      uri = uri.replace(queryParameters: queryParameters);
     }
 
     try {
@@ -175,8 +175,32 @@ class ReservationsRemoteServiceImpl implements ReservationsRemoteService {
 
   @override
   Future<ReservationModel> createReservation(ReservationModel reservation) async {
-    // TODO: implement createReservation
-    throw UnimplementedError();
+    Uri uri = Uri.parse(
+      '${AppConstants.baseUrl}${AppConstants.reservationsComplexesCREndpoint(reservation.complexId.toString())}',
+    );
+
+    try {
+      final response = await _client.post(uri, body: reservation.toJsonString());
+
+      final Map<String, dynamic> data;
+      try {
+        data = json.decode(utf8.decode(response.bodyBytes));
+      } catch (e) {
+        throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+      }
+
+      if (response.statusCode == 201) {
+        return ReservationModel.fromJson(data);
+      } else {
+        throw ServerException(
+          message: data['message'] ?? 'Error creating reservation: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error creating reservation: ${e.toString()}');
+    }
   }
 
   @override

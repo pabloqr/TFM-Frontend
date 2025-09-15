@@ -5,11 +5,10 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/complexes_list_provider.dart';
 import 'package:frontend/data/providers/reservations_list_provider.dart';
-import 'package:frontend/domain/usecases/courts_use_cases.dart';
+import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
 import 'package:frontend/features/complexes/data/models/complex_model.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
-import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/news/presentation/widgets/news_card.dart';
 import 'package:frontend/features/reservations/data/models/reservation_model.dart';
 import 'package:frontend/features/reservations/presentation/widgets/reservation_card.dart';
@@ -93,14 +92,6 @@ class _ClientDashboardScreenState extends State<ClientDashboardScreen> {
     super.dispose();
   }
 
-  Future<Set<Sport>> _getComplexSports(int complexId) async {
-    CourtsUseCases? courtsUseCases = context.read<CourtsUseCases?>();
-    if (courtsUseCases == null) return {};
-
-    final result = await courtsUseCases.getCourts(complexId);
-    return result.fold((failure) => {}, (value) => value.map((court) => court.sport).toSet());
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -147,7 +138,7 @@ class _ClientDashboardScreenState extends State<ClientDashboardScreen> {
               onPressed: widget.onReservationPressed,
             ),
             if (reservation != null)
-              ReservationCard(reservation: reservation)
+              ReservationCard(userId: widget.userId, reservation: reservation)
             else
               Center(heightFactor: 4.0, child: const Text('No upcoming reservations')),
           ],
@@ -184,7 +175,7 @@ class _ClientDashboardScreenState extends State<ClientDashboardScreen> {
                   }
 
                   return FutureBuilder(
-                    future: _getComplexSports(complexes.elementAt(index).id),
+                    future: NetworkUtilities.getComplexSports(context, complexes.elementAt(index).id),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Container(color: Theme.of(context).colorScheme.surfaceContainer);
@@ -200,6 +191,7 @@ class _ClientDashboardScreenState extends State<ClientDashboardScreen> {
                       final sports = snapshot.data!;
 
                       return ComplexCard.small(
+                        userId: null,
                         complex: complexes.elementAt(index),
                         rating: Random().nextInt(11) / 2.0,
                         sports: sports,

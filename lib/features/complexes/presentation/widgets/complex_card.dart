@@ -13,6 +13,7 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 class ComplexCard extends StatelessWidget {
   final WidgetSize size;
 
+  final int? userId;
   final ComplexModel complex;
   final double rating;
   final Set<Sport> sports;
@@ -22,6 +23,7 @@ class ComplexCard extends StatelessWidget {
 
   const ComplexCard._(
     this.size, {
+    required this.userId,
     required this.complex,
     required this.rating,
     required this.sports,
@@ -30,6 +32,7 @@ class ComplexCard extends StatelessWidget {
   });
 
   factory ComplexCard.small({
+    required int? userId,
     required ComplexModel complex,
     required double rating,
     required Set<Sport> sports,
@@ -39,6 +42,7 @@ class ComplexCard extends StatelessWidget {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
     return ComplexCard._(
       WidgetSize.small,
+      userId: userId,
       complex: complex,
       rating: rating,
       sports: sports,
@@ -48,6 +52,7 @@ class ComplexCard extends StatelessWidget {
   }
 
   factory ComplexCard.medium({
+    required int? userId,
     required ComplexModel complex,
     required double rating,
     required Set<Sport> sports,
@@ -57,6 +62,7 @@ class ComplexCard extends StatelessWidget {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
     return ComplexCard._(
       WidgetSize.medium,
+      userId: userId,
       complex: complex,
       rating: rating,
       sports: sports,
@@ -66,6 +72,7 @@ class ComplexCard extends StatelessWidget {
   }
 
   factory ComplexCard.large({
+    required int? userId,
     required ComplexModel complex,
     required double rating,
     required Set<Sport> sports,
@@ -75,6 +82,7 @@ class ComplexCard extends StatelessWidget {
     ValueNotifier<int> notifier = selectedIndex ?? ValueNotifier<int>(-1);
     return ComplexCard._(
       WidgetSize.large,
+      userId: userId,
       complex: complex,
       rating: rating,
       sports: sports,
@@ -231,8 +239,9 @@ class ComplexCard extends StatelessWidget {
                 child: const Text('More info'),
               ),
               FilledButton(
-                onPressed: () =>
-                    Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false, 'userId': userId}),
                 child: const Text('Book court'),
               ),
             ],

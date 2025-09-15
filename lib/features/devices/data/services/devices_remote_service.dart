@@ -66,7 +66,7 @@ class DevicesRemoteServiceImpl implements DevicesRemoteService {
         if (valueString != null) queryParameters[key] = valueString;
       });
 
-      uri.replace(queryParameters: queryParameters);
+      uri = uri.replace(queryParameters: queryParameters);
     }
 
     try {
@@ -188,7 +188,7 @@ class DevicesRemoteServiceImpl implements DevicesRemoteService {
         if (valueString != null) queryParameters[key] = valueString;
       });
 
-      uri.replace(queryParameters: queryParameters);
+      uri = uri.replace(queryParameters: queryParameters);
     }
 
     try {

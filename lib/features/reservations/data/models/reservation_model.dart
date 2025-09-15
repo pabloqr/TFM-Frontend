@@ -38,17 +38,17 @@ extension ReservationStatusExtension on ReservationStatus {
 enum TimeFilter { all, past, upcoming }
 
 class ReservationModel {
-  final int id;
-  final int userId;
-  final int complexId;
-  final int courtId;
-  final DateTime dateIni;
-  final DateTime dateEnd;
-  final AvailabilityStatus status;
-  final ReservationStatus reservationStatus;
-  final TimeFilter timeFilter;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  int id;
+  int userId;
+  int complexId;
+  int courtId;
+  DateTime dateIni;
+  DateTime dateEnd;
+  AvailabilityStatus status;
+  ReservationStatus reservationStatus;
+  TimeFilter timeFilter;
+  DateTime createdAt;
+  DateTime updatedAt;
 
   ReservationModel({
     required this.id,
@@ -111,5 +111,12 @@ class ReservationModel {
     };
 
     return data;
+  }
+
+  String toJsonString() => json.encode(toJson());
+
+  @override
+  String toString() {
+    return 'ReservationModel(id: $id, userId: $userId, complexId: $complexId, courtId: $courtId, dateIni: $dateIni, dateEnd: $dateEnd, status: $status, reservationStatus: $reservationStatus, timeFilter: $timeFilter, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }

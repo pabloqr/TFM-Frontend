@@ -132,14 +132,14 @@ class _CourtListTileState extends State<CourtListTile> {
                   Consumer<ComplexProvider?>(
                     builder: (context, nestedConsumerProvider, _) {
                       final currentProvider = nestedConsumerProvider ?? _complexProvider;
-                      final validStatus = currentProvider?.state == ProviderState.loaded;
+                      final validState = currentProvider?.state == ProviderState.loaded;
 
                       ComplexModel? complex = currentProvider?.complex;
 
                       return LabeledInfoWidget(
                         icon: Symbols.apartment_rounded,
                         label: 'Complex',
-                        text: !validStatus || complex == null ? 'Complex' : complex.complexName,
+                        text: !validState || complex == null ? 'Complex' : complex.complexName,
                       );
                     },
                   ),

@@ -4,8 +4,8 @@ import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/error/exceptions.dart';
 import 'package:frontend/data/services/authenticated_http_client.dart';
 import 'package:frontend/data/services/utilities.dart';
+import 'package:frontend/features/courts/data/models/court_availability_model.dart';
 import 'package:frontend/features/courts/data/models/court_model.dart';
-import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:frontend/features/devices/data/models/device_model.dart';
 
 abstract class CourtsRemoteService {
@@ -13,17 +13,19 @@ abstract class CourtsRemoteService {
 
   Future<CourtModel> getCourt(int complexId, int courtId);
 
+  Future<CourtAvailabilityModel> getCourtAvailability(int complexId, int courtId);
+
   Future<List<DeviceModel>> getCourtDevices(int complexId, int courtId);
 }
 
 class CourtsRemoteServiceImpl implements CourtsRemoteService {
   static const Map<String, Type> _queryValidator = {
     'id': int,
-    'sport': Sport,
+    'sport': String,
     'name': String,
     'description': String,
     'maxPeople': int,
-    'status': CourtStatus,
+    'status': String,
     'createdAt': DateTime,
     'updatedAt': DateTime,
   };
@@ -47,7 +49,7 @@ class CourtsRemoteServiceImpl implements CourtsRemoteService {
         if (valueString != null) queryParameters[key] = valueString;
       });
 
-      uri.replace(queryParameters: queryParameters);
+      uri = uri.replace(queryParameters: queryParameters);
     }
 
     try {
@@ -107,6 +109,36 @@ class CourtsRemoteServiceImpl implements CourtsRemoteService {
     } catch (e) {
       if (e is ServerException) rethrow;
       throw NetworkException(message: 'Network error getting court: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<CourtAvailabilityModel> getCourtAvailability(int complexId, int courtId) async {
+    Uri uri = Uri.parse(
+      '${AppConstants.baseUrl}${AppConstants.courtAvailabilityEndpoint(complexId.toString(), courtId.toString())}',
+    );
+
+    try {
+      final response = await _client.get(uri);
+
+      final Map<String, dynamic> data;
+      try {
+        data = json.decode(utf8.decode(response.bodyBytes));
+      } catch (e) {
+        throw UnexpectedException(message: 'Error decoding response body: ${e.toString()}');
+      }
+
+      if (response.statusCode == 200) {
+        return CourtAvailabilityModel.fromJson(data);
+      } else {
+        throw ServerException(
+          message: data['message'] ?? 'Error getting court availability: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw NetworkException(message: 'Network error getting court availability: ${e.toString()}');
     }
   }
 

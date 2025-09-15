@@ -445,8 +445,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> with SingleTickerProv
   Widget? _buildFloatingActionButton() {
     if (_selectedIndex == 1) {
       return FloatingActionButton.extended(
-        onPressed: () =>
-            Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': true}),
+        onPressed: () => Navigator.of(
+          context,
+        ).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': true, 'userId': null}),
         label: const Text('Book'),
         icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
       );

@@ -5,6 +5,7 @@ import 'package:frontend/data/providers/complex_provider.dart';
 import 'package:frontend/data/providers/courts_list_provider.dart';
 import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/domain/usecases/auth_use_cases.dart';
+import 'package:frontend/features/common/data/models/user_data.dart';
 import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
 import 'package:frontend/features/common/presentation/widgets/fake_item.dart';
 import 'package:frontend/features/common/presentation/widgets/header.dart';
@@ -90,7 +91,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     super.dispose();
   }
 
-  Future<bool> _checkIfUserIsAdmin() async {
+  Future<UserData> _checkIfUserIsAdmin() async {
     final authUseCases = context.read<AuthUseCases?>();
 
     if (authUseCases == null) {
@@ -100,7 +101,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
         }
       });
 
-      return false;
+      return UserData(userId: null, isAdmin: false);
     }
 
     final result = await authUseCases.getAuthenticatedUser();
@@ -111,13 +112,13 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
         }
       });
 
-      return false;
-    }, (user) => user.role == Role.admin || user.role == Role.superadmin);
+      return UserData(userId: null, isAdmin: false);
+    }, (user) => UserData(userId: user.id, isAdmin: user.role == Role.admin || user.role == Role.superadmin));
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<UserData>(
       future: _checkIfUserIsAdmin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -131,21 +132,21 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
             }
           });
 
-          return _buildConsumer(context, false);
+          return _buildConsumer(context, UserData(userId: null, isAdmin: false));
         }
 
-        final isAdmin = snapshot.data!;
-        return _buildConsumer(context, isAdmin);
+        final data = snapshot.data!;
+        return _buildConsumer(context, data);
       },
     );
   }
 
-  Widget _buildConsumer(BuildContext context, bool isAdmin) {
+  Widget _buildConsumer(BuildContext context, UserData data) {
     return Consumer<ComplexProvider?>(
       builder: (context, consumerProvider, _) {
         final currentProvider = consumerProvider ?? _complexProvider;
 
-        if (currentProvider == null) return _buildLoadingState(context, isAdmin);
+        if (currentProvider == null) return _buildLoadingState(context, data.isAdmin);
 
         Widget emptyWidget = const Center(child: Text('No complex found'));
         Widget errorWidget = const Center(child: Text('Error loading complex'));
@@ -153,17 +154,17 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
         switch (currentProvider.state) {
           case ProviderState.initial:
           case ProviderState.loading:
-            if (currentProvider.complex.id == -1) return _buildLoadingState(context, isAdmin);
-            return _buildLoadedState(context, currentProvider, isAdmin);
+            if (currentProvider.complex.id == -1) return _buildLoadingState(context, data.isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
           case ProviderState.empty:
-            return isAdmin ? emptyWidget : _buildProvisionalScaffold(context, emptyWidget);
+            return data.isAdmin ? emptyWidget : _buildProvisionalScaffold(context, emptyWidget);
           case ProviderState.error:
             if (currentProvider.complex.id != -1) {
-              return _buildLoadedState(context, currentProvider, isAdmin);
+              return _buildLoadedState(context, currentProvider, data);
             }
-            return isAdmin ? emptyWidget : _buildProvisionalScaffold(context, errorWidget);
+            return data.isAdmin ? emptyWidget : _buildProvisionalScaffold(context, errorWidget);
           case ProviderState.loaded:
-            return _buildLoadedState(context, currentProvider, isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
         }
       },
     );
@@ -189,7 +190,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     return isAdmin ? SafeArea(top: false, child: loadingWidget) : _buildProvisionalScaffold(context, loadingWidget);
   }
 
-  Widget _buildLoadedState(BuildContext context, ComplexProvider complexProvider, bool isAdmin) {
+  Widget _buildLoadedState(BuildContext context, ComplexProvider complexProvider, UserData data) {
     if (_loadingError) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -201,8 +202,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
       });
     }
 
-    return isAdmin
-        ? _buildContent(context, complexProvider, isAdmin)
+    return data.isAdmin
+        ? _buildContent(context, complexProvider, data.isAdmin)
         : Scaffold(
             appBar: AppBar(
               leading: IconButton(
@@ -211,8 +212,8 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
               ),
               title: const Text('Complex details'),
             ),
-            body: _buildContent(context, complexProvider, isAdmin),
-            floatingActionButton: _buildFloatingActionButton(context, isAdmin),
+            body: _buildContent(context, complexProvider, data.isAdmin),
+            floatingActionButton: _buildFloatingActionButton(context, data.userId),
           );
   }
 
@@ -310,7 +311,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     return Consumer<CourtsListProvider?>(
       builder: (context, consumerCourtsProvider, _) {
         final currentCourtsProvider = consumerCourtsProvider ?? _courtsListProvider;
-        final validStatus = currentCourtsProvider?.state == ProviderState.loaded;
+        final validState = currentCourtsProvider?.state == ProviderState.loaded;
 
         List<CourtModel> courts = currentCourtsProvider?.courts ?? [];
         final maxCapacity = courts.fold<int>(0, (prev, court) => court.maxPeople > prev ? court.maxPeople : prev);
@@ -360,7 +361,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                           LabeledInfoWidget(
                             icon: Symbols.tag_rounded,
                             label: 'Number of courts',
-                            text: !validStatus || courts.isEmpty ? '--' : courts.length.toString().padLeft(2, '0'),
+                            text: !validState || courts.isEmpty ? '--' : courts.length.toString().padLeft(2, '0'),
                           ),
                           LabeledInfoWidget(icon: Symbols.payments_rounded, label: 'Price per hour', text: '00.00 €'),
                         ],
@@ -368,7 +369,7 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
                           LabeledInfoWidget(
                             icon: Symbols.groups_rounded,
                             label: 'Capacity',
-                            text: !validStatus || courts.isEmpty
+                            text: !validState || courts.isEmpty
                                 ? '--'
                                 : '${minCapacity.toString().padLeft(2, '0')} - ${maxCapacity.toString().padLeft(2, '0')}',
                           ),
@@ -459,9 +460,11 @@ class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
     );
   }
 
-  Widget _buildFloatingActionButton(BuildContext context, bool isAdmin) {
+  Widget _buildFloatingActionButton(BuildContext context, int? userId) {
     return FloatingActionButton.extended(
-      onPressed: () => Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
+      onPressed: () => Navigator.of(
+        context,
+      ).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false, 'userId': userId}),
       label: const Text('Book'),
       icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
     );

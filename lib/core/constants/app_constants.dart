@@ -174,10 +174,10 @@ class AppConstants {
     reservationNewRoute: (context) {
       final arguments = ModalRoute.of(context)?.settings.arguments;
       if (arguments is Map<String, dynamic>) {
-        return ReservationScreen.create(isAdmin: arguments['isAdmin'] as bool);
+        return ReservationScreen.create(isAdmin: arguments['isAdmin'] as bool, userId: arguments['userId'] as int?);
       }
 
-      return ReservationScreen.create(isAdmin: false);
+      return ReservationScreen.create(isAdmin: false, userId: null);
     },
     reservationModifyRoute: (context) {
       final arguments = ModalRoute.of(context)?.settings.arguments;

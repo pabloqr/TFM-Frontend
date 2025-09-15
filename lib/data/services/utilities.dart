@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/domain/usecases/courts_use_cases.dart';
+import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 extension DoubleExtension on double {
+  DateTime toDateTime() {
+    final date = DateTime.now();
+    final hours = floor();
+    final minutes = ((this - hours) * 60).round();
+    return DateTime(date.year, date.month, date.day, hours, minutes);
+  }
+
   String formatAsTime() {
     final hours = floor();
     final minutes = ((this - hours) * 60).round();
@@ -15,17 +25,44 @@ extension StringExtension on String {
 }
 
 extension DateTimeExtension on DateTime {
-  String toFormattedDate() {
-    return DateFormat("dd/MM/yyyy").format(this);
+  static DateTime fromDouble(double value) {
+    final date = DateTime.now();
+    final hours = value.floor();
+    final minutes = ((value - hours) * 60).round();
+    return DateTime(date.year, date.month, date.day, hours, minutes);
   }
 
-  String toFormattedTime() {
-    return DateFormat("HH:mm").format(this);
+  bool isSameDay(DateTime other) => year == other.year && month == other.month && day == other.day;
+
+  DateTime copyWith({
+    int? year,
+    int? month,
+    int? day,
+    int? hour,
+    int? minute,
+    int? second,
+    int? millisecond,
+    int? microsecond,
+  }) {
+    return DateTime(
+      year ?? this.year,
+      month ?? this.month,
+      day ?? this.day,
+      hour ?? this.hour,
+      minute ?? this.minute,
+      second ?? this.second,
+      millisecond ?? this.millisecond,
+      microsecond ?? this.microsecond,
+    );
   }
 
-  String toFormattedString() {
-    return DateFormat("E, dd/MM/yyyy, HH:mm:ss").format(this);
-  }
+  double toDouble() => hour + minute / 60.0;
+
+  String toFormattedDate() => DateFormat("dd/MM/yyyy").format(this);
+
+  String toFormattedTime() => DateFormat("HH:mm").format(this);
+
+  String toFormattedString() => DateFormat("E, dd/MM/yyyy, HH:mm:ss").format(this);
 }
 
 extension RangeValuesExtension on RangeValues {
@@ -66,6 +103,14 @@ class NetworkUtilities {
       }
     }
     return null;
+  }
+
+  static Future<Set<Sport>> getComplexSports(BuildContext context, int complexId) async {
+    CourtsUseCases? courtsUseCases = context.read<CourtsUseCases?>();
+    if (courtsUseCases == null) return {};
+
+    final result = await courtsUseCases.getCourts(complexId);
+    return result.fold((failure) => {}, (value) => value.map((court) => court.sport).toSet());
   }
 }
 

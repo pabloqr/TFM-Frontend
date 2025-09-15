@@ -43,7 +43,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       onNewsPressed: () {},
     ),
     ClientReservationsScreen(userId: widget.userId),
-    const ClientExploreScreen(),
+    ClientExploreScreen(userId: widget.userId),
     const Center(child: Text('Account Screen Content')),
   ];
 
@@ -205,8 +205,9 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   Widget? _buildFloatingActionButton() {
     return _shouldShowFloatingActionButton()
         ? FloatingActionButton.extended(
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false}),
+            onPressed: () => Navigator.of(
+              context,
+            ).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false, 'userId': widget.userId}),
             label: const Text('Book'),
             icon: const Icon(
               Symbols.calendar_add_on_rounded,

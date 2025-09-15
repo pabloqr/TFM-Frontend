@@ -74,7 +74,7 @@ class _ClientReservationsScreenState extends State<ClientReservationsScreen> {
               if (reservations.isEmpty) return _buildLoadingListTile(context);
               return _buildListTile(context, reservations);
             case ProviderState.empty:
-              return _buildErrorListTile(context);
+              return _buildEmptyListTile(context);
             case ProviderState.error:
               if (reservations.isNotEmpty) {
                 return _buildListTile(context, reservations);
@@ -98,12 +98,22 @@ class _ClientReservationsScreenState extends State<ClientReservationsScreen> {
     );
   }
 
+  Widget _buildEmptyListTile(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+      itemCount: 1,
+      itemBuilder: (context, index) {
+        return const Center(heightFactor: 4.0, child: Text('No reservations found'));
+      },
+    );
+  }
+
   Widget _buildErrorListTile(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
       itemCount: 1,
       itemBuilder: (context, index) {
-        return const Center(heightFactor: 4.0, child: Text('Error loading complexes'));
+        return const Center(heightFactor: 4.0, child: Text('Error loading reservations'));
       },
     );
   }
@@ -115,7 +125,7 @@ class _ClientReservationsScreenState extends State<ClientReservationsScreen> {
       itemBuilder: (context, index) {
         return ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 252.0),
-          child: ReservationCard(reservation: reservations.elementAt(index)),
+          child: ReservationCard(userId: widget.userId, reservation: reservations.elementAt(index)),
         );
       },
     );

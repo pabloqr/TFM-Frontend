@@ -3,13 +3,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/models/provider_state_enum.dart';
 import 'package:frontend/data/providers/complexes_list_provider.dart';
-import 'package:frontend/domain/usecases/courts_use_cases.dart';
+import 'package:frontend/data/services/utilities.dart';
 import 'package:frontend/features/complexes/presentation/widgets/complex_card.dart';
 import 'package:frontend/features/courts/data/models/sport_enum.dart';
 import 'package:provider/provider.dart';
 
 class ClientExploreScreen extends StatefulWidget {
-  const ClientExploreScreen({super.key});
+  final int userId;
+
+  const ClientExploreScreen({super.key, required this.userId});
 
   @override
   State<ClientExploreScreen> createState() => _ClientExploreScreenState();
@@ -54,14 +56,6 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
     _providerListener = null;
 
     super.dispose();
-  }
-
-  Future<Set<Sport>> _getComplexSports(int complexId) async {
-    CourtsUseCases? courtsUseCases = context.read<CourtsUseCases?>();
-    if (courtsUseCases == null) return {};
-
-    final result = await courtsUseCases.getCourts(complexId);
-    return result.fold((failure) => {}, (value) => value.map((court) => court.sport).toSet());
   }
 
   @override
@@ -111,7 +105,7 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
           sports.shuffle(random);
 
           return FutureBuilder(
-            future: _getComplexSports(provider.complexes.elementAt(index).id),
+            future: NetworkUtilities.getComplexSports(context, provider.complexes.elementAt(index).id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return ConstrainedBox(
@@ -135,6 +129,7 @@ class _ClientExploreScreenState extends State<ClientExploreScreen> {
               return ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 358.0),
                 child: ComplexCard.large(
+                  userId: widget.userId,
                   complex: provider.complexes.elementAt(index),
                   rating: Random().nextInt(11) / 2.0,
                   sports: sports,
