@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -12,8 +13,7 @@ class WelcomeScreen extends StatelessWidget {
     // Se determina el brillo de los iconos de la barra de estado
     // Si el color primario es oscuro, los iconos deben ser claros
     final Brightness statusBarIconBrightness =
-        ThemeData.estimateBrightnessForColor(colorScheme.primary) ==
-            Brightness.dark
+        ThemeData.estimateBrightnessForColor(colorScheme.primary) == Brightness.dark
         ? Brightness.light
         : Brightness.dark;
 
@@ -38,25 +38,22 @@ class WelcomeScreen extends StatelessWidget {
                       Text(
                         'Let’s play some sport!',
                         textAlign: TextAlign.start,
-                        style: textTheme.displayMedium?.copyWith(
-                          color: colorScheme.onPrimary,
-                        ),
+                        style: textTheme.displayMedium?.copyWith(color: colorScheme.onPrimary),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'What do you want to do?',
                         textAlign: TextAlign.start,
-                        style: textTheme.headlineSmall?.copyWith(
-                          color: colorScheme.onPrimary,
-                        ),
+                        style: textTheme.headlineSmall?.copyWith(color: colorScheme.onPrimary),
                       ),
                     ],
                   ),
                 ),
                 Column(
+                  spacing: 16.0,
                   children: [
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.of(context).pushNamed(AppConstants.signInRoute),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         side: BorderSide(color: colorScheme.onPrimary),
@@ -64,15 +61,21 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       child: Text('Sign in'),
                     ),
-                    const SizedBox(height: 16),
                     FilledButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.of(context).pushNamed(AppConstants.signUpRoute),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         backgroundColor: colorScheme.onPrimary,
                         foregroundColor: colorScheme.primary,
                       ),
                       child: Text('Sign up'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pushNamed(AppConstants.adminSettingsRoute),
+                      child: Text(
+                        'Settings',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary),
+                      ),
                     ),
                   ],
                 ),

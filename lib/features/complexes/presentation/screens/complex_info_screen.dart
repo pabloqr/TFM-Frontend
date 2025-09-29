@@ -1,0 +1,472 @@
+import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/data/models/provider_state_enum.dart';
+import 'package:frontend/data/providers/complex_provider.dart';
+import 'package:frontend/data/providers/courts_list_provider.dart';
+import 'package:frontend/data/services/utilities.dart';
+import 'package:frontend/domain/usecases/auth_use_cases.dart';
+import 'package:frontend/features/common/data/models/user_data.dart';
+import 'package:frontend/features/common/presentation/widgets/custom_filter_chip.dart';
+import 'package:frontend/features/common/presentation/widgets/fake_item.dart';
+import 'package:frontend/features/common/presentation/widgets/header.dart';
+import 'package:frontend/features/common/presentation/widgets/image_carousel.dart';
+import 'package:frontend/features/common/presentation/widgets/info_section_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/labeled_info_widget.dart';
+import 'package:frontend/features/common/presentation/widgets/meta_data_card.dart';
+import 'package:frontend/features/common/presentation/widgets/sticky_header_delegate.dart';
+import 'package:frontend/features/courts/data/models/court_model.dart';
+import 'package:frontend/features/courts/presentation/widgets/court_list_tile.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:provider/provider.dart';
+
+class ComplexInfoScreen extends StatefulWidget {
+  final int complexId;
+
+  const ComplexInfoScreen({super.key, required this.complexId});
+
+  @override
+  State<ComplexInfoScreen> createState() => _ComplexInfoScreenState();
+}
+
+class _ComplexInfoScreenState extends State<ComplexInfoScreen> {
+  ComplexProvider? _complexProvider;
+  CourtsListProvider? _courtsListProvider;
+  VoidCallback? _providerListener;
+
+  bool _loadingError = false;
+
+  bool _sportSelected = false;
+  bool _capacitySelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      _complexProvider = context.read<ComplexProvider?>();
+      _courtsListProvider = context.read<CourtsListProvider?>();
+
+      if (_complexProvider != null && _courtsListProvider != null) {
+        _complexProvider!.getComplex(widget.complexId);
+        _courtsListProvider!.getCourts(widget.complexId);
+
+        _providerListener = () {
+          if (mounted &&
+              _complexProvider != null &&
+              _complexProvider!.state == ProviderState.error &&
+              _complexProvider!.failure != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_complexProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+            );
+          }
+
+          if (mounted &&
+              _courtsListProvider != null &&
+              _courtsListProvider!.state == ProviderState.error &&
+              _courtsListProvider!.failure != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_courtsListProvider!.failure!.message), behavior: SnackBarBehavior.floating),
+            );
+          }
+        };
+        _complexProvider!.addListener(_providerListener!);
+        _courtsListProvider!.addListener(_providerListener!);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_complexProvider != null && _providerListener != null) {
+      _complexProvider!.removeListener(_providerListener!);
+    }
+    if (_courtsListProvider != null && _providerListener != null) {
+      _courtsListProvider!.removeListener(_providerListener!);
+    }
+    _providerListener = null;
+
+    super.dispose();
+  }
+
+  Future<UserData> _checkIfUserIsAdmin() async {
+    final authUseCases = context.read<AuthUseCases?>();
+
+    if (authUseCases == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _loadingError = true);
+        }
+      });
+
+      return UserData(userId: null, isAdmin: false);
+    }
+
+    final result = await authUseCases.getAuthenticatedUser();
+    return result.fold((error) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _loadingError = true);
+        }
+      });
+
+      return UserData(userId: null, isAdmin: false);
+    }, (user) => UserData(userId: user.id, isAdmin: user.role == Role.admin || user.role == Role.superadmin));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<UserData>(
+      future: _checkIfUserIsAdmin(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingState(context, false);
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() => _loadingError = true);
+            }
+          });
+
+          return _buildConsumer(context, UserData(userId: null, isAdmin: false));
+        }
+
+        final data = snapshot.data!;
+        return _buildConsumer(context, data);
+      },
+    );
+  }
+
+  Widget _buildConsumer(BuildContext context, UserData data) {
+    return Consumer<ComplexProvider?>(
+      builder: (context, consumerProvider, _) {
+        final currentProvider = consumerProvider ?? _complexProvider;
+
+        if (currentProvider == null) return _buildLoadingState(context, data.isAdmin);
+
+        Widget emptyWidget = const Center(child: Text('No complex found'));
+        Widget errorWidget = const Center(child: Text('Error loading complex'));
+
+        switch (currentProvider.state) {
+          case ProviderState.initial:
+          case ProviderState.loading:
+            if (currentProvider.complex.id == -1) return _buildLoadingState(context, data.isAdmin);
+            return _buildLoadedState(context, currentProvider, data);
+          case ProviderState.empty:
+            return data.isAdmin ? emptyWidget : _buildProvisionalScaffold(context, emptyWidget);
+          case ProviderState.error:
+            if (currentProvider.complex.id != -1) {
+              return _buildLoadedState(context, currentProvider, data);
+            }
+            return data.isAdmin ? emptyWidget : _buildProvisionalScaffold(context, errorWidget);
+          case ProviderState.loaded:
+            return _buildLoadedState(context, currentProvider, data);
+        }
+      },
+    );
+  }
+
+  Widget _buildProvisionalScaffold(BuildContext context, Widget body) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded)),
+        title: const Text('Complex details'),
+      ),
+      body: SafeArea(top: false, child: body),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context, bool isAdmin) {
+    final colorScheme = Theme.of(context).colorScheme;
+    Widget loadingWidget = Container(
+      color: colorScheme.surface,
+      child: Center(child: CircularProgressIndicator()),
+    );
+
+    return isAdmin ? SafeArea(top: false, child: loadingWidget) : _buildProvisionalScaffold(context, loadingWidget);
+  }
+
+  Widget _buildLoadedState(BuildContext context, ComplexProvider complexProvider, UserData data) {
+    if (_loadingError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load user data. Continuing with limited information.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      });
+    }
+
+    return data.isAdmin
+        ? _buildContent(context, complexProvider, data.isAdmin)
+        : Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+              title: const Text('Complex details'),
+            ),
+            body: _buildContent(context, complexProvider, data.isAdmin),
+            floatingActionButton: _buildFloatingActionButton(context, data.userId),
+          );
+  }
+
+  Widget _buildContent(BuildContext context, ComplexProvider complexProvider, bool isAdmin) {
+    return SafeArea(
+      top: false,
+      child: CustomScrollView(
+        primary: !isAdmin,
+        slivers: [
+          _buildHeader(context, complexProvider, isAdmin),
+          _buildPinnedHeader(context, isAdmin),
+          _buildScrollableList(context, isAdmin),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ComplexProvider complexProvider, bool isAdmin) {
+    final complex = complexProvider.complex;
+
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        if (isAdmin)
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
+            child: MetaDataCard(
+              id: complex.id.toString().padLeft(8, '0'),
+              createdAt: complex.createdAt.toFormattedString(),
+              updatedAt: complex.updatedAt.toFormattedString(),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ImageCarousel(isAdmin: isAdmin),
+        ),
+        const SizedBox(height: 16.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8.0,
+            children: [
+              if (isAdmin)
+                Header.subheader(subheaderText: complexProvider.complex.complexName, showButton: false)
+              else
+                Header.subheader(
+                  subheaderText: complexProvider.complex.complexName,
+                  showButton: true,
+                  buttonText: 'Get directions',
+                  onPressed: () {},
+                ),
+              InfoSectionWidget(
+                leftChildren: [
+                  if (complex.locLatitude != null && complex.locLongitude != null)
+                    FutureBuilder(
+                      future: WidgetUtilities.getAddressFromLatLng(complex.locLatitude!, complex.locLongitude!),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting ||
+                            snapshot.hasError ||
+                            !snapshot.hasData) {
+                          return LabeledInfoWidget(
+                            icon: Symbols.location_on_rounded,
+                            label: 'Address',
+                            text: 'C/XXXXXXXX XXXXXXXX, 00',
+                          );
+                        }
+
+                        final address = snapshot.data!;
+                        return LabeledInfoWidget(icon: Symbols.location_on_rounded, label: 'Address', text: address);
+                      },
+                    )
+                  else
+                    LabeledInfoWidget(
+                      icon: Symbols.location_on_rounded,
+                      label: 'Address',
+                      text: 'C/XXXXXXXX XXXXXXXX, 00',
+                    ),
+                ],
+                rightChildren: [
+                  LabeledInfoWidget(
+                    icon: Symbols.schedule_rounded,
+                    label: 'Schedule',
+                    text: '${complexProvider.complex.timeIni} - ${complexProvider.complex.timeEnd}',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildPinnedHeader(BuildContext context, bool isAdmin) {
+    return Consumer<CourtsListProvider?>(
+      builder: (context, consumerCourtsProvider, _) {
+        final currentCourtsProvider = consumerCourtsProvider ?? _courtsListProvider;
+        final validState = currentCourtsProvider?.state == ProviderState.loaded;
+
+        List<CourtModel> courts = currentCourtsProvider?.courts ?? [];
+        final maxCapacity = courts.fold<int>(0, (prev, court) => court.maxPeople > prev ? court.maxPeople : prev);
+        final minCapacity = courts.fold<int>(
+          maxCapacity,
+          (prev, court) => court.maxPeople < prev ? court.maxPeople : prev,
+        );
+
+        return SliverPersistentHeader(
+          pinned: true,
+          delegate: StickyHeaderDelegate(
+            minHeight: isAdmin ? 184.0 : 171.0,
+            maxHeight: isAdmin ? 184.0 : 171.0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                spacing: 16.0,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isAdmin)
+                        Header.subheader(
+                          subheaderText: 'Courts',
+                          showButton: true,
+                          buttonText: 'Manage courts',
+                          onPressed: () {},
+                        )
+                      else
+                        Header.subheader(subheaderText: 'Courts', showButton: false),
+                      if (!isAdmin) const SizedBox(height: 8.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        spacing: 8.0,
+                        children: [
+                          CustomFilterChip.dropDown('Sport', _sportSelected, (selected) {
+                            setState(() => _sportSelected = selected);
+                          }),
+                          CustomFilterChip.dropDown('Capacity', _capacitySelected, (selected) {
+                            setState(() => _capacitySelected = selected);
+                          }),
+                        ],
+                      ),
+                      const SizedBox(height: 8.0),
+                      InfoSectionWidget(
+                        leftChildren: [
+                          LabeledInfoWidget(
+                            icon: Symbols.tag_rounded,
+                            label: 'Number of courts',
+                            text: !validState || courts.isEmpty ? '--' : courts.length.toString().padLeft(2, '0'),
+                          ),
+                          LabeledInfoWidget(icon: Symbols.payments_rounded, label: 'Price per hour', text: '00.00 €'),
+                        ],
+                        rightChildren: [
+                          LabeledInfoWidget(
+                            icon: Symbols.groups_rounded,
+                            label: 'Capacity',
+                            text: !validState || courts.isEmpty
+                                ? '--'
+                                : '${minCapacity.toString().padLeft(2, '0')} - ${maxCapacity.toString().padLeft(2, '0')}',
+                          ),
+                          LabeledInfoWidget(
+                            icon: Symbols.payments_rounded,
+                            filledIcon: true,
+                            label: 'Price per hour (with light)',
+                            text: '00.00 €',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildScrollableList(BuildContext context, bool isAdmin) {
+    return Consumer<CourtsListProvider?>(
+      builder: (context, consumerProvider, _) {
+        final currentProvider = consumerProvider ?? _courtsListProvider;
+
+        if (currentProvider == null) return _buildLoadingListTile(context);
+
+        List<CourtModel> courts = currentProvider.courts;
+
+        switch (currentProvider.state) {
+          case ProviderState.initial:
+          case ProviderState.loading:
+            if (courts.isEmpty) return _buildLoadingListTile(context);
+            return _buildListTile(context, courts, isAdmin);
+          case ProviderState.empty:
+            return _buildErrorListTile(context);
+          case ProviderState.error:
+            if (courts.isNotEmpty) {
+              return _buildListTile(context, courts, isAdmin);
+            }
+            return _buildErrorListTile(context);
+          case ProviderState.loaded:
+            return _buildListTile(context, courts, isAdmin);
+        }
+      },
+    );
+  }
+
+  Widget _buildLoadingListTile(BuildContext context) {
+    return SliverList.separated(
+      itemCount: 1,
+      itemBuilder: (context, index) {
+        return FakeItem(isBig: true);
+      },
+      separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+    );
+  }
+
+  Widget _buildErrorListTile(BuildContext context) {
+    return SliverList.separated(
+      itemCount: 1,
+      itemBuilder: (context, index) {
+        return const Center(heightFactor: 4.0, child: Text('Error loading courts'));
+      },
+      separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+    );
+  }
+
+  Widget _buildListTile(BuildContext context, List<CourtModel> courts, bool isAdmin) {
+    return SliverList.separated(
+      itemCount: courts.length,
+      itemBuilder: (context, index) {
+        return CourtListTile.list(
+          court: courts.elementAt(index),
+          onTap: () {
+            final court = courts.elementAt(index);
+
+            Navigator.of(
+              context,
+            ).pushNamed(AppConstants.courtInfoRoute, arguments: {'complexId': court.complexId, 'courtId': court.id});
+          },
+          isAdmin: isAdmin,
+        );
+      },
+      separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context, int? userId) {
+    return FloatingActionButton.extended(
+      onPressed: () => Navigator.of(
+        context,
+      ).pushNamed(AppConstants.reservationNewRoute, arguments: {'isAdmin': false, 'userId': userId}),
+      label: const Text('Book'),
+      icon: const Icon(Symbols.calendar_add_on_rounded, size: 24, fill: 1, weight: 400, grade: 0, opticalSize: 24),
+    );
+  }
+}

@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
-
-import 'core/constants/theme.dart';
-import 'features/auth/presentation/screens/screen_welcome.dart';
+import 'package:frontend/core/constants/app_constants.dart';
+import 'package:frontend/core/constants/theme.dart';
+import 'package:frontend/core/providers/dependency_providers.dart';
+import 'package:frontend/data/providers/settings_provider.dart';
+import 'package:frontend/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:frontend/features/auth/presentation/widgets/auth_guard.dart';
+import 'package:frontend/features/users/presentation/screens/admin_home_screen.dart';
+import 'package:frontend/features/users/presentation/screens/client_home_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MultiProvider(providers: appProviders, child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -18,8 +26,48 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TFM',
       theme: theme.light(),
-      // darkTheme: theme.dark(), // Puedes descomentar esto si tienes un tema oscuro
-      home: const WelcomeScreen(),
+      // darkTheme: theme.dark(), // TODO: descomentar al finalizar
+      home: Consumer2<SharedPreferences?, SettingsProvider?>(
+        builder: (context, sharedPreferences, settingsProvider, child) {
+          if (sharedPreferences == null || settingsProvider == null) return _buildLoadingScreen(context);
+
+          AppConstants.baseUrl = settingsProvider.currentBaseUrl;
+
+          return const AppInitializer();
+        },
+      ),
+      routes: AppConstants.routes,
+    );
+  }
+
+  Widget _buildLoadingScreen(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          color: colorScheme.surface,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+    );
+  }
+}
+
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  @override
+  Widget build(BuildContext context) {
+    return AuthGuard(
+      loginScreen: WelcomeScreen(),
+      clientAppBuilder: (userId) => ClientHomeScreen(userId: userId),
+      adminAppBuilder: (complexId) => AdminHomeScreen(complexId: complexId),
     );
   }
 }
